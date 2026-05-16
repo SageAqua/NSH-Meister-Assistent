@@ -1,16 +1,77 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import { loginAction } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { AlertTriangle } from "lucide-react"
 
 export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    const formData = new FormData(e.currentTarget)
+    startTransition(async () => {
+      const result = await loginAction(formData)
+      if (result?.error) setError(result.error)
+    })
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader><CardTitle>Login / Hyrje</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <Input placeholder="E-Mail" className="min-h-[56px]" />
-          <Input placeholder="Passwort" type="password" className="min-h-[56px]" />
-          <Button className="min-h-[56px] w-full">Anmelden</Button>
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-muted/30 p-4">
+      <div className="mb-8 flex flex-col items-center gap-3">
+        <div className="flex size-16 items-center justify-center rounded-2xl bg-primary shadow-lg">
+          <span className="text-3xl font-black text-primary-foreground">N</span>
+        </div>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">NSH Meister-Assistent</h1>
+          <p className="text-muted-foreground">Naim Shala Renovierung · Vechta</p>
+        </div>
+      </div>
+
+      <Card className="w-full max-w-sm shadow-lg">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl">Anmelden / Hyrje</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input
+              name="email"
+              type="email"
+              placeholder="E-Mail"
+              autoComplete="email"
+              required
+              className="h-12 text-base"
+            />
+            <Input
+              name="password"
+              type="password"
+              placeholder="Passwort / Fjalëkalimi"
+              autoComplete="current-password"
+              required
+              className="h-12 text-base"
+            />
+
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                <AlertTriangle className="size-4 shrink-0" />
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              size="touch"
+              className="w-full"
+              disabled={isPending}
+            >
+              {isPending ? "Lädt..." : "Anmelden"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>

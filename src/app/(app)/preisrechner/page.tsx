@@ -1,5 +1,5 @@
-import { EmptyState } from "@/components/ui/empty-state"
+import { PreisrechnerClient } from "./preisrechner-client"
 
-export default function Page() {
-  return <EmptyState title="preisrechner" description="Inhalt wird vorbereitet." />
+export default function PreisrechnerPage() {
+  return <PreisrechnerClient />
 }

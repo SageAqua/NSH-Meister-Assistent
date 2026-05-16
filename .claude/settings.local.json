@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Growlio\\\\Documents\\\\02_Growlio\\\\02_NSH\\\\NSH-Meister-Assistent\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(mkdir -p \"c:/Users/Growlio/Documents/02_Growlio/02_NSH/NSH-Meister-Assistent/src/app/\\(app\\)/kunden/[id]\")",
+      "PowerShell(winget --version)",
+      "PowerShell(winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); node --version; npm --version)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); Set-Location \"C:\\\\Users\\\\Growlio\\\\Documents\\\\02_Growlio\\\\02_NSH\\\\NSH-Meister-Assistent\"; npm install)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); Set-Location \"C:\\\\Users\\\\Growlio\\\\Documents\\\\02_Growlio\\\\02_NSH\\\\NSH-Meister-Assistent\"; npm run build 2>&1 | Select-Object -Last 40)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); Set-Location \"C:\\\\Users\\\\Growlio\\\\Documents\\\\02_Growlio\\\\02_NSH\\\\NSH-Meister-Assistent\"; npm run build 2>&1 | Select-Object -Last 50)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); Set-Location \"C:\\\\Users\\\\Growlio\\\\Documents\\\\02_Growlio\\\\02_NSH\\\\NSH-Meister-Assistent\"; npm run dev)",
+      "Bash(npm run *)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); cd \"c:\\\\Users\\\\Growlio\\\\Documents\\\\02_Growlio\\\\02_NSH\\\\NSH-Meister-Assistent\"; npm run build 2>&1)",
+      "PowerShell($env:PATH += \";C:\\\\Program Files\\\\nodejs\"; cd \"c:\\\\Users\\\\Growlio\\\\Documents\\\\02_Growlio\\\\02_NSH\\\\NSH-Meister-Assistent\"; npm run build 2>&1)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Growlio\\Documents\\02_Growlio\\02_NSH\\NSH-Meister-Assistent\\src\\app\\(app)\\kunden"
+    ]
+  }
+}

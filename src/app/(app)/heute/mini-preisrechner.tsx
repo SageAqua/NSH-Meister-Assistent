@@ -1,0 +1,86 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { Calculator, ArrowRight } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { SERVICES, CATEGORY_META, calcPrice } from "@/lib/calculations/pricing"
+import type { WorkCategory } from "@/lib/calculations/pricing"
+
+const CATEGORIES: WorkCategory[] = ["maler", "boden", "sonstiges"]
+
+export function MiniPreisrechner() {
+  const [serviceId, setServiceId] = useState<string>("waende")
+  const [area, setArea] = useState<number>(0)
+
+  const selected = SERVICES.find((s) => s.id === serviceId) ?? SERVICES[0]
+  const result = area > 0 ? calcPrice(selected, area, false) : null
+
+  return (
+    <Card className="border-primary/20">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calculator className="size-4 text-primary" />
+            <h3 className="font-bold">Schnell-Preis</h3>
+          </div>
+          <Link href="/preisrechner" className="flex items-center gap-1 text-xs text-primary font-semibold">
+            Vollständig <ArrowRight className="size-3" />
+          </Link>
+        </div>
+
+        <select
+          value={serviceId}
+          onChange={(e) => setServiceId(e.target.value)}
+          className="h-11 w-full rounded-xl border-2 border-border bg-background px-3 text-sm focus:border-primary focus:outline-none"
+        >
+          {CATEGORIES.map((cat) => (
+            <optgroup key={cat} label={`${CATEGORY_META[cat].emoji} ${CATEGORY_META[cat].labelDe}`}>
+              {SERVICES.filter((s) => s.category === cat).map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.labelDe} — {s.rateNormal} €/m²
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setArea(Math.max(0, area - 5))}
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl border-2 text-xl font-bold hover:border-primary hover:bg-accent"
+          >
+            −
+          </button>
+          <input
+            type="number"
+            min="0"
+            value={area || ""}
+            onChange={(e) => setArea(parseFloat(e.target.value) || 0)}
+            placeholder="m²"
+            className="h-11 flex-1 rounded-xl border-2 border-border bg-background px-3 text-center text-xl font-bold focus:border-primary focus:outline-none"
+          />
+          <button
+            onClick={() => setArea(area + 5)}
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl border-2 text-xl font-bold hover:border-primary hover:bg-accent"
+          >
+            +
+          </button>
+        </div>
+
+        {result ? (
+          <div className="rounded-xl bg-primary p-3 text-center text-primary-foreground">
+            <p className="text-3xl font-black">ca. {result.normal.toLocaleString("de-DE")} €</p>
+            <p className="mt-0.5 text-sm opacity-80">
+              {result.low.toLocaleString("de-DE")} – {result.high.toLocaleString("de-DE")} €
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-muted/60 p-3 text-center text-sm text-muted-foreground">
+            m² eingeben → Preis erscheint sofort
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}

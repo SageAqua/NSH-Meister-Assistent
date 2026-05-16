@@ -1,19 +1,45 @@
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import { Plus_Jakarta_Sans } from "next/font/google"
 import "./globals.css"
+import { ServiceWorkerRegister } from "@/components/service-worker-register"
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] })
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] })
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+})
 
 export const metadata: Metadata = {
   title: "NSH Meister-Assistent",
-  description: "Digitale Assistenz für Baustellen, Aufträge und Team-Workflows.",
+  description: "Digitale Assistenz für Naim Shala Renovierung — Baustellen, Aufträge, Kunden, Preise",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "NSH Meister",
+  },
+  formatDetection: { telephone: true },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#2d5fbf",
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="de">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <head>
+        <link rel="apple-touch-icon" href="/icon-192.svg" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
+      <body className={`${jakarta.variable} antialiased`}>
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   )
 }

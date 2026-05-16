@@ -4,33 +4,35 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
+  Building2,
+  CalendarPlus,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock,
   MapPin,
-  Phone,
   Navigation,
-  CheckCircle2,
-  Building2,
+  Pencil,
+  Phone,
+  Trash2,
   X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { SwipeToReveal } from "@/components/swipe-to-reveal"
 import {
-  markEventDone,
   deleteCalendarEvent,
+  markEventDone,
   updateCalendarEvent,
 } from "@/app/actions/orders"
 import type { CalendarEvent } from "@/types"
 import { cn } from "@/lib/utils"
 
-type View = "liste" | "woche" | "monat"
+type View = "monat" | "liste" | "woche"
 
-const WEEKDAYS_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
+const WEEKDAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 const MONTHS_DE = [
-  "Januar", "Februar", "März", "April", "Mai", "Juni",
+  "Januar", "Februar", "Maerz", "April", "Mai", "Juni",
   "Juli", "August", "September", "Oktober", "November", "Dezember",
 ]
 
@@ -38,7 +40,10 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
 }
 
-function isoToDate(iso: string) { return iso.split("T")[0] }
+function isoToDate(iso: string) {
+  return iso.split("T")[0]
+}
+
 function isoToTime(iso: string) {
   return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", hour12: false })
 }
@@ -47,205 +52,329 @@ function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
 }
 
-function EventRow({
+function isSameMonth(iso: string, month: number, year: number) {
+  const date = new Date(iso)
+  return date.getMonth() === month && date.getFullYear() === year
+}
+
+function getInitialMonth(events: CalendarEvent[]) {
+  const now = new Date()
+  const hasCurrentMonthEvents = events.some((event) => isSameMonth(event.start_time, now.getMonth(), now.getFullYear()))
+  if (hasCurrentMonthEvents || events.length === 0) return { month: now.getMonth(), year: now.getFullYear() }
+
+  const nowMs = now.getTime()
+  const nextEvent = events.find((event) => new Date(event.start_time).getTime() >= nowMs) ?? events[0]
+  const date = new Date(nextEvent.start_time)
+  return { month: date.getMonth(), year: date.getFullYear() }
+}
+
+function getEventLocation(event: CalendarEvent) {
+  const customer = event.projects?.customers
+  return [customer?.address, customer?.city].filter(Boolean).join(", ")
+}
+
+function EmptyState({ month, year }: { month: number; year: number }) {
+  return (
+    <Card className="border-dashed">
+      <CardContent className="py-12 text-center text-muted-foreground">
+        <p className="text-lg font-bold text-foreground">Keine Termine im {MONTHS_DE[month]} {year}</p>
+        <p className="text-sm">Mit "Neuer Termin" kannst du direkt einen Termin eintragen.</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function EventCard({
   event,
   onDelete,
   onEdit,
+  dense = false,
 }: {
   event: CalendarEvent
   onDelete: () => void
   onEdit: () => void
+  dense?: boolean
 }) {
   const customer = event.projects?.customers
   const project = event.projects
-  const locationStr = [customer?.address, customer?.city].filter(Boolean).join(", ")
+  const location = getEventLocation(event)
 
   return (
-    <SwipeToReveal onDelete={onDelete} onEdit={onEdit} className="rounded-xl">
-      <div
-        className={cn(
-          "rounded-xl border-l-4 p-4 bg-card space-y-2",
-          event.status === "erledigt" ? "border-l-green-500 opacity-70" : "border-l-primary"
-        )}
-      >
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Clock className="size-4 text-muted-foreground" />
-              <span className="text-sm font-semibold text-muted-foreground">
-                {formatTime(event.start_time)} – {formatTime(event.end_time)}
-              </span>
-              {event.status === "erledigt" && (
-                <Badge variant="secondary" className="text-xs">Erledigt</Badge>
-              )}
-            </div>
-            <h4 className="mt-1 font-bold text-base">{event.title}</h4>
-            {customer && <p className="text-sm text-muted-foreground">{customer.name}</p>}
+    <div
+      className={cn(
+        "rounded-lg border border-l-4 bg-card p-4 shadow-sm",
+        event.status === "erledigt" ? "border-l-green-500 opacity-75" : "border-l-primary",
+        dense && "p-3"
+      )}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <Clock className="size-4" />
+            <span>{formatTime(event.start_time)} - {formatTime(event.end_time)}</span>
+            {event.status === "erledigt" && <Badge variant="secondary" className="text-xs">Erledigt</Badge>}
           </div>
+          <h3 className={cn("mt-1 font-black", dense ? "text-base" : "text-lg")}>{event.title}</h3>
+          {customer?.name && <p className="text-sm font-semibold text-muted-foreground">{customer.name}</p>}
+          {location && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="size-4 shrink-0" />
+              <span className="truncate">{location}</span>
+            </p>
+          )}
         </div>
 
-        {locationStr && (
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="size-3.5 shrink-0" />
-            {locationStr}
-          </div>
-        )}
-
-        {event.status !== "erledigt" && (
-          <div className="flex flex-wrap gap-2">
-            {customer?.phone && (
-              <a href={`tel:${customer.phone}`}>
-                <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs">
-                  <Phone className="size-3.5" /> Anrufen
-                </Button>
-              </a>
-            )}
-            {locationStr && (
-              <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(locationStr)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs">
-                  <Navigation className="size-3.5" /> Navigation
-                </Button>
-              </a>
-            )}
-            {project && (
-              <Link href={`/baustellen/${project.id}`}>
-                <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs">
-                  <Building2 className="size-3.5" /> Baustelle
-                </Button>
-              </Link>
-            )}
+        <div className="flex flex-wrap gap-2 sm:justify-end">
+          <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs" onClick={onEdit}>
+            <Pencil className="size-3.5" /> Aendern
+          </Button>
+          <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs text-destructive" onClick={onDelete}>
+            <Trash2 className="size-3.5" /> Loeschen
+          </Button>
+          {event.status !== "erledigt" && (
             <form action={markEventDone.bind(null, event.id)}>
               <Button size="sm" type="submit" className="h-9 gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700">
                 <CheckCircle2 className="size-3.5" /> Erledigt
               </Button>
             </form>
-          </div>
-        )}
+          )}
+          {customer?.phone && (
+            <a
+              href={`tel:${customer.phone}`}
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-2.5 text-xs font-medium transition-colors hover:bg-muted"
+            >
+              <Phone className="size-3.5" /> Anrufen
+            </a>
+          )}
+          {location && (
+            <a
+              href={`https://maps.google.com/?q=${encodeURIComponent(location)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-2.5 text-xs font-medium transition-colors hover:bg-muted"
+            >
+              <Navigation className="size-3.5" /> Navi
+            </a>
+          )}
+          {project && (
+            <Link
+              href={`/baustellen/${project.id}`}
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-2.5 text-xs font-medium transition-colors hover:bg-muted"
+            >
+              <Building2 className="size-3.5" /> Baustelle
+            </Link>
+          )}
+        </div>
       </div>
-    </SwipeToReveal>
+    </div>
   )
 }
 
 function ListView({
   events,
+  month,
+  year,
   onDelete,
   onEdit,
 }: {
   events: CalendarEvent[]
+  month: number
+  year: number
   onDelete: (id: string) => void
   onEdit: (event: CalendarEvent) => void
 }) {
-  if (events.length === 0) {
-    return (
-      <Card className="border-dashed">
-        <CardContent className="py-12 text-center text-muted-foreground">
-          <p className="text-lg">Keine Termine geplant.</p>
-          <p className="text-sm">Nuk ka termine të planifikuara.</p>
-        </CardContent>
-      </Card>
-    )
-  }
+  if (events.length === 0) return <EmptyState month={month} year={year} />
 
-  const grouped = events.reduce<Record<string, CalendarEvent[]>>((acc, e) => {
-    const day = e.start_time.split("T")[0]
+  const grouped = events.reduce<Record<string, CalendarEvent[]>>((acc, event) => {
+    const day = isoToDate(event.start_time)
     if (!acc[day]) acc[day] = []
-    acc[day].push(e)
+    acc[day].push(event)
     return acc
   }, {})
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {Object.entries(grouped).map(([day, dayEvents]) => {
         const date = new Date(day + "T12:00:00")
         const isToday = isSameDay(date, new Date())
         return (
-          <div key={day}>
-            <div className={cn("mb-2 flex items-center gap-2 rounded-lg px-3 py-1.5", isToday && "bg-primary/10")}>
-              <span className={cn("text-sm font-bold capitalize", isToday && "text-primary")}>
-                {isToday ? "Heute · " : ""}
+          <section key={day}>
+            <div className={cn("mb-3 flex items-center gap-2 rounded-lg px-3 py-2", isToday && "bg-primary/10")}>
+              <h2 className={cn("text-base font-black capitalize", isToday && "text-primary")}>
+                {isToday ? "Heute - " : ""}
                 {date.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}
-              </span>
+              </h2>
               <Badge variant="secondary" className="text-xs">{dayEvents.length}</Badge>
             </div>
-            <div className="space-y-2">
-              {dayEvents.map((e) => (
-                <EventRow
-                  key={e.id}
-                  event={e}
-                  onDelete={() => onDelete(e.id)}
-                  onEdit={() => onEdit(e)}
+            <div className="space-y-3">
+              {dayEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onDelete={() => onDelete(event.id)}
+                  onEdit={() => onEdit(event)}
                 />
               ))}
             </div>
-          </div>
+          </section>
         )
       })}
     </div>
   )
 }
 
-function MonthView({ events, month, year }: { events: CalendarEvent[]; month: number; year: number }) {
+function WeekView({
+  events,
+  month,
+  year,
+  onDelete,
+  onEdit,
+}: {
+  events: CalendarEvent[]
+  month: number
+  year: number
+  onDelete: (id: string) => void
+  onEdit: (event: CalendarEvent) => void
+}) {
+  if (events.length === 0) return <EmptyState month={month} year={year} />
+
+  const weeks = events.reduce<Record<string, CalendarEvent[]>>((acc, event) => {
+    const date = new Date(event.start_time)
+    const weekStart = new Date(date)
+    const day = weekStart.getDay()
+    weekStart.setDate(date.getDate() - (day === 0 ? 6 : day - 1))
+    const key = weekStart.toISOString().split("T")[0]
+    if (!acc[key]) acc[key] = []
+    acc[key].push(event)
+    return acc
+  }, {})
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-2">
+      {Object.entries(weeks).map(([weekStart, weekEvents]) => {
+        const start = new Date(weekStart + "T12:00:00")
+        const end = new Date(start)
+        end.setDate(start.getDate() + 6)
+        return (
+          <section key={weekStart} className="rounded-lg border bg-card p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="font-black">
+                {start.toLocaleDateString("de-DE", { day: "numeric", month: "short" })} -{" "}
+                {end.toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
+              </h2>
+              <Badge variant="secondary">{weekEvents.length}</Badge>
+            </div>
+            <div className="space-y-3">
+              {weekEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  dense
+                  onDelete={() => onDelete(event.id)}
+                  onEdit={() => onEdit(event)}
+                />
+              ))}
+            </div>
+          </section>
+        )
+      })}
+    </div>
+  )
+}
+
+function MonthView({
+  events,
+  month,
+  year,
+  onEdit,
+}: {
+  events: CalendarEvent[]
+  month: number
+  year: number
+  onEdit: (event: CalendarEvent) => void
+}) {
   const firstDay = new Date(year, month, 1).getDay()
+  const firstOffset = firstDay === 0 ? 6 : firstDay - 1
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const today = new Date()
 
   const eventsByDay: Record<number, CalendarEvent[]> = {}
-  events.forEach((e) => {
-    const d = new Date(e.start_time)
-    if (d.getMonth() === month && d.getFullYear() === year) {
-      const day = d.getDate()
-      if (!eventsByDay[day]) eventsByDay[day] = []
-      eventsByDay[day].push(e)
-    }
+  events.forEach((event) => {
+    const date = new Date(event.start_time)
+    const day = date.getDate()
+    if (!eventsByDay[day]) eventsByDay[day] = []
+    eventsByDay[day].push(event)
   })
 
+  const cells: (number | null)[] = [
+    ...Array(firstOffset).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ]
+  while (cells.length % 7 !== 0) cells.push(null)
+
   return (
-    <div>
-      <div className="grid grid-cols-7 text-center mb-1">
-        {WEEKDAYS_SHORT.map((d) => (
-          <div key={d} className="py-1 text-xs font-semibold text-muted-foreground">{d}</div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden">
-        {Array.from({ length: firstDay }).map((_, i) => (
-          <div key={`empty-${i}`} className="bg-background aspect-square" />
-        ))}
-        {Array.from({ length: daysInMonth }).map((_, i) => {
-          const day = i + 1
-          const isToday = isSameDay(new Date(year, month, day), today)
-          const dayEvents = eventsByDay[day] ?? []
-          return (
-            <div
-              key={day}
-              className={cn("bg-background p-1 text-center", isToday && "bg-primary/10")}
-            >
-              <span className={cn(
-                "flex size-7 mx-auto items-center justify-center rounded-full text-sm",
-                isToday && "bg-primary text-primary-foreground font-bold"
-              )}>
-                {day}
-              </span>
-              {dayEvents.slice(0, 2).map((e, j) => (
-                <div
-                  key={j}
-                  className={cn(
-                    "mt-0.5 rounded text-[9px] px-1 truncate",
-                    e.status === "erledigt" ? "bg-green-100 text-green-700" : "bg-primary/20 text-primary"
+    <div className="overflow-x-auto rounded-lg border bg-card p-3">
+      <div className="min-w-[920px]">
+        <div className="mb-2 grid grid-cols-7 gap-2">
+          {WEEKDAYS_SHORT.map((day) => (
+            <div key={day} className="px-2 py-1 text-sm font-black text-muted-foreground">{day}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-2">
+          {cells.map((day, index) => {
+            if (!day) return <div key={`empty-${index}`} className="min-h-32 rounded-lg bg-muted/20" />
+            const dayEvents = eventsByDay[day] ?? []
+            const isToday = isSameDay(new Date(year, month, day), today)
+            return (
+              <div
+                key={day}
+                className={cn(
+                  "min-h-32 rounded-lg border bg-background p-2",
+                  dayEvents.length > 0 && "border-primary/40 bg-primary/5",
+                  isToday && "border-primary bg-primary/10"
+                )}
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className={cn(
+                    "flex size-8 items-center justify-center rounded-full text-sm font-black",
+                    isToday && "bg-primary text-primary-foreground"
+                  )}>
+                    {day}
+                  </span>
+                  {dayEvents.length > 0 && (
+                    <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-black text-primary-foreground">
+                      {dayEvents.length}
+                    </span>
                   )}
-                >
-                  {formatTime(e.start_time)}
                 </div>
-              ))}
-              {dayEvents.length > 2 && (
-                <div className="text-[9px] text-muted-foreground">+{dayEvents.length - 2}</div>
-              )}
-            </div>
-          )
-        })}
+
+                <div className="space-y-1.5">
+                  {dayEvents.slice(0, 3).map((event) => (
+                    <button
+                      key={event.id}
+                      type="button"
+                      onClick={() => onEdit(event)}
+                      className={cn(
+                        "block w-full rounded-md px-2 py-1.5 text-left text-xs leading-tight",
+                        event.status === "erledigt" ? "bg-green-100 text-green-800" : "bg-primary text-primary-foreground"
+                      )}
+                    >
+                      <span className="block font-black">{formatTime(event.start_time)} {event.title}</span>
+                      {event.projects?.customers?.name && (
+                        <span className="block truncate opacity-85">{event.projects.customers.name}</span>
+                      )}
+                    </button>
+                  ))}
+                  {dayEvents.length > 3 && (
+                    <p className="rounded-md border px-2 py-1 text-xs font-bold text-primary">
+                      +{dayEvents.length - 3} weitere
+                    </p>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
@@ -254,19 +383,23 @@ function MonthView({ events, month, year }: { events: CalendarEvent[]; month: nu
 export function KalenderClient({ events }: { events: CalendarEvent[] }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const initial = getInitialMonth(events)
 
-  const [view, setView] = useState<View>("liste")
-  const now = new Date()
-  const [month, setMonth] = useState(now.getMonth())
-  const [year, setYear] = useState(now.getFullYear())
+  const [view, setView] = useState<View>("monat")
+  const [month, setMonth] = useState(initial.month)
+  const [year, setYear] = useState(initial.year)
 
-  // Edit modal state
   const [editing, setEditing] = useState<CalendarEvent | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [editDate, setEditDate] = useState("")
   const [editStart, setEditStart] = useState("")
   const [editEnd, setEditEnd] = useState("")
   const [editError, setEditError] = useState("")
+
+  const monthEvents = events.filter((event) => isSameMonth(event.start_time, month, year))
+  const activeEvents = monthEvents.filter((event) => event.status !== "abgesagt")
+  const doneCount = activeEvents.filter((event) => event.status === "erledigt").length
+  const openCount = activeEvents.length - doneCount
 
   function handleDelete(eventId: string) {
     startTransition(async () => {
@@ -304,120 +437,130 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
   }
 
   const prevMonth = () => {
-    if (month === 0) { setMonth(11); setYear((y) => y - 1) } else setMonth((m) => m - 1)
+    if (month === 0) { setMonth(11); setYear((value) => value - 1) } else setMonth((value) => value - 1)
   }
   const nextMonth = () => {
-    if (month === 11) { setMonth(0); setYear((y) => y + 1) } else setMonth((m) => m + 1)
+    if (month === 11) { setMonth(0); setYear((value) => value + 1) } else setMonth((value) => value + 1)
   }
 
-  const monthEvents = events.filter((e) => {
-    const d = new Date(e.start_time)
-    return d.getMonth() === month && d.getFullYear() === year
-  })
-
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Kalender</h1>
-        <div className="flex gap-1 rounded-xl border p-1">
-          {(["liste", "woche", "monat"] as View[]).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-sm font-medium capitalize transition-colors",
-                view === v ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-              )}
-            >
-              {v.charAt(0).toUpperCase() + v.slice(1)}
-            </button>
-          ))}
+    <div className="w-full max-w-7xl space-y-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-black">Kalender</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Alle Termine im Monat klar sehen, aendern und abhaken.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/heute?new-event=1"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <CalendarPlus className="size-4" /> Neuer Termin
+          </Link>
+          <div className="flex gap-1 rounded-lg border bg-card p-1">
+            {(["monat", "liste", "woche"] as View[]).map((item) => (
+              <button
+                key={item}
+                onClick={() => setView(item)}
+                className={cn(
+                  "min-w-20 rounded-md px-3 py-2 text-sm font-bold capitalize transition-colors",
+                  view === item ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                )}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Month navigation */}
-      <div className="flex items-center justify-between">
-        <button onClick={prevMonth} className="flex size-9 items-center justify-center rounded-lg hover:bg-accent">
-          <ChevronLeft className="size-5" />
-        </button>
-        <h2 className="text-lg font-bold">{MONTHS_DE[month]} {year}</h2>
-        <button onClick={nextMonth} className="flex size-9 items-center justify-center rounded-lg hover:bg-accent">
-          <ChevronRight className="size-5" />
-        </button>
+      <div className="rounded-lg border bg-card p-3">
+        <div className="flex items-center justify-between gap-3">
+          <button onClick={prevMonth} className="flex size-11 items-center justify-center rounded-lg border hover:bg-accent" aria-label="Vorheriger Monat">
+            <ChevronLeft className="size-5" />
+          </button>
+          <div className="text-center">
+            <h2 className="text-2xl font-black">{MONTHS_DE[month]} {year}</h2>
+            <p className="text-sm font-semibold text-muted-foreground">
+              {activeEvents.length} Termine, {openCount} offen, {doneCount} erledigt
+            </p>
+          </div>
+          <button onClick={nextMonth} className="flex size-11 items-center justify-center rounded-lg border hover:bg-accent" aria-label="Naechster Monat">
+            <ChevronRight className="size-5" />
+          </button>
+        </div>
       </div>
 
-      {/* Content */}
-      {view === "monat" ? (
-        <MonthView events={events} month={month} year={year} />
-      ) : (
-        <ListView
-          events={view === "liste" ? events : monthEvents}
-          onDelete={handleDelete}
-          onEdit={openEdit}
-        />
+      {view === "monat" && (
+        <MonthView events={activeEvents} month={month} year={year} onEdit={openEdit} />
+      )}
+      {view === "liste" && (
+        <ListView events={activeEvents} month={month} year={year} onDelete={handleDelete} onEdit={openEdit} />
+      )}
+      {view === "woche" && (
+        <WeekView events={activeEvents} month={month} year={year} onDelete={handleDelete} onEdit={openEdit} />
       )}
 
-      {/* Edit modal */}
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
           onClick={() => setEditing(null)}
         >
-          <Card className="w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
-            <CardContent className="space-y-3 p-5">
+          <Card className="w-full max-w-lg" onClick={(event) => event.stopPropagation()}>
+            <CardContent className="space-y-4 p-5">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold">Termin ändern / Ndrysho terminin</h3>
+                <h3 className="text-lg font-black">Termin aendern</h3>
                 <button
                   onClick={() => setEditing(null)}
-                  className="flex size-8 items-center justify-center rounded-full hover:bg-accent"
+                  className="flex size-9 items-center justify-center rounded-lg hover:bg-accent"
+                  aria-label="Schliessen"
                 >
-                  <X className="size-4" />
+                  <X className="size-5" />
                 </button>
               </div>
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
-              />
               <div>
-                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Datum</label>
+                <label className="mb-1 block text-xs font-bold text-muted-foreground">Titel</label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(event) => setEditTitle(event.target.value)}
+                  className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-bold text-muted-foreground">Datum</label>
                 <input
                   type="date"
                   value={editDate}
-                  onChange={(e) => setEditDate(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  onChange={(event) => setEditDate(event.target.value)}
+                  className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Von</label>
+                  <label className="mb-1 block text-xs font-bold text-muted-foreground">Von</label>
                   <input
                     type="time"
                     value={editStart}
-                    onChange={(e) => setEditStart(e.target.value)}
-                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    onChange={(event) => setEditStart(event.target.value)}
+                    className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Bis</label>
+                  <label className="mb-1 block text-xs font-bold text-muted-foreground">Bis</label>
                   <input
                     type="time"
                     value={editEnd}
-                    onChange={(e) => setEditEnd(e.target.value)}
-                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    onChange={(event) => setEditEnd(event.target.value)}
+                    className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>
-              {editError && <p className="text-sm text-destructive">{editError}</p>}
+              {editError && <p className="text-sm font-semibold text-destructive">{editError}</p>}
               <div className="flex gap-2">
-                <Button
-                  size="touch"
-                  className="flex-1"
-                  onClick={handleEditSave}
-                  disabled={isPending}
-                >
+                <Button size="touch" className="flex-1" onClick={handleEditSave} disabled={isPending}>
                   {isPending ? "Speichert..." : "Speichern"}
                 </Button>
                 <Button size="touch" variant="outline" onClick={() => setEditing(null)}>

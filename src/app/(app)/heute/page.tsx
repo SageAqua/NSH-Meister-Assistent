@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { markTaskDone } from "@/app/actions/orders"
 import { TagesplanSection } from "./tagesplan"
-import { MonthlyCalendar } from "./monthly-calendar"
+import { MonthlyCalendar, type MonthlyCalendarEvent } from "./monthly-calendar"
 import { SERVICES } from "@/lib/calculations/pricing"
 import type { FreeSlot } from "./tagesplan"
 import type { CalendarEvent, Task, Project, Customer, PriceCalculation } from "@/types"
@@ -366,21 +366,23 @@ export default async function HeutePage({
       .neq("status", "abgesagt")
       .order("start_time"),
 
-    // Prev month events (dates only for calendar)
+    // Prev month events for calendar
     supabase
       .from("calendar_events")
-      .select("start_time")
+      .select("*, projects(*, customers(*))")
       .gte("start_time", fmt(prevStart, "00:00:00"))
       .lte("start_time", fmt(prevEnd, "23:59:59"))
-      .neq("status", "abgesagt"),
+      .neq("status", "abgesagt")
+      .order("start_time"),
 
-    // Next month events (dates only for calendar)
+    // Next month events for calendar
     supabase
       .from("calendar_events")
-      .select("start_time")
+      .select("*, projects(*, customers(*))")
       .gte("start_time", fmt(nextStart, "00:00:00"))
       .lte("start_time", fmt(nextEnd, "23:59:59"))
-      .neq("status", "abgesagt"),
+      .neq("status", "abgesagt")
+      .order("start_time"),
 
     // Last price calculation
     supabase
@@ -403,18 +405,20 @@ export default async function HeutePage({
   const prevMonthKey = `${m === 0 ? y - 1 : y}-${String(m === 0 ? 12 : m).padStart(2, "0")}`
   const nextMonthKey = `${m === 11 ? y + 1 : y}-${String(m === 11 ? 1 : m + 2).padStart(2, "0")}`
 
-  const toDateStr = (iso: string) => iso.split("T")[0]
-  const currDates = [
-    ...todayEvents.map((e) => toDateStr(e.start_time)),
-    ...upcomingEvents.map((e) => toDateStr(e.start_time)),
-  ]
-  const prevDates = (prevEventsRaw ?? []).map((e) => toDateStr(e.start_time))
-  const nextDates = (nextEventsRaw ?? []).map((e) => toDateStr(e.start_time))
+  const toMonthlyEvent = (event: CalendarEvent): MonthlyCalendarEvent => ({
+    id: event.id,
+    date: event.start_time.split("T")[0],
+    startTime: formatTime(event.start_time),
+    endTime: formatTime(event.end_time),
+    title: event.title,
+    customer: event.projects?.customers?.name,
+    status: event.status,
+  })
 
-  const monthEventsMap: Record<string, string[]> = {
-    [prevMonthKey]: prevDates,
-    [currMonthKey]: currDates,
-    [nextMonthKey]: nextDates,
+  const monthEventsMap: Record<string, MonthlyCalendarEvent[]> = {
+    [prevMonthKey]: ((prevEventsRaw ?? []) as CalendarEvent[]).map(toMonthlyEvent),
+    [currMonthKey]: [...todayEvents, ...upcomingEvents].map(toMonthlyEvent),
+    [nextMonthKey]: ((nextEventsRaw ?? []) as CalendarEvent[]).map(toMonthlyEvent),
   }
 
   const greeting = getGreeting()

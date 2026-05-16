@@ -286,11 +286,13 @@ function MonthView({
   events,
   month,
   year,
+  onDelete,
   onEdit,
 }: {
   events: CalendarEvent[]
   month: number
   year: number
+  onDelete: (id: string) => void
   onEdit: (event: CalendarEvent) => void
 }) {
   const firstDay = new Date(year, month, 1).getDay()
@@ -313,8 +315,24 @@ function MonthView({
   while (cells.length % 7 !== 0) cells.push(null)
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-card p-3">
-      <div className="min-w-[920px]">
+    <div className="space-y-4">
+      <div className="space-y-3 md:hidden">
+        {events.length === 0 ? (
+          <EmptyState month={month} year={year} />
+        ) : (
+          events.map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              onDelete={() => onDelete(event.id)}
+              onEdit={() => onEdit(event)}
+            />
+          ))
+        )}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-lg border bg-card p-3 md:block">
+        <div className="min-w-[920px]">
         <div className="mb-2 grid grid-cols-7 gap-2">
           {WEEKDAYS_SHORT.map((day) => (
             <div key={day} className="px-2 py-1 text-sm font-black text-muted-foreground">{day}</div>
@@ -375,6 +393,7 @@ function MonthView({
             )
           })}
         </div>
+      </div>
       </div>
     </div>
   )
@@ -494,7 +513,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
       </div>
 
       {view === "monat" && (
-        <MonthView events={activeEvents} month={month} year={year} onEdit={openEdit} />
+        <MonthView events={activeEvents} month={month} year={year} onDelete={handleDelete} onEdit={openEdit} />
       )}
       {view === "liste" && (
         <ListView events={activeEvents} month={month} year={year} onDelete={handleDelete} onEdit={openEdit} />

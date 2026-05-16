@@ -28,11 +28,11 @@ export function IpadSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden w-64 shrink-0 flex-col bg-sidebar md:flex" style={{ minHeight: "100dvh" }}>
+    <aside className="hidden h-dvh w-64 shrink-0 flex-col overflow-y-auto overscroll-contain bg-sidebar md:flex">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-6">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-primary">
-          <span className="text-xl font-black text-primary-foreground">N</span>
+        <div className="flex size-10 items-center justify-center overflow-hidden rounded-xl bg-white">
+          <img src="/logo.png" alt="NSH Renovierung" className="size-10 object-contain" />
         </div>
         <div>
           <p className="text-base font-bold leading-tight text-sidebar-foreground">NSH Meister</p>

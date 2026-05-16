@@ -19,7 +19,7 @@ export function MobileBottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t bg-background md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
       {mainNav.map((item) => {
         const Icon = iconMap[item.icon ?? ""] ?? Home
         const isActive = pathname === item.href || (item.href !== "/mehr" && pathname.startsWith(item.href + "/"))

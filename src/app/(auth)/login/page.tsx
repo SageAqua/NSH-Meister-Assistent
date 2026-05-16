@@ -24,8 +24,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-muted/30 p-4">
       <div className="mb-8 flex flex-col items-center gap-3">
-        <div className="flex size-16 items-center justify-center rounded-2xl bg-primary shadow-lg">
-          <span className="text-3xl font-black text-primary-foreground">N</span>
+        <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-border">
+          <img src="/logo.png" alt="NSH Renovierung" className="size-20 object-contain" />
         </div>
         <div className="text-center">
           <h1 className="text-2xl font-bold">NSH Meister-Assistent</h1>

@@ -19,6 +19,14 @@ export const metadata: Metadata = {
   title: "NSH Meister-Assistent",
   description: "Digitale Assistenz für Naim Shala Renovierung — Baustellen, Aufträge, Kunden, Preise",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -39,7 +47,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="de">
       <head>
-        <link rel="apple-touch-icon" href="/icon-192.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className={`${manrope.variable} ${fraunces.variable} antialiased`}>

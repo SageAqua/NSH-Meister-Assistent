@@ -127,4 +127,10 @@
   html {
     @apply font-sans;
   }
+  h1,
+  h2,
+  h3,
+  .font-heading {
+    font-family: var(--font-heading), var(--font-sans), system-ui, sans-serif;
+  }
 }

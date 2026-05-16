@@ -19,7 +19,7 @@ export function MiniPreisrechner() {
   return (
     <Card className="border-primary/20">
       <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Calculator className="size-4 text-primary" />
             <h3 className="font-bold">Schnell-Preis</h3>
@@ -45,7 +45,7 @@ export function MiniPreisrechner() {
           ))}
         </select>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <button
             onClick={() => setArea(Math.max(0, area - 5))}
             className="flex size-11 shrink-0 items-center justify-center rounded-xl border-2 text-xl font-bold hover:border-primary hover:bg-accent"
@@ -58,7 +58,7 @@ export function MiniPreisrechner() {
             value={area || ""}
             onChange={(e) => setArea(parseFloat(e.target.value) || 0)}
             placeholder="m²"
-            className="h-11 flex-1 rounded-xl border-2 border-border bg-background px-3 text-center text-xl font-bold focus:border-primary focus:outline-none"
+            className="h-11 min-w-0 flex-1 rounded-xl border-2 border-border bg-background px-3 text-center text-xl font-bold focus:border-primary focus:outline-none"
           />
           <button
             onClick={() => setArea(area + 5)}
@@ -70,7 +70,7 @@ export function MiniPreisrechner() {
 
         {result ? (
           <div className="rounded-xl bg-primary p-3 text-center text-primary-foreground">
-            <p className="text-3xl font-black">ca. {result.normal.toLocaleString("de-DE")} €</p>
+            <p className="text-2xl font-black sm:text-3xl">ca. {result.normal.toLocaleString("de-DE")} €</p>
             <p className="mt-0.5 text-sm opacity-80">
               {result.low.toLocaleString("de-DE")} – {result.high.toLocaleString("de-DE")} €
             </p>

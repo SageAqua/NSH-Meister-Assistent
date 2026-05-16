@@ -46,8 +46,8 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
   }
 
   return (
-    <div className="max-w-2xl space-y-5">
-      <div className="flex items-center justify-between">
+    <div className="w-full max-w-2xl space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Kunden</h1>
           <p className="text-sm text-muted-foreground">Klientët — {customers.length} gesamt</p>
@@ -61,7 +61,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
       {showForm && (
         <Card className="border-primary/30">
           <CardContent className="space-y-3 p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 font-bold">
                 <User className="size-4 text-primary" /> Neuer Kontakt
               </h3>
@@ -82,7 +82,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
               className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
             />
 
-            <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <input
                 type="tel"
                 value={phone}
@@ -117,7 +117,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <div className="flex gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
               <Button
                 size="touch"
                 className="flex-1"
@@ -157,7 +157,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
             return (
               <Link key={c.id} href={`/kunden/${c.id}`}>
                 <Card className="transition-all hover:border-primary/30 hover:shadow-sm">
-                  <CardContent className="flex items-center gap-4 p-4">
+                  <CardContent className="flex min-w-0 items-center gap-3 p-3 sm:gap-4 sm:p-4">
                     <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
                       {c.name.charAt(0).toUpperCase()}
                     </div>
@@ -180,7 +180,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                         </div>
                       )}
                     </div>
-                    <div className="flex shrink-0 items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                       {c.phone && (
                         <a href={`tel:${c.phone}`} onClick={(e) => e.stopPropagation()}>
                           <div className="flex size-10 items-center justify-center rounded-full bg-muted hover:bg-accent">

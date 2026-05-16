@@ -31,7 +31,7 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
   const c = customer as Customer
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="w-full max-w-2xl space-y-5">
       {/* Header */}
       <div className="flex items-start gap-3">
         <Link href="/kunden">
@@ -39,7 +39,7 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
             <ChevronLeft className="size-5" />
           </button>
         </Link>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-2xl mb-2">
             {c.name.charAt(0).toUpperCase()}
           </div>
@@ -47,7 +47,7 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
           {c.city && <p className="text-muted-foreground">{c.city}</p>}
           {c.address && (
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
-              <MapPin className="size-3.5" /> {c.address}
+              <MapPin className="size-3.5 shrink-0" /> <span className="min-w-0 break-words">{c.address}</span>
             </div>
           )}
         </div>
@@ -103,7 +103,7 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
             {(projects as Project[]).map((p) => (
               <Link key={p.id} href={`/baustellen/${p.id}`}>
                 <Card className="hover:border-primary/30 transition-all">
-                  <CardContent className="flex items-center gap-3 p-4">
+                  <CardContent className="flex min-w-0 flex-col gap-2 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4">
                     <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold shrink-0", STATUS_COLORS[p.status])}>
                       {p.status === "geplant" ? "Geplant" : p.status === "in_arbeit" ? "In Arbeit" : p.status === "fertig" ? "Fertig" : "Abgesagt"}
                     </span>
@@ -112,7 +112,7 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
                       <p className="text-xs text-muted-foreground truncate">{p.address ?? "Keine Adresse"}</p>
                       {p.area_m2 && <p className="text-xs text-muted-foreground">{p.area_m2} m²</p>}
                     </div>
-                    <p className="text-xs text-muted-foreground shrink-0">
+                    <p className="text-xs text-muted-foreground sm:shrink-0">
                       {new Date(p.created_at).toLocaleDateString("de-DE", { month: "short", year: "numeric" })}
                     </p>
                   </CardContent>

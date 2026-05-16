@@ -55,8 +55,8 @@ export function NotizenClient({
   }
 
   return (
-    <div className="max-w-2xl space-y-5">
-      <div className="flex items-center justify-between">
+    <div className="w-full max-w-2xl space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Notizen <span className="text-muted-foreground font-normal text-lg">/ Shënime</span></h1>
         <Button size="touch" onClick={() => setShowNew(true)} className="gap-2">
           <Plus className="size-4" /> Neue Notiz
@@ -67,7 +67,7 @@ export function NotizenClient({
       {showNew && (
         <Card className="border-primary/30">
           <CardContent className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <h3 className="font-bold">Neue Notiz</h3>
               <button onClick={() => setShowNew(false)} className="flex size-8 items-center justify-center rounded-full hover:bg-accent">
                 <X className="size-4" />
@@ -75,7 +75,7 @@ export function NotizenClient({
             </div>
 
             {/* Type */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {(["privat", "kunden", "baustellen"] as const).map((t) => (
                 <button
                   key={t}
@@ -129,7 +129,7 @@ export function NotizenClient({
               className="w-full rounded-xl border-2 border-border bg-background p-3 text-base focus:border-primary focus:outline-none resize-none"
             />
 
-            <div className="flex gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
               <Button size="touch" className="flex-1" onClick={handleSave} disabled={isPending || !content.trim()}>
                 {isPending ? "Speichert..." : "Speichern"}
               </Button>
@@ -140,7 +140,7 @@ export function NotizenClient({
       )}
 
       {/* Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
         {(["alle", "privat", "kunden", "baustellen"] as const).map((f) => (
           <button
             key={f}

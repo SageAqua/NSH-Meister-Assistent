@@ -55,7 +55,7 @@ const MORE_ITEMS = [
 
 export default function MehrPage() {
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="w-full max-w-2xl space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Mehr</h1>
         <p className="text-muted-foreground text-sm">Më shumë — Weitere Funktionen</p>
@@ -65,7 +65,7 @@ export default function MehrPage() {
         {MORE_ITEMS.map(({ href, icon: Icon, labelDe, labelSq, desc, color }) => (
           <Link key={href} href={href}>
             <Card className="transition-all hover:border-primary/30 hover:shadow-sm">
-              <CardContent className="flex items-center gap-4 p-4">
+              <CardContent className="flex min-w-0 items-center gap-3 p-3 sm:gap-4 sm:p-4">
                 <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${color}`}>
                   <Icon className="size-6" />
                 </div>

@@ -9,12 +9,12 @@ export default async function EinstellungenPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <div className="max-w-lg space-y-6">
+    <div className="w-full max-w-lg space-y-5 sm:space-y-6">
       <div className="flex items-center gap-3">
         <div className="flex size-10 items-center justify-center rounded-xl bg-primary">
           <Settings className="size-5 text-primary-foreground" />
         </div>
-        <h1 className="text-2xl font-bold">Einstellungen <span className="text-muted-foreground font-normal text-lg">/ Cilësimet</span></h1>
+        <h1 className="text-xl font-bold sm:text-2xl">Einstellungen <span className="text-muted-foreground font-normal text-base sm:text-lg">/ Cilësimet</span></h1>
       </div>
 
       {/* Profile */}
@@ -57,9 +57,9 @@ export default async function EinstellungenPage() {
               { label: "Sprache / Gjuha", value: "Deutsch (DE)" },
               { label: "Datenbankstatus", value: user ? "Verbunden ✓" : "Nicht verbunden" },
             ].map(({ label, value }) => (
-              <div key={label} className="flex items-center justify-between py-1 border-b last:border-0">
+              <div key={label} className="flex flex-col gap-0.5 py-1 border-b last:border-0 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-sm text-muted-foreground">{label}</span>
-                <span className="text-sm font-semibold">{value}</span>
+                <span className="text-sm font-semibold sm:text-right">{value}</span>
               </div>
             ))}
           </CardContent>

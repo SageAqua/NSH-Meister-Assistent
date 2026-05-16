@@ -179,7 +179,7 @@ export function TagesplanSection({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-semibold text-muted-foreground">
           {events.length === 0
             ? "Heute keine Termine"
@@ -381,7 +381,7 @@ export function TagesplanSection({
       {formOpen && (
         <Card className="border-primary/30">
           <CardContent className="space-y-3 p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <h3 className="font-bold">Neuer Termin / Termin i ri</h3>
               <button
                 onClick={() => setFormOpen(false)}
@@ -407,7 +407,7 @@ export function TagesplanSection({
                 className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground">Von</label>
                 <input
@@ -428,7 +428,7 @@ export function TagesplanSection({
               </div>
             </div>
             {saveError && <p className="text-sm text-destructive">{saveError}</p>}
-            <div className="flex gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
               <Button
                 size="touch"
                 className="flex-1"
@@ -453,7 +453,7 @@ export function TagesplanSection({
         >
           <Card className="w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
             <CardContent className="space-y-3 p-5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <h3 className="font-bold">Termin verschieben / Shtyj terminin</h3>
                 <button
                   onClick={() => setEditing(null)}
@@ -477,7 +477,7 @@ export function TagesplanSection({
                   className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-muted-foreground">Von</label>
                   <input
@@ -498,7 +498,7 @@ export function TagesplanSection({
                 </div>
               </div>
               {editError && <p className="text-sm text-destructive">{editError}</p>}
-              <div className="flex gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
                 <Button
                   size="touch"
                   className="flex-1"

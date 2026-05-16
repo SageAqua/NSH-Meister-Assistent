@@ -71,7 +71,7 @@ export default async function BaustelleDetailPage({
   }
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="w-full max-w-2xl space-y-5">
       {/* Back + Header */}
       <div className="flex items-start gap-3">
         <Link href="/baustellen">
@@ -79,8 +79,8 @@ export default async function BaustelleDetailPage({
             <ChevronLeft className="size-5" />
           </button>
         </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", STATUS_COLORS[p.status])}>
               {p.status === "geplant" ? "Geplant" : p.status === "in_arbeit" ? "In Arbeit" : p.status === "fertig" ? "Fertig" : "Abgesagt"}
             </span>
@@ -90,7 +90,7 @@ export default async function BaustelleDetailPage({
           {(p.address || customer?.city) && (
             <div className="flex items-center gap-1.5 text-muted-foreground mt-0.5">
               <MapPin className="size-4 shrink-0" />
-              <span>{[p.address, customer?.city].filter(Boolean).join(", ")}</span>
+              <span className="min-w-0 break-words">{[p.address, customer?.city].filter(Boolean).join(", ")}</span>
             </div>
           )}
         </div>
@@ -159,9 +159,9 @@ export default async function BaustelleDetailPage({
             { label: "Untergrund", value: p.ground_condition },
             { label: "Material", value: p.material_supply },
           ].filter((r) => r.value).map((row) => (
-            <div key={row.label} className="flex items-center justify-between py-1 border-b last:border-0">
+            <div key={row.label} className="flex flex-col gap-0.5 py-1 border-b last:border-0 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm text-muted-foreground">{row.label}</span>
-              <span className="text-sm font-semibold capitalize">{row.value}</span>
+              <span className="text-sm font-semibold capitalize sm:text-right">{row.value}</span>
             </div>
           ))}
           {Object.entries(extras).filter(([, v]) => v).length > 0 && (
@@ -186,7 +186,7 @@ export default async function BaustelleDetailPage({
               <h3 className="font-bold">Nächster Termin</h3>
             </div>
             <p className="text-lg font-bold">{nextEvent.title}</p>
-            <div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">
+            <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-sm mt-1">
               <Clock className="size-4" />
               {formatDate(nextEvent.start_time)} · {formatTime(nextEvent.start_time)} – {formatTime(nextEvent.end_time)}
             </div>
@@ -202,7 +202,7 @@ export default async function BaustelleDetailPage({
           </h3>
           <div className="space-y-2">
             {(events as CalendarEvent[]).map((e) => (
-              <div key={e.id} className={cn("flex items-center gap-3 rounded-xl border p-3", e.status === "erledigt" && "opacity-60")}>
+              <div key={e.id} className={cn("flex min-w-0 items-center gap-3 rounded-xl border p-3", e.status === "erledigt" && "opacity-60")}>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm">{e.title}</p>
                   <p className="text-xs text-muted-foreground">
@@ -270,8 +270,8 @@ export default async function BaustelleDetailPage({
           </h3>
           <div className="space-y-2">
             {(materials as Material[]).map((m) => (
-              <div key={m.id} className="flex items-center gap-3 rounded-xl border p-3">
-                <div className="flex-1">
+              <div key={m.id} className="flex min-w-0 items-center gap-3 rounded-xl border p-3">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">{m.name}</p>
                   {m.quantity && <p className="text-xs text-muted-foreground">{m.quantity} {m.unit}</p>}
                 </div>

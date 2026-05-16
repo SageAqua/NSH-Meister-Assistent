@@ -58,7 +58,7 @@ export function PreisrechnerClient() {
   }
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="w-full max-w-2xl space-y-5">
       <div className="flex items-center gap-3">
         <div className="flex size-10 items-center justify-center rounded-xl bg-primary">
           <Calculator className="size-5 text-primary-foreground" />
@@ -72,7 +72,7 @@ export function PreisrechnerClient() {
       {/* Step 1: Category */}
       <div className="space-y-2">
         <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">1. Kategorie</p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {CATEGORIES.map((cat) => {
             const meta = CATEGORY_META[cat]
             return (
@@ -97,7 +97,7 @@ export function PreisrechnerClient() {
       {/* Step 2: Service */}
       <div className="space-y-2">
         <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">2. Leistung</p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {servicesForCategory.map((service) => (
             <button
               key={service.id}
@@ -119,7 +119,7 @@ export function PreisrechnerClient() {
       {/* Step 3: Area + difficulty */}
       <div className="space-y-3">
         <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">3. Fläche / Siperfaqja</p>
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             onClick={() => setArea(Math.max(0, area - 5))}
             className="flex size-14 shrink-0 items-center justify-center rounded-2xl border-2 text-2xl font-bold hover:border-primary hover:bg-accent"
@@ -132,7 +132,7 @@ export function PreisrechnerClient() {
             value={area || ""}
             onChange={(e) => setArea(parseFloat(e.target.value) || 0)}
             placeholder="0"
-            className="h-14 flex-1 rounded-2xl border-2 border-primary bg-background px-4 text-center text-3xl font-black focus:outline-none"
+            className="h-14 min-w-0 flex-1 rounded-2xl border-2 border-primary bg-background px-3 text-center text-2xl font-black focus:outline-none sm:px-4 sm:text-3xl"
           />
           <span className="text-xl font-bold text-muted-foreground">m²</span>
           <button
@@ -174,7 +174,7 @@ export function PreisrechnerClient() {
         <Card className="overflow-hidden border-primary/30">
           <div className="bg-primary p-5 text-center text-primary-foreground">
             <p className="text-sm font-medium opacity-80">ca.</p>
-            <p className="mt-1 text-5xl font-black">{result.normal.toLocaleString("de-DE")} €</p>
+            <p className="mt-1 text-3xl font-black sm:text-5xl">{result.normal.toLocaleString("de-DE")} €</p>
             <p className="mt-2 text-base opacity-80">
               {result.low.toLocaleString("de-DE")} – {result.high.toLocaleString("de-DE")} €
             </p>
@@ -188,7 +188,7 @@ export function PreisrechnerClient() {
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
               Preis nach Besichtigung bestätigt / Cmimi konfirmohet pas shikimit
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <a
                 href={`https://wa.me/?text=${buildWhatsAppText(selectedService, area, result)}`}
                 target="_blank"

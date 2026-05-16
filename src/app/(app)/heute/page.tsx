@@ -8,12 +8,12 @@ import {
   Calculator,
   User,
   CalendarPlus,
+  CalendarDays,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { markTaskDone } from "@/app/actions/orders"
 import { TagesplanSection } from "./tagesplan"
-import { MonthlyCalendar, type MonthlyCalendarEvent } from "./monthly-calendar"
 import { SERVICES } from "@/lib/calculations/pricing"
 import type { FreeSlot } from "./tagesplan"
 import type { CalendarEvent, Task, Project, Customer, PriceCalculation } from "@/types"
@@ -29,6 +29,14 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
 }
 
+function formatDateKey(date: Date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-")
+}
+
 // ─── Numbered section wrapper ────────────────────────────────────────────────
 function NumberedSection({
   number,
@@ -42,9 +50,9 @@ function NumberedSection({
   children: React.ReactNode
 }) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+    <div className="space-y-2.5">
+      <div className="flex items-center gap-2.5">
+        <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
           {number}
         </div>
         <div>
@@ -218,30 +226,30 @@ function PreisrechnerWidget({ lastCalc }: { lastCalc: PriceCalculation | null })
 // ─── Schnellaktionen ──────────────────────────────────────────────────────────
 function Schnellaktionen() {
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
       <Link href="/neuer-auftrag">
-        <div className="flex flex-col items-start gap-1 rounded-xl bg-primary p-4 text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer">
+        <div className="flex min-h-20 flex-col items-start gap-1 rounded-xl bg-primary p-3 text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer">
           <Plus className="size-5" />
           <span className="font-semibold text-sm">Neuer Auftrag</span>
           <span className="text-xs opacity-75">Punë e re</span>
         </div>
       </Link>
       <Link href="/heute?new-event=1">
-        <div className="flex flex-col items-start gap-1 rounded-xl bg-primary p-4 text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer">
+        <div className="flex min-h-20 flex-col items-start gap-1 rounded-xl bg-primary p-3 text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer">
           <CalendarPlus className="size-5" />
           <span className="font-semibold text-sm">Neuer Termin</span>
           <span className="text-xs opacity-75">Termini i ri</span>
         </div>
       </Link>
       <Link href="/notizen">
-        <div className="flex flex-col items-start gap-1 rounded-xl border-2 border-border bg-card p-4 hover:bg-accent transition-colors cursor-pointer">
+        <div className="flex min-h-20 flex-col items-start gap-1 rounded-xl border-2 border-border bg-card p-3 hover:bg-accent transition-colors cursor-pointer">
           <FileText className="size-5" />
           <span className="font-semibold text-sm">Neue Notiz</span>
           <span className="text-xs text-muted-foreground">Shënim i ri</span>
         </div>
       </Link>
       <Link href="/kunden">
-        <div className="flex flex-col items-start gap-1 rounded-xl border-2 border-border bg-card p-4 hover:bg-accent transition-colors cursor-pointer">
+        <div className="flex min-h-20 flex-col items-start gap-1 rounded-xl border-2 border-border bg-card p-3 hover:bg-accent transition-colors cursor-pointer">
           <User className="size-5" />
           <span className="font-semibold text-sm">Kunde anlegen</span>
           <span className="text-xs text-muted-foreground">Klient i ri</span>
@@ -252,6 +260,88 @@ function Schnellaktionen() {
 }
 
 // ─── Free slots helper ────────────────────────────────────────────────────────
+function UpcomingWeekPreview({
+  events,
+  today,
+}: {
+  events: CalendarEvent[]
+  today: string
+}) {
+  const start = new Date(today + "T12:00:00")
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
+  const endKey = formatDateKey(end)
+
+  const weekEvents = events
+    .filter((event) => {
+      const key = event.start_time.split("T")[0]
+      return key >= today && key <= endKey && event.status !== "abgesagt"
+    })
+    .sort((a, b) => a.start_time.localeCompare(b.start_time))
+
+  const grouped = weekEvents.reduce<Record<string, CalendarEvent[]>>((acc, event) => {
+    const key = event.start_time.split("T")[0]
+    if (!acc[key]) acc[key] = []
+    acc[key].push(event)
+    return acc
+  }, {})
+
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(start)
+    date.setDate(start.getDate() + index)
+    return date
+  })
+
+  return (
+    <div className="rounded-xl border bg-card p-3">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div>
+          <p className="font-bold leading-tight">Naechste 7 Tage</p>
+          <p className="text-xs text-muted-foreground">Kompakte Termin-Vorschau</p>
+        </div>
+        <Link href="/kalender" className="flex items-center gap-1.5 text-xs font-bold text-primary">
+          <CalendarDays className="size-4" />
+          Kalender
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-7">
+        {days.map((date) => {
+          const key = formatDateKey(date)
+          const dayEvents = grouped[key] ?? []
+          const isToday = key === today
+          return (
+            <div
+              key={key}
+              className={cn(
+                "rounded-lg border bg-background p-2 sm:min-h-20 sm:p-1.5",
+                dayEvents.length > 0 && "border-primary/30 bg-primary/5",
+                isToday && "border-primary"
+              )}
+            >
+              <p className={cn("text-[10px] font-bold text-muted-foreground", isToday && "text-primary")}>
+                {isToday ? "Heute" : date.toLocaleDateString("de-DE", { weekday: "short" })}
+              </p>
+              <p className="text-sm font-black">{date.getDate()}</p>
+              {dayEvents.length > 0 ? (
+                <div className="mt-1 space-y-1">
+                  <p className="truncate rounded bg-primary px-1 py-0.5 text-[10px] font-bold text-primary-foreground">
+                    {formatTime(dayEvents[0].start_time)} {dayEvents[0].title}
+                  </p>
+                  {dayEvents.length > 1 && (
+                    <p className="text-[10px] font-bold text-primary">+{dayEvents.length - 1}</p>
+                  )}
+                </div>
+              ) : (
+                <p className="mt-2 text-[10px] text-muted-foreground">frei</p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function computeFreeSlots(events: CalendarEvent[]): FreeSlot[] {
   const WORK_START = 7 * 60
   const WORK_END = 19 * 60
@@ -306,16 +396,13 @@ export default async function HeutePage({
 
   const supabase = await createClient()
   const today = new Date()
-  const todayStr = today.toISOString().split("T")[0]
+  const todayStr = formatDateKey(today)
 
   // Month boundaries
   const y = today.getFullYear()
   const m = today.getMonth()
 
-  const currStart = new Date(y, m, 1)
   const currEnd = new Date(y, m + 1, 0)
-  const prevStart = new Date(y, m - 1, 1)
-  const prevEnd = new Date(y, m, 0)
   const nextStart = new Date(y, m + 1, 1)
   const nextEnd = new Date(y, m + 2, 0)
 
@@ -329,7 +416,6 @@ export default async function HeutePage({
     { data: tasksRaw },
     { data: projectsRaw },
     { data: upcomingRaw },
-    { data: prevEventsRaw },
     { data: nextEventsRaw },
     { data: lastCalcRaw },
   ] = await Promise.all([
@@ -366,15 +452,6 @@ export default async function HeutePage({
       .neq("status", "abgesagt")
       .order("start_time"),
 
-    // Prev month events for calendar
-    supabase
-      .from("calendar_events")
-      .select("*, projects(*, customers(*))")
-      .gte("start_time", fmt(prevStart, "00:00:00"))
-      .lte("start_time", fmt(prevEnd, "23:59:59"))
-      .neq("status", "abgesagt")
-      .order("start_time"),
-
     // Next month events for calendar
     supabase
       .from("calendar_events")
@@ -400,26 +477,11 @@ export default async function HeutePage({
 
   const freeSlots = computeFreeSlots(todayEvents)
 
-  // Build monthEventsMap for calendar
-  const currMonthKey = `${y}-${String(m + 1).padStart(2, "0")}`
-  const prevMonthKey = `${m === 0 ? y - 1 : y}-${String(m === 0 ? 12 : m).padStart(2, "0")}`
-  const nextMonthKey = `${m === 11 ? y + 1 : y}-${String(m === 11 ? 1 : m + 2).padStart(2, "0")}`
-
-  const toMonthlyEvent = (event: CalendarEvent): MonthlyCalendarEvent => ({
-    id: event.id,
-    date: event.start_time.split("T")[0],
-    startTime: formatTime(event.start_time),
-    endTime: formatTime(event.end_time),
-    title: event.title,
-    customer: event.projects?.customers?.name,
-    status: event.status,
-  })
-
-  const monthEventsMap: Record<string, MonthlyCalendarEvent[]> = {
-    [prevMonthKey]: ((prevEventsRaw ?? []) as CalendarEvent[]).map(toMonthlyEvent),
-    [currMonthKey]: [...todayEvents, ...upcomingEvents].map(toMonthlyEvent),
-    [nextMonthKey]: ((nextEventsRaw ?? []) as CalendarEvent[]).map(toMonthlyEvent),
-  }
+  const weekPreviewEvents = [
+    ...todayEvents,
+    ...upcomingEvents,
+    ...((nextEventsRaw ?? []) as CalendarEvent[]),
+  ]
 
   const greeting = getGreeting()
   const dateStr = today.toLocaleDateString("de-DE", {
@@ -429,22 +491,22 @@ export default async function HeutePage({
   })
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 overflow-x-hidden">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-black">{greeting}, Naim</h1>
-          <p className="capitalize text-muted-foreground">{dateStr}</p>
+          <h1 className="text-2xl font-black md:text-3xl">{greeting}, Naim</h1>
+          <p className="text-sm capitalize text-muted-foreground">{dateStr}</p>
         </div>
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-          N
+        <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border">
+          <img src="/logo.png" alt="NSH Renovierung" className="size-12 object-contain" />
         </div>
       </div>
 
       {/* ── Two-column grid ── */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         {/* Left column */}
-        <div className="space-y-8">
+        <div className="space-y-4">
           <NumberedSection number={1} de="Heutige Termine" sq="Terminet e sotme">
             <TagesplanSection
               events={todayEvents}
@@ -460,7 +522,7 @@ export default async function HeutePage({
         </div>
 
         {/* Right column */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <NumberedSection number={2} de="Offene Aufgaben" sq="Detyra të hapura">
             <OffeneAufgaben tasks={openTasks} />
           </NumberedSection>
@@ -475,12 +537,12 @@ export default async function HeutePage({
         </div>
       </div>
 
-      {/* ── Monthly calendar — full width ── */}
+      {/* Next 7 days */}
       <div className="space-y-2">
         <h2 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
           📆 Kalender
         </h2>
-        <MonthlyCalendar monthEventsMap={monthEventsMap} today={todayStr} />
+        <UpcomingWeekPreview events={weekPreviewEvents} today={todayStr} />
       </div>
     </div>
   )

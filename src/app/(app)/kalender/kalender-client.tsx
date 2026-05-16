@@ -257,7 +257,7 @@ function WeekView({
         end.setDate(start.getDate() + 6)
         return (
           <section key={weekStart} className="rounded-lg border bg-card p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-black">
                 {start.toLocaleDateString("de-DE", { day: "numeric", month: "short" })} -{" "}
                 {end.toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
@@ -331,61 +331,61 @@ function MonthView({
         )}
       </div>
 
-      <div className="hidden overflow-x-auto rounded-lg border bg-card p-3 md:block">
-        <div className="min-w-[920px]">
-        <div className="mb-2 grid grid-cols-7 gap-2">
+      <div className="hidden rounded-lg border bg-card p-2 md:block lg:p-3">
+        <div className="mb-2 grid grid-cols-7 gap-1.5 lg:gap-2">
           {WEEKDAYS_SHORT.map((day) => (
-            <div key={day} className="px-2 py-1 text-sm font-black text-muted-foreground">{day}</div>
+            <div key={day} className="px-1 py-1 text-xs font-black text-muted-foreground lg:px-2 lg:text-sm">{day}</div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1.5 lg:gap-2">
           {cells.map((day, index) => {
-            if (!day) return <div key={`empty-${index}`} className="min-h-32 rounded-lg bg-muted/20" />
+            if (!day) return <div key={`empty-${index}`} className="min-h-[84px] rounded-lg bg-muted/20 lg:min-h-[112px]" />
             const dayEvents = eventsByDay[day] ?? []
             const isToday = isSameDay(new Date(year, month, day), today)
             return (
               <div
                 key={day}
                 className={cn(
-                  "min-h-32 rounded-lg border bg-background p-2",
+                  "min-h-[84px] rounded-lg border bg-background p-1.5 lg:min-h-[112px] lg:p-2",
                   dayEvents.length > 0 && "border-primary/40 bg-primary/5",
                   isToday && "border-primary bg-primary/10"
                 )}
               >
-                <div className="mb-2 flex items-center justify-between">
+                <div className="mb-1 flex items-center justify-between lg:mb-2">
                   <span className={cn(
-                    "flex size-8 items-center justify-center rounded-full text-sm font-black",
+                    "flex size-6 items-center justify-center rounded-full text-xs font-black lg:size-8 lg:text-sm",
                     isToday && "bg-primary text-primary-foreground"
                   )}>
                     {day}
                   </span>
                   {dayEvents.length > 0 && (
-                    <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-black text-primary-foreground">
+                    <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-black text-primary-foreground lg:px-2 lg:text-[11px]">
                       {dayEvents.length}
                     </span>
                   )}
                 </div>
 
-                <div className="space-y-1.5">
-                  {dayEvents.slice(0, 3).map((event) => (
+                <div className="space-y-1">
+                  {dayEvents.slice(0, 2).map((event, eventIndex) => (
                     <button
                       key={event.id}
                       type="button"
                       onClick={() => onEdit(event)}
                       className={cn(
-                        "block w-full rounded-md px-2 py-1.5 text-left text-xs leading-tight",
+                        "block w-full rounded-md px-1.5 py-1 text-left text-[10px] leading-tight lg:px-2 lg:text-xs",
+                        eventIndex === 1 && "hidden xl:block",
                         event.status === "erledigt" ? "bg-green-100 text-green-800" : "bg-primary text-primary-foreground"
                       )}
                     >
-                      <span className="block font-black">{formatTime(event.start_time)} {event.title}</span>
+                      <span className="block truncate font-black">{formatTime(event.start_time)} {event.title}</span>
                       {event.projects?.customers?.name && (
-                        <span className="block truncate opacity-85">{event.projects.customers.name}</span>
+                        <span className="hidden truncate opacity-85 lg:block">{event.projects.customers.name}</span>
                       )}
                     </button>
                   ))}
-                  {dayEvents.length > 3 && (
-                    <p className="rounded-md border px-2 py-1 text-xs font-bold text-primary">
-                      +{dayEvents.length - 3} weitere
+                  {dayEvents.length > 1 && (
+                    <p className="rounded-md border px-1.5 py-0.5 text-[10px] font-bold text-primary lg:px-2 lg:text-xs">
+                      +{dayEvents.length - 1} weitere
                     </p>
                   )}
                 </div>
@@ -393,7 +393,6 @@ function MonthView({
             )
           })}
         </div>
-      </div>
       </div>
     </div>
   )
@@ -496,12 +495,12 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
       </div>
 
       <div className="rounded-lg border bg-card p-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-3">
           <button onClick={prevMonth} className="flex size-11 items-center justify-center rounded-lg border hover:bg-accent" aria-label="Vorheriger Monat">
             <ChevronLeft className="size-5" />
           </button>
           <div className="text-center">
-            <h2 className="text-2xl font-black">{MONTHS_DE[month]} {year}</h2>
+            <h2 className="text-xl font-black sm:text-2xl">{MONTHS_DE[month]} {year}</h2>
             <p className="text-sm font-semibold text-muted-foreground">
               {activeEvents.length} Termine, {openCount} offen, {doneCount} erledigt
             </p>
@@ -529,7 +528,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
         >
           <Card className="w-full max-w-lg" onClick={(event) => event.stopPropagation()}>
             <CardContent className="space-y-4 p-5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <h3 className="text-lg font-black">Termin aendern</h3>
                 <button
                   onClick={() => setEditing(null)}
@@ -557,7 +556,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
                   className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-xs font-bold text-muted-foreground">Von</label>
                   <input

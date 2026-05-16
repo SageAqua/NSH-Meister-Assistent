@@ -78,7 +78,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full min-w-0 space-y-5 sm:space-y-6">
       {/* Progress bar */}
       <div className="flex items-center gap-1.5">
         {([1, 2, 3, 4, 5] as Step[]).map((s) => (
@@ -100,7 +100,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <p className="text-sm text-muted-foreground">Çfarë do të bëhet?</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
             {(Object.entries(CATEGORY_META) as [string, { labelDe: string; labelSq: string; emoji: string }][]).map(
               ([id, meta]) => (
                 <button
@@ -129,7 +129,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
               <p className="text-sm font-semibold text-muted-foreground">
                 Welche Leistung? / Çfarë shërbimi?
               </p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {servicesForCategory.map((service) => (
                   <button
                     key={service.id}
@@ -169,7 +169,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <p className="text-sm text-muted-foreground">Sa m²? — {selectedService.labelDe}</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => adjustArea(-20)}
@@ -189,7 +189,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
               type="number"
               value={area}
               onChange={(e) => setArea(Math.max(1, parseInt(e.target.value) || 1))}
-              className="h-24 flex-1 rounded-2xl border-2 border-primary bg-primary/5 text-center text-4xl font-black focus:outline-none"
+              className="h-20 min-w-0 flex-1 rounded-2xl border-2 border-primary bg-primary/5 text-center text-3xl font-black focus:outline-none sm:h-24 sm:text-4xl"
             />
 
             <div className="flex flex-col gap-2">
@@ -209,11 +209,11 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
           </div>
           <p className="text-center text-sm text-muted-foreground">m² Quadratmeter</p>
 
-          <div className="flex gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
             <button
               onClick={() => setAufwaendig(false)}
               className={cn(
-                "flex-1 rounded-xl border-2 py-3 text-sm font-bold transition-all",
+                "rounded-xl border-2 py-3 text-sm font-bold transition-all",
                 !aufwaendig ? "border-primary bg-primary/10 text-primary" : "border-border"
               )}
             >
@@ -222,7 +222,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <button
               onClick={() => setAufwaendig(true)}
               className={cn(
-                "flex-1 rounded-xl border-2 py-3 text-sm font-bold transition-all",
+                "rounded-xl border-2 py-3 text-sm font-bold transition-all",
                 aufwaendig ? "border-primary bg-primary/10 text-primary" : "border-border"
               )}
             >
@@ -261,7 +261,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <p className="text-sm text-muted-foreground">Kush punon?</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
             {WORKER_CONFIGS.map((worker) => (
               <button
                 key={worker.id}
@@ -327,7 +327,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
               </p>
               {plan.map((day) => (
                 <div key={day.day} className="rounded-xl border bg-card p-3">
-                  <div className="mb-1 flex items-center justify-between">
+                  <div className="mb-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-xs font-bold text-primary">
                       Tag {day.day} —{" "}
                       {new Date(day.date + "T12:00:00").toLocaleDateString("de-DE", {
@@ -392,9 +392,9 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
               })}
             />
             <div className="border-t border-primary/20 pt-2.5">
-              <div className="flex items-end justify-between">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <span className="text-sm text-muted-foreground">Preis / Çmimi</span>
-                <div className="text-right">
+                <div className="sm:text-right">
                   <p className="text-2xl font-black text-primary">
                     {price.normal.toLocaleString("de-DE")} €
                   </p>
@@ -455,9 +455,9 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="font-semibold">{value}</span>
+      <span className="font-semibold sm:text-right">{value}</span>
     </div>
   )
 }

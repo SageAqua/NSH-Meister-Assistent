@@ -36,7 +36,7 @@ function FlashCard({ term }: { term: DictionaryTerm }) {
 
   return (
     <Card className="w-full">
-      <CardContent className="p-6 space-y-4">
+      <CardContent className="p-4 space-y-4 sm:p-6">
         {/* German */}
         <div className="rounded-2xl bg-primary/10 p-5 text-center">
           <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Deutsch</p>
@@ -56,7 +56,7 @@ function FlashCard({ term }: { term: DictionaryTerm }) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Button size="touch" variant="outline" className="flex-1 gap-2" onClick={copyDE}>
             {copied ? <><Check className="size-4" /> Kopiert!</> : <><Copy className="size-4" /> Kopieren</>}
           </Button>
@@ -94,7 +94,7 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
 
   if (mode === "cards" && currentCard) {
     return (
-      <div className="max-w-2xl space-y-5">
+      <div className="w-full max-w-2xl space-y-5">
         {/* Header */}
         <div className="flex items-center gap-3">
           <button onClick={() => setMode("section")} className="flex size-10 items-center justify-center rounded-full hover:bg-accent">
@@ -118,7 +118,7 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
         <FlashCard term={currentCard} />
 
         {/* Navigation */}
-        <div className="flex gap-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
           <Button size="touch" variant="outline" onClick={prev} disabled={cardIndex === 0} className="flex-1 gap-2">
             <ChevronLeft className="size-5" /> Zurück
           </Button>
@@ -132,7 +132,7 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
   }
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="w-full max-w-2xl space-y-5">
       <div className="flex items-center gap-3">
         <div className="flex size-10 items-center justify-center rounded-xl bg-primary">
           <BookOpen className="size-5 text-primary-foreground" />
@@ -143,7 +143,7 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         {Object.entries(SECTIONS).map(([key, { label, sq }]) => {
           const count = terms.filter((t) => t.section === key).length
           return (

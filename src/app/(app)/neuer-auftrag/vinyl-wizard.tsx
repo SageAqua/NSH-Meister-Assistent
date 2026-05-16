@@ -75,9 +75,9 @@ function StepKunde({ form, setForm, customers }: {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Welcher Kunde? <span className="text-lg text-muted-foreground font-normal">/ Cili klient?</span></h2>
+      <h2 className="text-xl font-bold sm:text-2xl">Welcher Kunde? <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Cili klient?</span></h2>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         <button
           onClick={() => setMode("select")}
           className={cn("rounded-xl border-2 p-3 text-sm font-semibold transition-all",
@@ -104,14 +104,14 @@ function StepKunde({ form, setForm, customers }: {
               key={c.id}
               onClick={() => setForm({ ...form, customerId: c.id, customerName: c.name, isNewCustomer: false })}
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all",
+                "flex w-full min-w-0 items-center gap-3 rounded-xl border-2 p-3 text-left transition-all sm:p-4",
                 form.customerId === c.id ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
               )}
             >
               <div className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
                 {c.name.charAt(0).toUpperCase()}
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="font-bold">{c.name}</p>
                 <p className="text-sm text-muted-foreground">{c.city ?? c.phone ?? ""}</p>
               </div>
@@ -154,8 +154,8 @@ function StepObjekttyp({ form, setForm }: { form: VinylOrderForm; setForm: (f: V
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Objekttyp <span className="text-lg text-muted-foreground font-normal">/ Lloji i objektit</span></h2>
-      <div className="grid grid-cols-2 gap-3">
+      <h2 className="text-xl font-bold sm:text-2xl">Objekttyp <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Lloji i objektit</span></h2>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         {options.map((o) => (
           <BigCard
             key={o.value}
@@ -180,8 +180,8 @@ function StepVinylArt({ form, setForm }: { form: VinylOrderForm; setForm: (f: Vi
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Vinyl-Art <span className="text-lg text-muted-foreground font-normal">/ Lloji i vinilit</span></h2>
-      <div className="grid grid-cols-2 gap-3">
+      <h2 className="text-xl font-bold sm:text-2xl">Vinyl-Art <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Lloji i vinilit</span></h2>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         {options.map((o) => (
           <BigCard
             key={o.value}
@@ -199,9 +199,9 @@ function StepVinylArt({ form, setForm }: { form: VinylOrderForm; setForm: (f: Vi
 function StepFlaeche({ form, setForm }: { form: VinylOrderForm; setForm: (f: VinylOrderForm) => void }) {
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Fläche <span className="text-lg text-muted-foreground font-normal">/ Sipërfaqja</span></h2>
+      <h2 className="text-xl font-bold sm:text-2xl">Fläche <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Sipërfaqja</span></h2>
       <div className="flex flex-col items-center gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             onClick={() => setForm({ ...form, area: Math.max(0, (form.area ?? 0) - 5) })}
             className="flex size-14 items-center justify-center rounded-full border-2 border-border bg-card text-2xl font-bold hover:border-primary hover:bg-accent"
@@ -213,7 +213,7 @@ function StepFlaeche({ form, setForm }: { form: VinylOrderForm; setForm: (f: Vin
               max="9999"
               value={form.area ?? ""}
               onChange={(e) => setForm({ ...form, area: parseFloat(e.target.value) || 0 })}
-              className="w-32 rounded-2xl border-2 border-primary bg-background py-3 text-center text-4xl font-black focus:outline-none"
+              className="w-24 rounded-2xl border-2 border-primary bg-background py-3 text-center text-3xl font-black focus:outline-none sm:w-32 sm:text-4xl"
             />
             <span className="pb-3 text-2xl font-bold text-muted-foreground">m²</span>
           </div>
@@ -236,14 +236,14 @@ function StepFlaeche({ form, setForm }: { form: VinylOrderForm; setForm: (f: Vin
 function StepRaeume({ form, setForm }: { form: VinylOrderForm; setForm: (f: VinylOrderForm) => void }) {
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Räume <span className="text-lg text-muted-foreground font-normal">/ Dhomat</span></h2>
+      <h2 className="text-xl font-bold sm:text-2xl">Räume <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Dhomat</span></h2>
       <div className="flex flex-col items-center gap-4">
         <div className="flex items-center gap-6">
           <button
             onClick={() => setForm({ ...form, rooms: Math.max(1, (form.rooms ?? 1) - 1) })}
             className="flex size-14 items-center justify-center rounded-full border-2 border-border text-2xl font-bold hover:border-primary hover:bg-accent"
           >−</button>
-          <span className="w-16 text-center text-5xl font-black">{form.rooms ?? 1}</span>
+          <span className="w-14 text-center text-4xl font-black sm:w-16 sm:text-5xl">{form.rooms ?? 1}</span>
           <button
             onClick={() => setForm({ ...form, rooms: (form.rooms ?? 1) + 1 })}
             className="flex size-14 items-center justify-center rounded-full border-2 border-border text-2xl font-bold hover:border-primary hover:bg-accent"
@@ -265,8 +265,8 @@ function StepUntergrund({ form, setForm }: { form: VinylOrderForm; setForm: (f: 
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Untergrund <span className="text-lg text-muted-foreground font-normal">/ Baza</span></h2>
-      <div className="grid grid-cols-2 gap-3">
+      <h2 className="text-xl font-bold sm:text-2xl">Untergrund <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Baza</span></h2>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         {options.map((o) => (
           <BigCard
             key={o.value}
@@ -299,14 +299,14 @@ function StepZusatzarbeiten({ form, setForm }: { form: VinylOrderForm; setForm: 
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Zusatzarbeiten <span className="text-lg text-muted-foreground font-normal">/ Punë shtesë</span></h2>
+      <h2 className="text-xl font-bold sm:text-2xl">Zusatzarbeiten <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Punë shtesë</span></h2>
       <div className="space-y-2">
         {options.map(({ key, de, sq, price }) => (
           <button
             key={key}
             onClick={() => toggle(key)}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all",
+              "flex w-full min-w-0 items-start gap-3 rounded-xl border-2 p-3 text-left transition-all sm:items-center sm:p-4",
               form.extras[key] ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
             )}
           >
@@ -316,11 +316,11 @@ function StepZusatzarbeiten({ form, setForm }: { form: VinylOrderForm; setForm: 
             )}>
               {form.extras[key] && <Check className="size-4 text-primary-foreground" />}
             </div>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <p className="font-semibold">{de}</p>
               <p className="text-sm text-muted-foreground">{sq}</p>
             </div>
-            <span className="text-sm font-mono text-muted-foreground">{price}</span>
+            <span className="shrink-0 text-right text-sm font-mono text-muted-foreground">{price}</span>
           </button>
         ))}
       </div>
@@ -349,7 +349,7 @@ function StepMaterial({ form, setForm }: { form: VinylOrderForm; setForm: (f: Vi
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Material <span className="text-lg text-muted-foreground font-normal">/ Materiali</span></h2>
+      <h2 className="text-xl font-bold sm:text-2xl">Material <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Materiali</span></h2>
       <div className="space-y-3">
         {options.map((o) => (
           <BigCard
@@ -369,7 +369,7 @@ function StepStartdatum({ form, setForm }: { form: VinylOrderForm; setForm: (f: 
   const today = new Date().toISOString().split("T")[0]
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Startdatum <span className="text-lg text-muted-foreground font-normal">/ Data e fillimit</span></h2>
+      <h2 className="text-xl font-bold sm:text-2xl">Startdatum <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Data e fillimit</span></h2>
       <div className="flex flex-col items-center gap-4">
         <input
           type="date"
@@ -378,7 +378,7 @@ function StepStartdatum({ form, setForm }: { form: VinylOrderForm; setForm: (f: 
           onChange={(e) => setForm({ ...form, startDate: e.target.value })}
           className="h-14 w-full rounded-2xl border-2 border-primary bg-background px-4 text-lg font-semibold focus:outline-none"
         />
-        <div className="grid w-full grid-cols-2 gap-2">
+        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
           {[1, 3, 7, 14].map((days) => {
             const d = new Date(); d.setDate(d.getDate() + days)
             const str = d.toISOString().split("T")[0]
@@ -410,7 +410,7 @@ function StepArbeitszeit({ form, setForm }: { form: VinylOrderForm; setForm: (f:
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Arbeitszeit <span className="text-lg text-muted-foreground font-normal">/ Orari i punës</span></h2>
+      <h2 className="text-xl font-bold sm:text-2xl">Arbeitszeit <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Orari i punës</span></h2>
       <div className="space-y-3">
         {options.map((o) => (
           <BigCard
@@ -468,11 +468,11 @@ function ResultScreen({ form, onBack, onEdit }: {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full hover:bg-accent">
           <ChevronLeft className="size-5" />
         </button>
-        <h2 className="text-2xl font-bold">Auftrag prüfen / Kontrollo porosinë</h2>
+        <h2 className="text-xl font-bold sm:text-2xl">Auftrag prüfen / Kontrollo porosinë</h2>
       </div>
 
       {/* Summary */}
@@ -488,9 +488,9 @@ function ResultScreen({ form, onBack, onEdit }: {
             { label: "Untergrund", value: conditionLabels[form.groundCondition ?? ""] ?? "—", step: 5 },
             { label: "Startdatum", value: form.startDate ?? "—", step: 8 },
           ].map(({ label, value, step }) => (
-            <div key={label} className="flex items-center justify-between py-1 border-b last:border-0">
+            <div key={label} className="flex flex-col gap-1 py-1 border-b last:border-0 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm text-muted-foreground">{label}</span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <span className="font-semibold">{value}</span>
                 <button onClick={() => onEdit(step)} className="text-xs text-primary underline">Ändern</button>
               </div>
@@ -506,7 +506,7 @@ function ResultScreen({ form, onBack, onEdit }: {
             <Clock className="size-5 text-primary" />
             <h3 className="font-bold text-lg">Dauer / Kohëzgjatja</h3>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
             <div className="rounded-xl bg-muted/50 p-3 text-center">
               <p className="text-3xl font-black text-primary">{duration.alleine}</p>
               <p className="text-sm text-muted-foreground">Tage alleine</p>
@@ -526,7 +526,7 @@ function ResultScreen({ form, onBack, onEdit }: {
             <Euro className="size-5 text-primary" />
             <h3 className="font-bold text-lg">Preisspanne / Gama e çmimeve</h3>
           </div>
-          <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="grid grid-cols-1 gap-2 mb-3 sm:grid-cols-3">
             {[
               { label: "Niedrig", value: price.low },
               { label: "Normal", value: price.normal, highlight: true },
@@ -578,7 +578,7 @@ function ResultScreen({ form, onBack, onEdit }: {
             <div className="space-y-2">
               {plan.map((day, i) => (
                 <div key={i} className="rounded-xl border p-3">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex flex-col gap-1 mb-1 sm:flex-row sm:items-center sm:justify-between">
                     <p className="font-semibold">{day.title}</p>
                     <Badge variant="secondary" className="text-xs">{day.startTime}–{day.endTime}</Badge>
                   </div>
@@ -677,7 +677,7 @@ export function VinylWizard({ customers }: { customers: Customer[] }) {
     <div className="space-y-5">
       {/* Header */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-medium text-muted-foreground">
             Schritt {step + 1} von {STEPS.length} · Vinyl verlegen
           </p>
@@ -687,12 +687,12 @@ export function VinylWizard({ customers }: { customers: Customer[] }) {
       </div>
 
       {/* Step content */}
-      <div className="min-h-[400px]">
+      <div className="min-h-0 sm:min-h-[400px]">
         {stepComponents[step]}
       </div>
 
       {/* Navigation */}
-      <div className="flex gap-3">
+      <div className="flex gap-2 sm:gap-3">
         {step > 0 && (
           <Button size="touch" variant="outline" onClick={back} className="flex-1">
             <ChevronLeft className="size-5" /> Zurück

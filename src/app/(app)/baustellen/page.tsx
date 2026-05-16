@@ -42,8 +42,8 @@ export default async function BaustellenPage() {
   const done = allProjects.filter((p) => p.status === "fertig" || p.status === "abgesagt")
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="w-full space-y-5 sm:space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Baustellen</h1>
           <p className="text-muted-foreground text-sm">Kantieret — {allProjects.length} gesamt</p>
@@ -84,9 +84,9 @@ function ProjectSection({ title, projects }: { title: string; projects: Project[
           <Link key={p.id} href={`/baustellen/${p.id}`}>
             <Card className="transition-all hover:shadow-md hover:border-primary/30">
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex min-w-0 items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className={cn(
                         "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold",
                         STATUS_COLORS[p.status]

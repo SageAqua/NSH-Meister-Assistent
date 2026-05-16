@@ -32,7 +32,7 @@ export default async function MaterialPage() {
   })
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="w-full max-w-2xl space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Material</h1>
         <p className="text-sm text-muted-foreground">Materiali — {allMaterials.length} Einträge</p>
@@ -53,17 +53,17 @@ export default async function MaterialPage() {
           return (
             <section key={projectId}>
               <Link href={`/baustellen/${projectId}`}>
-                <div className="mb-2 flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 hover:bg-accent transition-colors">
-                  <div>
+                <div className="mb-2 flex min-w-0 items-center justify-between gap-3 rounded-lg bg-muted/50 px-3 py-2 hover:bg-accent transition-colors">
+                  <div className="min-w-0">
                     <p className="font-bold">{project?.customers?.name ?? "Unbekannt"}</p>
-                    <p className="text-xs text-muted-foreground">{project?.address ?? project?.service_type}</p>
+                    <p className="truncate text-xs text-muted-foreground">{project?.address ?? project?.service_type}</p>
                   </div>
                   {pending > 0 && <Badge variant="secondary">{pending} offen</Badge>}
                 </div>
               </Link>
               <div className="space-y-2">
                 {items.map((m) => (
-                  <div key={m.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
+                  <div key={m.id} className="flex min-w-0 items-center gap-3 rounded-xl border bg-card p-3">
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm">{m.name}</p>
                       {m.quantity && (

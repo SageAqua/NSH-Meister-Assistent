@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
-import type { VinylOrderForm, CalendarPlanDay } from "@/types"
+import type { ProjectStatus, VinylOrderForm, CalendarPlanDay } from "@/types"
 
 export async function saveVinylOrder(form: VinylOrderForm, plan: CalendarPlanDay[]) {
   const supabase = await createClient()
@@ -321,4 +321,63 @@ export async function updateProjectStatus(projectId: string, status: string): Pr
     .update({ status })
     .eq("id", projectId)
     .eq("user_id", user.id)
+
+  revalidatePath("/heute")
+  revalidatePath("/baustellen")
+  revalidatePath(`/baustellen/${projectId}`)
+}
+
+export async function updateProject(data: {
+  id: string
+  customerId?: string
+  serviceType: string
+  status: ProjectStatus
+  address?: string
+  areaM2?: number | null
+  helpersCount?: number
+  notes?: string
+}): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { error } = await supabase
+    .from("projects")
+    .update({
+      customer_id: data.customerId || null,
+      service_type: data.serviceType.trim() || "sonstiges",
+      status: data.status,
+      address: data.address?.trim() || null,
+      area_m2: data.areaM2 ?? null,
+      helpers_count: data.helpersCount ?? 0,
+      notes: data.notes?.trim() || null,
+    })
+    .eq("id", data.id)
+    .eq("user_id", user.id)
+
+  if (error) return { error: "Baustelle konnte nicht gespeichert werden." }
+
+  revalidatePath("/heute")
+  revalidatePath("/baustellen")
+  revalidatePath(`/baustellen/${data.id}`)
+  return {}
+}
+
+export async function deleteProject(projectId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("id", projectId)
+    .eq("user_id", user.id)
+
+  if (error) return { error: "Baustelle konnte nicht gelöscht werden." }
+
+  revalidatePath("/heute")
+  revalidatePath("/kalender")
+  revalidatePath("/baustellen")
+  return {}
 }

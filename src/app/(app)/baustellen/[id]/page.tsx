@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { markEventDone, markTaskDone, updateProjectStatus } from "@/app/actions/orders"
 import type { Project, CalendarEvent, Task, Note, Material } from "@/types"
 import { cn } from "@/lib/utils"
+import { ProjectEditor } from "./project-editor"
 
 const STATUS_COLORS: Record<string, string> = {
   geplant: "bg-blue-100 text-blue-700",
@@ -47,12 +48,14 @@ export default async function BaustelleDetailPage({
     { data: tasks },
     { data: notes },
     { data: materials },
+    { data: customers },
   ] = await Promise.all([
     supabase.from("projects").select("*, customers(*)").eq("id", id).single(),
     supabase.from("calendar_events").select("*").eq("project_id", id).order("start_time"),
     supabase.from("tasks").select("*").eq("project_id", id).order("created_at"),
     supabase.from("notes").select("*").eq("project_id", id).order("created_at", { ascending: false }),
     supabase.from("materials").select("*").eq("project_id", id).order("created_at"),
+    supabase.from("customers").select("*").order("name"),
   ])
 
   if (!project) notFound()
@@ -121,6 +124,8 @@ export default async function BaustelleDetailPage({
         )}
       </div>
 
+      <ProjectEditor project={p} customers={customers ?? []} />
+
       {/* Status change */}
       <Card>
         <CardContent className="p-4">
@@ -176,6 +181,15 @@ export default async function BaustelleDetailPage({
           )}
         </CardContent>
       </Card>
+
+      {p.notes && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-semibold mb-1">Baustellen-Notiz</p>
+            <p className="whitespace-pre-wrap text-sm text-muted-foreground">{p.notes}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Next event */}
       {nextEvent && (

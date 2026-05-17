@@ -233,6 +233,114 @@ export async function saveUniversalOrder(data: {
   return { projectId: project.id }
 }
 
+export async function saveSimpleOrder(data: {
+  workTitle: string
+  customerMode: "existing" | "new" | "later"
+  customerId?: string
+  customerName?: string
+  customerPhone?: string
+  customerAddress?: string
+  customerCity?: string
+  areaM2?: number | null
+  helpersCount: number
+  startDate?: string
+  startTime?: string
+  endTime?: string
+  notes?: string
+  materialNeeded: boolean
+  offerNeeded: boolean
+}): Promise<{ error?: string; projectId?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const workTitle = data.workTitle.trim()
+  if (!workTitle) return { error: "Bitte kurz schreiben, welche Arbeit gemacht wird." }
+
+  let customerId = data.customerMode === "existing" ? data.customerId : undefined
+
+  if (data.customerMode === "new" && data.customerName?.trim()) {
+    const { data: customer, error } = await supabase
+      .from("customers")
+      .insert({
+        user_id: user.id,
+        name: data.customerName.trim(),
+        phone: data.customerPhone?.trim() || null,
+        address: data.customerAddress?.trim() || null,
+        city: data.customerCity?.trim() || null,
+      })
+      .select("id")
+      .single()
+
+    if (error) return { error: "Kunde konnte nicht gespeichert werden." }
+    customerId = customer.id
+  }
+
+  let address = data.customerAddress?.trim() || null
+  if (!address && customerId) {
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("address")
+      .eq("id", customerId)
+      .single()
+    address = customer?.address ?? null
+  }
+
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .insert({
+      user_id: user.id,
+      customer_id: customerId ?? null,
+      service_type: workTitle,
+      status: "geplant",
+      address,
+      area_m2: data.areaM2 ?? null,
+      helpers_count: data.helpersCount,
+      notes: data.notes?.trim() || null,
+      extras: {
+        materialNeeded: data.materialNeeded,
+        offerNeeded: data.offerNeeded,
+      },
+    })
+    .select("id")
+    .single()
+
+  if (projectError) return { error: "Auftrag konnte nicht gespeichert werden." }
+
+  if (data.startDate) {
+    const startTime = data.startTime || "08:00"
+    const endTime = data.endTime || "16:00"
+    await supabase.from("calendar_events").insert({
+      user_id: user.id,
+      project_id: project.id,
+      title: workTitle,
+      start_time: `${data.startDate}T${startTime}:00`,
+      end_time: `${data.startDate}T${endTime}:00`,
+      status: "geplant",
+      helpers_count: data.helpersCount,
+      notes: data.notes?.trim() || null,
+    })
+  }
+
+  const tasks = [
+    data.offerNeeded ? { title: "Angebot schicken", due_date: new Date().toISOString().split("T")[0] } : null,
+    data.materialNeeded ? { title: "Material pruefen oder bestellen", due_date: data.startDate || null } : null,
+    { title: "Kunde nach Fertigstellung informieren", due_date: null },
+    { title: "Rechnung stellen", due_date: null },
+  ].filter(Boolean) as { title: string; due_date: string | null }[]
+
+  if (tasks.length > 0) {
+    await supabase.from("tasks").insert(
+      tasks.map((task) => ({ ...task, user_id: user.id, project_id: project.id }))
+    )
+  }
+
+  revalidatePath("/heute")
+  revalidatePath("/kalender")
+  revalidatePath("/baustellen")
+  return { projectId: project.id }
+}
+
 export async function saveCustomer(data: {
   name: string
   phone?: string

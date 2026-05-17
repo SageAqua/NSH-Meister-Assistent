@@ -1,76 +1,96 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, ChevronRight, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
-  SERVICES,
-  WORKER_CONFIGS,
-  CATEGORY_META,
-  calcPrice,
-  calcDaysWithWorkers,
-  generateWorkPlan,
-} from "@/lib/calculations/pricing"
-import type { ServiceItem, WorkerConfig } from "@/lib/calculations/pricing"
-import { saveUniversalOrder } from "@/app/actions/orders"
-import type { Customer } from "@/types"
+  CalendarDays,
+  Check,
+  ClipboardList,
+  Hammer,
+  MapPin,
+  PackageCheck,
+  Phone,
+  Save,
+  UserRound,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { saveSimpleOrder } from "@/app/actions/orders"
+import type { Customer } from "@/types"
 
-type Step = 1 | 2 | 3 | 4 | 5
+const QUICK_WORK = [
+  "Vinyl verlegen",
+  "Laminat verlegen",
+  "Waende streichen",
+  "Decke streichen",
+  "Spachteln",
+  "Trockenbau",
+  "Bad renovieren",
+  "Reparatur",
+]
+
+type CustomerMode = "existing" | "new" | "later"
+
+function todayKey() {
+  return new Date().toISOString().split("T")[0]
+}
 
 export function UniversalWizard({ customers }: { customers: Customer[] }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [workTitle, setWorkTitle] = useState("")
+  const [customerMode, setCustomerMode] = useState<CustomerMode>(
+    customers.length > 0 ? "existing" : "new"
+  )
+  const [customerId, setCustomerId] = useState(customers[0]?.id ?? "")
+  const [customerName, setCustomerName] = useState("")
+  const [customerPhone, setCustomerPhone] = useState("")
+  const [customerAddress, setCustomerAddress] = useState("")
+  const [customerCity, setCustomerCity] = useState("")
+  const [areaM2, setAreaM2] = useState("")
+  const [helpersCount, setHelpersCount] = useState(0)
+  const [startDate, setStartDate] = useState(todayKey())
+  const [startTime, setStartTime] = useState("08:00")
+  const [endTime, setEndTime] = useState("16:00")
+  const [notes, setNotes] = useState("")
+  const [materialNeeded, setMaterialNeeded] = useState(true)
+  const [offerNeeded, setOfferNeeded] = useState(true)
+  const [error, setError] = useState("")
 
-  const [step, setStep] = useState<Step>(1)
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null)
-  const [area, setArea] = useState(50)
-  const [aufwaendig, setAufwaendig] = useState(false)
-  const [selectedWorker, setSelectedWorker] = useState<WorkerConfig | null>(null)
-  const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0])
-  const [customerId, setCustomerId] = useState("")
-  const [saveError, setSaveError] = useState("")
+  const selectedCustomer = useMemo(
+    () => customers.find((customer) => customer.id === customerId),
+    [customerId, customers]
+  )
 
-  const servicesForCategory = selectedCategory
-    ? SERVICES.filter((s) => s.category === selectedCategory)
-    : []
+  const canSave =
+    workTitle.trim().length > 1 &&
+    (customerMode !== "new" || customerName.trim().length > 1)
 
-  const price = selectedService ? calcPrice(selectedService, area, aufwaendig) : null
-  const totalDays =
-    selectedService && selectedWorker
-      ? calcDaysWithWorkers(selectedService, area, selectedWorker.totalWorkers)
-      : 0
-  const plan =
-    selectedService && selectedWorker && startDate
-      ? generateWorkPlan(selectedService, area, selectedWorker.totalWorkers, startDate)
-      : []
+  function save() {
+    if (!canSave) return
+    setError("")
 
-  function adjustArea(delta: number) {
-    setArea((a) => Math.max(1, a + delta))
-  }
-
-  function handleSave() {
-    if (!selectedService || !selectedWorker) return
     startTransition(async () => {
-      const result = await saveUniversalOrder({
-        serviceId: selectedService.id,
-        area,
-        unit: selectedService.unit,
-        workersCount: selectedWorker.totalWorkers,
-        helpersCount: selectedWorker.helpersCount,
-        startDate,
-        customerId: customerId || undefined,
-        plan: plan.map((d) => ({
-          date: d.date,
-          title: d.title,
-          startTime: d.startTime,
-          endTime: d.endTime,
-        })),
+      const result = await saveSimpleOrder({
+        workTitle,
+        customerMode,
+        customerId: customerMode === "existing" ? customerId : undefined,
+        customerName,
+        customerPhone,
+        customerAddress,
+        customerCity,
+        areaM2: areaM2 ? Number(areaM2) : null,
+        helpersCount,
+        startDate: startDate || undefined,
+        startTime,
+        endTime,
+        notes,
+        materialNeeded,
+        offerNeeded,
       })
+
       if (result.error) {
-        setSaveError(result.error)
+        setError(result.error)
       } else if (result.projectId) {
         router.push(`/baustellen/${result.projectId}`)
       }
@@ -78,386 +98,291 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
   }
 
   return (
-    <div className="w-full min-w-0 space-y-5 sm:space-y-6">
-      {/* Progress bar */}
-      <div className="flex items-center gap-1.5">
-        {([1, 2, 3, 4, 5] as Step[]).map((s) => (
-          <div
-            key={s}
-            className={cn(
-              "h-1.5 flex-1 rounded-full transition-colors",
-              step >= s ? "bg-primary" : "bg-muted"
-            )}
-          />
-        ))}
-      </div>
-
-      {/* ── Step 1: Service ── */}
-      {step === 1 && (
-        <div className="space-y-5">
+    <div className="space-y-4">
+      <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Hammer className="size-6" />
+          </div>
           <div>
-            <h2 className="text-xl font-bold">Was wird gemacht?</h2>
-            <p className="text-sm text-muted-foreground">Çfarë do të bëhet?</p>
+            <h2 className="text-xl font-black leading-tight">Was ist die Arbeit?</h2>
+            <p className="text-sm text-muted-foreground">Ein Satz reicht. Er kann frei schreiben.</p>
           </div>
-
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
-            {(Object.entries(CATEGORY_META) as [string, { labelDe: string; labelSq: string; emoji: string }][]).map(
-              ([id, meta]) => (
-                <button
-                  key={id}
-                  onClick={() => {
-                    setSelectedCategory(id)
-                    setSelectedService(null)
-                  }}
-                  className={cn(
-                    "flex flex-col items-center gap-1.5 rounded-xl border-2 p-4 transition-all",
-                    selectedCategory === id
-                      ? "border-primary bg-primary/10"
-                      : "border-border hover:border-primary/40"
-                  )}
-                >
-                  <span className="text-3xl">{meta.emoji}</span>
-                  <span className="text-xs font-bold text-center leading-tight">{meta.labelDe}</span>
-                  <span className="text-[10px] text-muted-foreground text-center leading-tight">{meta.labelSq}</span>
-                </button>
-              )
-            )}
-          </div>
-
-          {selectedCategory && (
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-muted-foreground">
-                Welche Leistung? / Çfarë shërbimi?
-              </p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {servicesForCategory.map((service) => (
-                  <button
-                    key={service.id}
-                    onClick={() => setSelectedService(service)}
-                    className={cn(
-                      "flex flex-col items-start rounded-xl border-2 p-3 text-left transition-all",
-                      selectedService?.id === service.id
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary/40"
-                    )}
-                  >
-                    <p className="font-semibold text-sm">{service.labelDe}</p>
-                    <p className="text-xs text-muted-foreground">{service.labelSq}</p>
-                    <p className="mt-2 text-xs font-bold text-primary">{service.rateNormal} €/m²</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <Button
-            size="touch"
-            className="w-full gap-1"
-            disabled={!selectedService}
-            onClick={() => setStep(2)}
-          >
-            Weiter / Vazhdo <ChevronRight className="size-4" />
-          </Button>
         </div>
-      )}
 
-      {/* ── Step 2: Area ── */}
-      {step === 2 && selectedService && (
-        <div className="space-y-5">
-          <div>
-            <h2 className="text-xl font-bold">Wie viele m²?</h2>
-            <p className="text-sm text-muted-foreground">Sa m²? — {selectedService.labelDe}</p>
+        <textarea
+          value={workTitle}
+          onChange={(event) => setWorkTitle(event.target.value)}
+          placeholder="z.B. Kueche renovieren, Boden raus, Vinyl rein, Waende streichen"
+          rows={3}
+          autoFocus
+          className="w-full resize-none rounded-lg border-2 border-border bg-background p-4 text-lg font-semibold leading-snug outline-none transition-colors focus:border-primary"
+        />
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {QUICK_WORK.map((work) => (
+            <button
+              key={work}
+              type="button"
+              onClick={() => setWorkTitle(work)}
+              className={cn(
+                "rounded-lg border px-3 py-2 text-sm font-bold transition-colors",
+                workTitle === work
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "bg-background hover:bg-muted"
+              )}
+            >
+              {work}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
+            <UserRound className="size-6" />
           </div>
+          <div>
+            <h2 className="text-xl font-black leading-tight">Wer ist der Kunde?</h2>
+            <p className="text-sm text-muted-foreground">Bestehend waehlen, neu eintragen oder spaeter machen.</p>
+          </div>
+        </div>
 
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => adjustArea(-20)}
-                className="flex h-12 w-14 items-center justify-center rounded-xl border-2 border-border text-base font-bold hover:bg-accent active:bg-accent"
-              >
-                −20
-              </button>
-              <button
-                onClick={() => adjustArea(-5)}
-                className="flex h-12 w-14 items-center justify-center rounded-xl border-2 border-border text-base font-bold hover:bg-accent active:bg-accent"
-              >
-                −5
-              </button>
-            </div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {[
+            { value: "existing" as const, label: "Kunde waehlen", disabled: customers.length === 0 },
+            { value: "new" as const, label: "Neuer Kunde" },
+            { value: "later" as const, label: "Spaeter" },
+          ].map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              disabled={option.disabled}
+              onClick={() => setCustomerMode(option.value)}
+              className={cn(
+                "min-h-12 rounded-lg border-2 px-3 text-base font-black transition-colors disabled:opacity-40",
+                customerMode === option.value
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-background hover:bg-muted"
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
 
+        {customerMode === "existing" && customers.length > 0 && (
+          <div className="mt-3 space-y-3">
+            <select
+              value={customerId}
+              onChange={(event) => setCustomerId(event.target.value)}
+              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-lg font-semibold outline-none focus:border-primary"
+            >
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.name}
+                </option>
+              ))}
+            </select>
+            {selectedCustomer && (
+              <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                {selectedCustomer.phone && (
+                  <p className="flex items-center gap-2 rounded-lg bg-muted p-3">
+                    <Phone className="size-4" /> {selectedCustomer.phone}
+                  </p>
+                )}
+                {(selectedCustomer.address || selectedCustomer.city) && (
+                  <p className="flex items-center gap-2 rounded-lg bg-muted p-3">
+                    <MapPin className="size-4" />
+                    {[selectedCustomer.address, selectedCustomer.city].filter(Boolean).join(", ")}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {customerMode === "new" && (
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <input
+              value={customerName}
+              onChange={(event) => setCustomerName(event.target.value)}
+              placeholder="Name *"
+              className="h-14 rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+            />
+            <input
+              value={customerPhone}
+              onChange={(event) => setCustomerPhone(event.target.value)}
+              placeholder="Telefon"
+              type="tel"
+              className="h-14 rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+            />
+            <input
+              value={customerAddress}
+              onChange={(event) => setCustomerAddress(event.target.value)}
+              placeholder="Adresse"
+              className="h-14 rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary sm:col-span-2"
+            />
+            <input
+              value={customerCity}
+              onChange={(event) => setCustomerCity(event.target.value)}
+              placeholder="Ort"
+              className="h-14 rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+            />
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
+            <CalendarDays className="size-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black leading-tight">Wann und wie gross?</h2>
+            <p className="text-sm text-muted-foreground">Nur ausfuellen, was schon bekannt ist.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+          <label className="space-y-1 sm:col-span-2">
+            <span className="text-xs font-bold uppercase text-muted-foreground">Start</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+            />
+          </label>
+          <label className="space-y-1">
+            <span className="text-xs font-bold uppercase text-muted-foreground">Von</span>
+            <input
+              type="time"
+              value={startTime}
+              onChange={(event) => setStartTime(event.target.value)}
+              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+            />
+          </label>
+          <label className="space-y-1">
+            <span className="text-xs font-bold uppercase text-muted-foreground">Bis</span>
+            <input
+              type="time"
+              value={endTime}
+              onChange={(event) => setEndTime(event.target.value)}
+              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+            />
+          </label>
+          <label className="space-y-1 sm:col-span-2">
+            <span className="text-xs font-bold uppercase text-muted-foreground">Flaeche m2</span>
             <input
               type="number"
-              value={area}
-              onChange={(e) => setArea(Math.max(1, parseInt(e.target.value) || 1))}
-              className="h-20 min-w-0 flex-1 rounded-2xl border-2 border-primary bg-primary/5 text-center text-3xl font-black focus:outline-none sm:h-24 sm:text-4xl"
+              min="0"
+              value={areaM2}
+              onChange={(event) => setAreaM2(event.target.value)}
+              placeholder="z.B. 80"
+              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
             />
-
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => adjustArea(20)}
-                className="flex h-12 w-14 items-center justify-center rounded-xl border-2 border-border text-base font-bold hover:bg-accent active:bg-accent"
-              >
-                +20
-              </button>
-              <button
-                onClick={() => adjustArea(5)}
-                className="flex h-12 w-14 items-center justify-center rounded-xl border-2 border-border text-base font-bold hover:bg-accent active:bg-accent"
-              >
-                +5
-              </button>
-            </div>
-          </div>
-          <p className="text-center text-sm text-muted-foreground">m² Quadratmeter</p>
-
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
-            <button
-              onClick={() => setAufwaendig(false)}
-              className={cn(
-                "rounded-xl border-2 py-3 text-sm font-bold transition-all",
-                !aufwaendig ? "border-primary bg-primary/10 text-primary" : "border-border"
-              )}
-            >
-              Standard
-            </button>
-            <button
-              onClick={() => setAufwaendig(true)}
-              className={cn(
-                "rounded-xl border-2 py-3 text-sm font-bold transition-all",
-                aufwaendig ? "border-primary bg-primary/10 text-primary" : "border-border"
-              )}
-            >
-              Aufwändig +25%
-            </button>
-          </div>
-
-          {price && (
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center">
-              <p className="mb-1 text-xs text-muted-foreground">Geschätzter Preis</p>
-              <p className="text-3xl font-black text-primary">
-                {price.normal.toLocaleString("de-DE")} €
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {price.low.toLocaleString("de-DE")} – {price.high.toLocaleString("de-DE")} €
-              </p>
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button size="touch" variant="outline" onClick={() => setStep(1)}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            <Button size="touch" className="flex-1 gap-1" onClick={() => setStep(3)}>
-              Weiter / Vazhdo <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 3: Workers ── */}
-      {step === 3 && (
-        <div className="space-y-5">
-          <div>
-            <h2 className="text-xl font-bold">Wer arbeitet?</h2>
-            <p className="text-sm text-muted-foreground">Kush punon?</p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
-            {WORKER_CONFIGS.map((worker) => (
-              <button
-                key={worker.id}
-                onClick={() => setSelectedWorker(worker)}
-                className={cn(
-                  "flex flex-col items-center gap-2 rounded-xl border-2 p-5 transition-all",
-                  selectedWorker?.id === worker.id
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/40"
-                )}
-              >
-                <span className="text-4xl">{worker.emoji}</span>
-                <span className="text-sm font-bold text-center">{worker.label}</span>
-                <span className="text-xs text-muted-foreground text-center">{worker.labelSq}</span>
-              </button>
-            ))}
-          </div>
-
-          {selectedService && selectedWorker && (
-            <div className="rounded-xl bg-muted/50 p-4 text-center">
-              <p className="text-sm text-muted-foreground">Geschätzte Dauer / Kohëzgjatja</p>
-              <p className="text-3xl font-black">
-                {calcDaysWithWorkers(selectedService, area, selectedWorker.totalWorkers)} Tage
-              </p>
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button size="touch" variant="outline" onClick={() => setStep(2)}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            <Button
-              size="touch"
-              className="flex-1 gap-1"
-              disabled={!selectedWorker}
-              onClick={() => setStep(4)}
-            >
-              Weiter / Vazhdo <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 4: Start date + plan ── */}
-      {step === 4 && selectedService && selectedWorker && (
-        <div className="space-y-5">
-          <div>
-            <h2 className="text-xl font-bold">Wann fangen wir an?</h2>
-            <p className="text-sm text-muted-foreground">Kur fillojmë?</p>
-          </div>
-
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="h-14 w-full rounded-xl border-2 border-border bg-background px-4 text-lg focus:border-primary focus:outline-none"
-          />
-
-          {plan.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-sm font-bold">
-                Arbeitsplan / Plani i punës — {plan.length} Tage
-              </p>
-              {plan.map((day) => (
-                <div key={day.day} className="rounded-xl border bg-card p-3">
-                  <div className="mb-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs font-bold text-primary">
-                      Tag {day.day} —{" "}
-                      {new Date(day.date + "T12:00:00").toLocaleDateString("de-DE", {
-                        weekday: "short",
-                        day: "numeric",
-                        month: "short",
-                      })}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {day.startTime}–{day.endTime}
-                    </span>
-                  </div>
-                  <p className="text-sm font-semibold">{day.title}</p>
-                  <ul className="mt-1 space-y-0.5">
-                    {day.tasksDe.map((t, i) => (
-                      <li key={i} className="flex gap-1.5 text-xs text-muted-foreground">
-                        <span>•</span>
-                        {t}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+          </label>
+          <div className="space-y-1 sm:col-span-2">
+            <span className="text-xs font-bold uppercase text-muted-foreground">Helfer</span>
+            <div className="grid grid-cols-3 gap-2">
+              {[0, 1, 2].map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  onClick={() => setHelpersCount(count)}
+                  className={cn(
+                    "h-14 rounded-lg border-2 text-base font-black",
+                    helpersCount === count
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-background"
+                  )}
+                >
+                  {count}
+                </button>
               ))}
             </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button size="touch" variant="outline" onClick={() => setStep(3)}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            <Button
-              size="touch"
-              className="flex-1 gap-1"
-              disabled={!startDate}
-              onClick={() => setStep(5)}
-            >
-              Weiter / Vazhdo <ChevronRight className="size-4" />
-            </Button>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* ── Step 5: Customer + summary + save ── */}
-      {step === 5 && selectedService && selectedWorker && price && (
-        <div className="space-y-5">
+      <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-white">
+            <ClipboardList className="size-6" />
+          </div>
           <div>
-            <h2 className="text-xl font-bold">Zusammenfassung</h2>
-            <p className="text-sm text-muted-foreground">Përmbledhje</p>
-          </div>
-
-          <div className="space-y-2.5 rounded-xl border-2 border-primary/30 bg-primary/5 p-4">
-            <Row label="Leistung" value={selectedService.labelDe} />
-            <Row label="Fläche / Sipërfaqja" value={`${area} m²${aufwaendig ? " (aufwändig)" : ""}`} />
-            <Row label="Team" value={selectedWorker.label} />
-            <Row label="Dauer / Kohëzgjatja" value={`${totalDays} Tage`} />
-            <Row
-              label="Start"
-              value={new Date(startDate + "T12:00:00").toLocaleDateString("de-DE", {
-                weekday: "short",
-                day: "numeric",
-                month: "long",
-              })}
-            />
-            <div className="border-t border-primary/20 pt-2.5">
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                <span className="text-sm text-muted-foreground">Preis / Çmimi</span>
-                <div className="sm:text-right">
-                  <p className="text-2xl font-black text-primary">
-                    {price.normal.toLocaleString("de-DE")} €
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {price.low.toLocaleString("de-DE")} – {price.high.toLocaleString("de-DE")} €
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {customers.length > 0 && (
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold">
-                Kunde (optional) / Klienti
-              </label>
-              <select
-                value={customerId}
-                onChange={(e) => setCustomerId(e.target.value)}
-                className="h-14 w-full rounded-xl border-2 border-border bg-background px-4 text-base focus:border-primary focus:outline-none"
-              >
-                <option value="">Kein Kunde / Pa klient</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {saveError && <p className="text-sm text-destructive">{saveError}</p>}
-
-          <div className="flex gap-2">
-            <Button size="touch" variant="outline" onClick={() => setStep(4)}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            <Button
-              size="touch"
-              className="flex-1 gap-2"
-              onClick={handleSave}
-              disabled={isPending}
-            >
-              {isPending ? (
-                "Speichert..."
-              ) : (
-                <>
-                  <Check className="size-4" /> Speichern & Kalender
-                </>
-              )}
-            </Button>
+            <h2 className="text-xl font-black leading-tight">Noch etwas merken?</h2>
+            <p className="text-sm text-muted-foreground">Notiz und automatische Aufgaben.</p>
           </div>
         </div>
-      )}
+
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <ToggleButton
+            checked={offerNeeded}
+            onClick={() => setOfferNeeded((value) => !value)}
+            icon={Check}
+            label="Angebot schicken"
+          />
+          <ToggleButton
+            checked={materialNeeded}
+            onClick={() => setMaterialNeeded((value) => !value)}
+            icon={PackageCheck}
+            label="Material pruefen"
+          />
+        </div>
+
+        <textarea
+          value={notes}
+          onChange={(event) => setNotes(event.target.value)}
+          placeholder="Notiz, Material, Besonderheiten, Kundenwunsch ..."
+          rows={4}
+          className="mt-3 w-full resize-none rounded-lg border-2 border-border bg-background p-4 text-base outline-none focus:border-primary"
+        />
+      </section>
+
+      {error && <p className="rounded-lg bg-destructive/10 p-3 font-semibold text-destructive">{error}</p>}
+
+      <div className="sticky bottom-20 z-10 rounded-lg border bg-background/95 p-3 shadow-lg backdrop-blur md:bottom-4">
+        <Button size="touch-xl" className="w-full gap-2" onClick={save} disabled={!canSave || isPending}>
+          <Save className="size-5" />
+          {isPending ? "Speichert..." : "Auftrag speichern"}
+        </Button>
+      </div>
     </div>
   )
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function ToggleButton({
+  checked,
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  checked: boolean
+  onClick: () => void
+  icon: typeof Check
+  label: string
+}) {
   return (
-    <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="font-semibold sm:text-right">{value}</span>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex min-h-14 items-center gap-3 rounded-lg border-2 px-4 text-left font-black transition-colors",
+        checked ? "border-primary bg-primary/10 text-primary" : "border-border bg-background"
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-7 shrink-0 items-center justify-center rounded-md border-2",
+          checked ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"
+        )}
+      >
+        {checked && <Icon className="size-4" />}
+      </span>
+      {label}
+    </button>
   )
 }

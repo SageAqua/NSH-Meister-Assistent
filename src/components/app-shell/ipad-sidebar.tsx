@@ -28,15 +28,15 @@ export function IpadSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden h-dvh w-64 shrink-0 flex-col overflow-y-auto overscroll-contain bg-sidebar md:flex">
+    <aside className="hidden h-dvh w-72 shrink-0 flex-col overflow-y-auto overscroll-contain bg-sidebar md:flex">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-6">
-        <div className="flex size-10 items-center justify-center overflow-hidden rounded-xl bg-white">
-          <img src="/logo.png" alt="NSH Renovierung" className="size-10 object-contain" />
+        <div className="flex size-12 items-center justify-center overflow-hidden rounded-lg bg-white">
+          <img src="/logo.png" alt="NSH Renovierung" className="size-12 object-contain" />
         </div>
         <div>
-          <p className="text-base font-bold leading-tight text-sidebar-foreground">NSH Meister</p>
-          <p className="text-xs text-sidebar-foreground/50">Naim Shala Renovierung</p>
+          <p className="text-lg font-black leading-tight text-sidebar-foreground">NSH Meister</p>
+          <p className="text-sm text-sidebar-foreground/60">Einfach arbeiten</p>
         </div>
       </div>
 
@@ -51,7 +51,7 @@ export function IpadSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex min-h-[52px] items-center gap-3 rounded-xl px-4 transition-colors",
+                "flex min-h-[64px] items-center gap-4 rounded-lg px-4 transition-colors",
                 isNewAuftrag
                   ? "mt-2 bg-primary text-primary-foreground hover:bg-primary/90"
                   : isActive
@@ -59,11 +59,11 @@ export function IpadSidebar() {
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
             >
-              <Icon className="size-5 shrink-0" />
+              <Icon className="size-6 shrink-0" />
               <div>
-                <p className={cn("text-sm font-semibold", isNewAuftrag && "text-primary-foreground")}>{item.labelDe}</p>
+                <p className={cn("text-base font-black", isNewAuftrag && "text-primary-foreground")}>{item.labelDe}</p>
                 {item.labelSq && (
-                  <p className={cn("text-[10px]", isNewAuftrag ? "text-primary-foreground/70" : "text-sidebar-foreground/40")}>
+                  <p className={cn("text-xs", isNewAuftrag ? "text-primary-foreground/70" : "text-sidebar-foreground/45")}>
                     {item.labelSq}
                   </p>
                 )}
@@ -84,14 +84,17 @@ export function IpadSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex min-h-[48px] items-center gap-3 rounded-xl px-4 transition-colors",
+                "flex min-h-[52px] items-center gap-3 rounded-lg px-4 transition-colors",
                 isActive
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
             >
               <Icon className="size-4 shrink-0" />
-              <p className="text-sm font-medium">{item.labelDe}</p>
+              <div>
+                <p className="text-sm font-bold leading-tight">{item.labelDe}</p>
+                {item.labelSq && <p className="text-xs text-sidebar-foreground/40">{item.labelSq}</p>}
+              </div>
             </Link>
           )
         })}

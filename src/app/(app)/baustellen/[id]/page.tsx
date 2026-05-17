@@ -74,9 +74,9 @@ export default async function BaustelleDetailPage({
   }
 
   return (
-    <div className="w-full max-w-2xl space-y-5">
+    <div className="nsh-page max-w-5xl">
       {/* Back + Header */}
-      <div className="flex items-start gap-3">
+      <div className="nsh-page-header flex items-start gap-3">
         <Link href="/baustellen">
           <button className="mt-1 flex size-9 items-center justify-center rounded-full hover:bg-accent">
             <ChevronLeft className="size-5" />
@@ -89,7 +89,7 @@ export default async function BaustelleDetailPage({
             </span>
             <span className="text-sm text-muted-foreground">{p.service_type}</span>
           </div>
-          <h1 className="text-2xl font-bold">{customer?.name ?? "Unbekannt"}</h1>
+          <h1 className="nsh-title">{customer?.name ?? "Unbekannt"}</h1>
           {(p.address || customer?.city) && (
             <div className="flex items-center gap-1.5 text-muted-foreground mt-0.5">
               <MapPin className="size-4 shrink-0" />

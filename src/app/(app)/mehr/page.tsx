@@ -15,7 +15,7 @@ const MORE_ITEMS = [
     href: "/notizen",
     icon: FileText,
     labelDe: "Notizen",
-    labelSq: "Shënime",
+    labelSq: "Shenime",
     desc: "Privat, Kunden oder Baustellen",
     color: "bg-blue-100 text-blue-700",
   },
@@ -23,7 +23,7 @@ const MORE_ITEMS = [
     href: "/kunden",
     icon: Users,
     labelDe: "Kunden",
-    labelSq: "Klientët",
+    labelSq: "Klientet",
     desc: "Alle Kontakte verwalten",
     color: "bg-green-100 text-green-700",
   },
@@ -31,8 +31,8 @@ const MORE_ITEMS = [
     href: "/deutsch-lernen",
     icon: BookOpen,
     labelDe: "Deutsch lernen",
-    labelSq: "Mëso Gjermanisht",
-    desc: "Flashcards mit Beispielsätzen",
+    labelSq: "Meso Gjermanisht",
+    desc: "Flashcards mit Beispielsatzen",
     color: "bg-purple-100 text-purple-700",
   },
   {
@@ -47,7 +47,7 @@ const MORE_ITEMS = [
     href: "/einstellungen",
     icon: Settings,
     labelDe: "Einstellungen",
-    labelSq: "Cilësimet",
+    labelSq: "Cilesimet",
     desc: "App-Einstellungen & Konto",
     color: "bg-gray-100 text-gray-700",
   },
@@ -55,25 +55,26 @@ const MORE_ITEMS = [
 
 export default function MehrPage() {
   return (
-    <div className="w-full max-w-2xl space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Mehr</h1>
-        <p className="text-muted-foreground text-sm">Më shumë — Weitere Funktionen</p>
+    <div className="nsh-page">
+      <div className="nsh-page-header">
+        <p className="nsh-eyebrow">Werkzeuge</p>
+        <h1 className="nsh-title">Mehr</h1>
+        <p className="nsh-subtitle">Weitere Funktionen fuer Preise, Notizen, Material und Lernen.</p>
       </div>
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {MORE_ITEMS.map(({ href, icon: Icon, labelDe, labelSq, desc, color }) => (
           <Link key={href} href={href}>
             <Card className="transition-all hover:border-primary/30 hover:shadow-sm">
-              <CardContent className="flex min-w-0 items-center gap-3 p-3 sm:gap-4 sm:p-4">
-                <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${color}`}>
+              <CardContent className="flex min-h-28 min-w-0 items-center gap-3 p-4">
+                <div className={`flex size-12 shrink-0 items-center justify-center rounded-lg ${color}`}>
                   <Icon className="size-6" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-base">{labelDe}</p>
-                  <p className="text-xs text-muted-foreground">{labelSq} · {desc}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-bold">{labelDe}</p>
+                  <p className="text-xs text-muted-foreground">{labelSq} - {desc}</p>
                 </div>
-                <ChevronRight className="size-5 text-muted-foreground shrink-0" />
+                <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
               </CardContent>
             </Card>
           </Link>

@@ -20,7 +20,7 @@ export function MobileBottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t bg-background/94 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur md:hidden">
       {mainNav.map((item) => {
         const Icon = iconMap[item.icon ?? ""] ?? Home
         const isActive = pathname === item.href || (item.href !== "/mehr" && pathname.startsWith(item.href + "/"))
@@ -40,11 +40,13 @@ export function MobileBottomNav() {
             )}
           >
             {isNewAuftrag ? (
-              <div className="flex size-12 items-center justify-center rounded-full bg-primary shadow-sm">
+              <div className="flex size-12 items-center justify-center rounded-lg bg-primary shadow-sm">
                 <Icon className="size-6 text-primary-foreground" />
               </div>
             ) : (
-              <Icon className="size-6" />
+              <span className={cn("flex size-8 items-center justify-center rounded-lg", isActive && "bg-primary/10")}>
+                <Icon className="size-5" />
+              </span>
             )}
             <span className={cn("text-[11px] font-black leading-none", isNewAuftrag && "sr-only")}>
               {item.labelDe}

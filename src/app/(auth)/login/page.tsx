@@ -22,9 +22,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-muted/30 p-4">
-      <div className="mb-8 flex flex-col items-center gap-3">
-        <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-border">
+    <div className="grid min-h-dvh grid-cols-1 bg-background lg:grid-cols-[minmax(0,1fr)_28rem]">
+      <div className="hidden min-h-dvh flex-col justify-between bg-sidebar p-8 text-sidebar-foreground lg:flex">
+        <div className="flex items-center gap-3">
+          <div className="flex size-14 items-center justify-center overflow-hidden rounded-lg bg-white">
+            <img src="/logo.png" alt="NSH Renovierung" className="size-14 object-contain" />
+          </div>
+          <div>
+            <p className="text-xl font-black">NSH Meister</p>
+            <p className="text-sm text-sidebar-foreground/55">Renovierung Vechta</p>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.16em] text-sidebar-primary">Assistent</p>
+          <h1 className="mt-3 max-w-xl text-5xl font-black leading-tight">Alles fuer Baustellen, Kunden und Termine an einem Ort.</h1>
+        </div>
+        <p className="text-sm text-sidebar-foreground/45">NSH Renovierung</p>
+      </div>
+      <div className="flex min-h-dvh flex-col items-center justify-center p-4">
+      <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
+        <div className="flex size-20 items-center justify-center overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-border">
           <img src="/logo.png" alt="NSH Renovierung" className="size-20 object-contain" />
         </div>
         <div className="text-center">
@@ -74,6 +91,7 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

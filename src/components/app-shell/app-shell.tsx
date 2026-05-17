@@ -4,11 +4,20 @@ import { MobileBottomNav } from "@/components/app-shell/mobile-bottom-nav"
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-muted/40 md:h-dvh md:overflow-hidden">
+    <div className="min-h-dvh overflow-x-hidden md:h-dvh md:overflow-hidden">
       <div className="flex min-h-dvh min-w-0 overflow-x-hidden md:h-dvh md:min-h-0">
         <IpadSidebar />
-        <main className="min-w-0 flex-1 overflow-x-hidden p-3 pb-28 sm:p-4 md:h-dvh md:overflow-y-auto md:overscroll-contain md:p-6 md:pb-6">
-          <div className="mx-auto w-full max-w-5xl">
+        <main className="min-w-0 flex-1 overflow-x-hidden pb-28 md:h-dvh md:overflow-y-auto md:overscroll-contain md:pb-0">
+          <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur md:hidden">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="NSH Renovierung" className="size-10 rounded-lg bg-white object-contain ring-1 ring-border" />
+              <div>
+                <p className="text-sm font-black leading-tight">NSH Meister</p>
+                <p className="text-xs text-muted-foreground">Baustellen, Kunden, Termine</p>
+              </div>
+            </div>
+          </div>
+          <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 md:px-6 md:py-6 xl:px-8">
             {children}
           </div>
         </main>

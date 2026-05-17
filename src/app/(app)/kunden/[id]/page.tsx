@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server"
 import { Phone, Navigation, ChevronLeft, Building2, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import type { Customer, Project, Note } from "@/types"
 import { cn } from "@/lib/utils"
 
@@ -31,19 +30,19 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
   const c = customer as Customer
 
   return (
-    <div className="w-full max-w-2xl space-y-5">
+    <div className="nsh-page max-w-5xl">
       {/* Header */}
-      <div className="flex items-start gap-3">
+      <div className="nsh-page-header flex items-start gap-3">
         <Link href="/kunden">
           <button className="mt-1 flex size-9 items-center justify-center rounded-full hover:bg-accent">
             <ChevronLeft className="size-5" />
           </button>
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-2xl mb-2">
+          <div className="mb-2 flex size-14 items-center justify-center rounded-lg bg-primary text-2xl font-bold text-primary-foreground">
             {c.name.charAt(0).toUpperCase()}
           </div>
-          <h1 className="text-2xl font-bold">{c.name}</h1>
+          <h1 className="nsh-title">{c.name}</h1>
           {c.city && <p className="text-muted-foreground">{c.city}</p>}
           {c.address && (
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">

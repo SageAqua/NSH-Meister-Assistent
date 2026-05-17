@@ -268,13 +268,13 @@ export default async function HeutePage({
   })
 
   return (
-    <div className="space-y-5">
-      <header className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+    <div className="nsh-page">
+      <header className="nsh-panel p-4 sm:p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-black uppercase tracking-wide text-primary">Heute</p>
-            <h1 className="mt-1 text-3xl font-black leading-tight">Hallo Naim</h1>
-            <p className="mt-1 text-base capitalize text-muted-foreground">{dateStr}</p>
+            <p className="nsh-eyebrow">Heute</p>
+            <h1 className="nsh-title">Hallo Naim</h1>
+            <p className="nsh-subtitle capitalize">{dateStr}</p>
           </div>
           <img src="/logo.png" alt="NSH Renovierung" className="size-14 rounded-lg bg-white object-contain ring-1 ring-border" />
         </div>

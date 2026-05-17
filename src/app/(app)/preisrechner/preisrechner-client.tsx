@@ -58,14 +58,15 @@ export function PreisrechnerClient() {
   }
 
   return (
-    <div className="w-full max-w-2xl space-y-5">
-      <div className="flex items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-primary">
+    <div className="nsh-page max-w-6xl">
+      <div className="nsh-page-header flex items-center gap-3">
+        <div className="flex size-10 items-center justify-center rounded-lg bg-primary">
           <Calculator className="size-5 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Preisrechner</h1>
-          <p className="text-sm text-muted-foreground">Kalkulatori i cmimeve</p>
+          <p className="nsh-eyebrow">Kalkulation</p>
+          <h1 className="nsh-title">Preisrechner</h1>
+          <p className="nsh-subtitle">Kalkulatori i cmimeve</p>
         </div>
       </div>
 

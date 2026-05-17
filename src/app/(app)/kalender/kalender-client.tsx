@@ -78,7 +78,7 @@ function EmptyState({ month, year }: { month: number; year: number }) {
     <Card className="border-dashed">
       <CardContent className="py-12 text-center text-muted-foreground">
         <p className="text-lg font-bold text-foreground">Keine Termine im {MONTHS_DE[month]} {year}</p>
-        <p className="text-sm">Mit "Neuer Termin" kannst du direkt einen Termin eintragen.</p>
+        <p className="text-sm">Mit &quot;Neuer Termin&quot; kannst du direkt einen Termin eintragen.</p>
       </CardContent>
     </Card>
   )
@@ -462,11 +462,12 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
   }
 
   return (
-    <div className="w-full max-w-7xl space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="nsh-page">
+      <div className="nsh-page-header flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl font-black">Kalender</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="nsh-eyebrow">Termine</p>
+          <h1 className="nsh-title">Kalender</h1>
+          <p className="nsh-subtitle">
             Alle Termine im Monat klar sehen, aendern und abhaken.
           </p>
         </div>

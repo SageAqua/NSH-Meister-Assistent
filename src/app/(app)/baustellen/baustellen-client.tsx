@@ -97,11 +97,12 @@ export function BaustellenClient({
   )
 
   return (
-    <div className="w-full space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="nsh-page">
+      <div className="nsh-page-header flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Baustellen</h1>
-          <p className="text-muted-foreground text-sm">Kantieret - {projects.length} gesamt</p>
+          <p className="nsh-eyebrow">Arbeit</p>
+          <h1 className="nsh-title">Baustellen</h1>
+          <p className="nsh-subtitle">Kantieret - {projects.length} gesamt</p>
         </div>
         <Link href="/neuer-auftrag">
           <Button size="touch" className="gap-2">
@@ -111,9 +112,9 @@ export function BaustellenClient({
       </div>
 
       {projects.length > 0 && (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {stats.map((stat) => (
-            <div key={stat.label} className={cn("rounded-xl border p-3", stat.className)}>
+            <div key={stat.label} className={cn("rounded-lg border p-4", stat.className)}>
               <p className="text-2xl font-black">{stat.value}</p>
               <p className="text-xs font-bold">{stat.label}</p>
             </div>
@@ -133,7 +134,7 @@ export function BaustellenClient({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-5">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
           {active.length > 0 && <ProjectSection title="In Arbeit" projects={active} customers={customers} />}
           {planned.length > 0 && <ProjectSection title="Geplant" projects={planned} customers={customers} />}
           {done.length > 0 && <ProjectSection title="Abgeschlossen" projects={done} customers={customers} />}
@@ -153,7 +154,7 @@ function ProjectSection({
   customers: Customer[]
 }) {
   return (
-    <section>
+    <section className="min-w-0">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-lg font-bold">{title}</h2>
         <Badge variant="secondary">{projects.length}</Badge>

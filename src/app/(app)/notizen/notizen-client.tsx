@@ -55,9 +55,12 @@ export function NotizenClient({
   }
 
   return (
-    <div className="w-full max-w-2xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Notizen <span className="text-muted-foreground font-normal text-lg">/ Shënime</span></h1>
+    <div className="nsh-page max-w-5xl">
+      <div className="nsh-page-header flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="nsh-eyebrow">Merken</p>
+          <h1 className="nsh-title">Notizen</h1>
+        </div>
         <Button size="touch" onClick={() => setShowNew(true)} className="gap-2">
           <Plus className="size-4" /> Neue Notiz
         </Button>
@@ -166,7 +169,7 @@ export function NotizenClient({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {filtered.map((note) => (
             <Card key={note.id} className="hover:border-primary/30 transition-colors">
               <CardContent className="p-4">

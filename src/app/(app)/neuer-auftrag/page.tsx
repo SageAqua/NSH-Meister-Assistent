@@ -3,7 +3,7 @@ import { BriefcaseBusiness, Building2, User } from "lucide-react"
 
 export default async function NeuerAuftragPage() {
   return (
-    <div className="flex min-h-[calc(100dvh-5.5rem)] w-full flex-col justify-center p-4 sm:p-6">
+    <div className="flex min-h-[calc(100dvh-5.5rem)] w-full flex-col justify-center p-4 sm:p-6 md:justify-start md:pt-8">
       <div className="mx-auto w-full max-w-5xl">
         <p className="nsh-eyebrow">Schnell starten / Fillo shpejt</p>
         <h1 className="nsh-title mt-1">Was willst du eintragen?</h1>

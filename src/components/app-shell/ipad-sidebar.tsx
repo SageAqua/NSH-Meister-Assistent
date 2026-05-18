@@ -28,7 +28,7 @@ export function IpadSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden h-dvh w-[19rem] shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-sidebar-border bg-sidebar md:flex">
+    <aside className="hidden h-dvh w-56 shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-sidebar-border bg-sidebar md:flex lg:w-[19rem]">
       <div className="px-4 pb-4 pt-5">
         <div className="flex items-center gap-3 rounded-lg bg-white/7 p-3 ring-1 ring-white/10">
           <div className="flex size-12 items-center justify-center overflow-hidden rounded-lg bg-white">

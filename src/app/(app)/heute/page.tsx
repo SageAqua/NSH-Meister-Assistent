@@ -104,36 +104,34 @@ function EventPill({ event }: { event: CalendarEvent }) {
 
 function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }) {
   const days = buildWeekDays(events, today)
-  const hasAny = days.some((d) => d.events.length > 0)
+  const activeDays = days.filter((d) => d.events.length > 0)
 
-  if (!hasAny) {
+  if (activeDays.length === 0) {
     return (
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
-        <p className="text-sm font-black text-primary">Diese Woche / Këtë javë</p>
-        <p className="mt-1 text-sm text-muted-foreground">Keine Termine diese Woche.</p>
+      <div className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+        <p className="text-sm text-muted-foreground">Keine Termine diese Woche.</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
-      <p className="mb-3 text-sm font-black text-primary">Diese Woche / Këtë javë</p>
-      <div className="space-y-2">
-        {days.map((day) => (
-          <div key={day.dateStr} className="flex items-start gap-3">
-            <span className="w-14 shrink-0 pt-0.5 text-xs font-black text-foreground">{day.label}</span>
-            {day.events.length === 0 ? (
-              <span className="text-xs text-muted-foreground">Frei</span>
+    <div className="flex gap-2 overflow-x-auto pb-1">
+      {days.map((day) => {
+          const hasEvents = day.events.length > 0
+        return (
+          <div
+            key={day.dateStr}
+            className={`flex min-w-[80px] flex-col gap-1 rounded-xl border px-2 py-2.5 ${hasEvents ? "border-primary/30 bg-primary/5" : "border-transparent bg-muted/30"}`}
+          >
+            <span className="text-[11px] font-black text-muted-foreground">{day.label}</span>
+            {hasEvents ? (
+              day.events.map((e) => <EventPill key={e.id} event={e} />)
             ) : (
-              <div className="flex flex-wrap gap-1">
-                {day.events.map((e) => (
-                  <EventPill key={e.id} event={e} />
-                ))}
-              </div>
+              <span className="text-[10px] text-muted-foreground/50">Frei</span>
             )}
           </div>
-        ))}
-      </div>
+        )
+      })}
     </div>
   )
 }
@@ -315,7 +313,7 @@ export default async function HeutePage() {
         <TagesplanSection events={todayEvents} freeSlots={[]} today={todayStr} />
       </section>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_300px] lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="space-y-3">
           <h2 className="flex items-center gap-2 text-xl font-black">
             <CalendarDays className="size-6 text-primary" /> Dieser Monat

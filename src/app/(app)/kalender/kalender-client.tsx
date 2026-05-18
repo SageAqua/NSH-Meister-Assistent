@@ -250,7 +250,7 @@ function WeekView({
   }, {})
 
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2">
       {Object.entries(weeks).map(([weekStart, weekEvents]) => {
         const start = new Date(weekStart + "T12:00:00")
         const end = new Date(start)
@@ -373,7 +373,7 @@ function MonthView({
                       onClick={() => onEdit(event)}
                       className={cn(
                         "block w-full rounded-md px-1.5 py-1 text-left text-[10px] leading-tight lg:px-2 lg:text-xs",
-                        eventIndex === 1 && "hidden xl:block",
+                        eventIndex === 1 && "hidden lg:block",
                         event.status === "erledigt" ? "bg-green-100 text-green-800" : "bg-primary text-primary-foreground"
                       )}
                     >

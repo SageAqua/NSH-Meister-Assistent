@@ -223,11 +223,11 @@ export function TagesplanSection({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2">
         {([
-          { key: "privat" as const, label: "Privat Termin / Termin privat", icon: User, type: "privat" as const },
-          { key: "arbeit" as const, label: "Work Termin / Termin pune", icon: BriefcaseBusiness, type: "arbeit" as const },
-          { key: "baustelle" as const, label: "Baustelle planen / Planifiko kantierin", icon: Building2, type: "baustelle" as const },
+          { key: "privat" as const, label: "Privat", icon: User, type: "privat" as const },
+          { key: "arbeit" as const, label: "Work", icon: BriefcaseBusiness, type: "arbeit" as const },
+          { key: "baustelle" as const, label: "Baustelle", icon: Building2, type: "baustelle" as const },
         ]).map((option) => {
           const Icon = option.icon
           return (
@@ -239,9 +239,10 @@ export function TagesplanSection({
                 setTitle(getDefaultTitle(option.type))
                 setFormOpen(true)
               }}
-              className="flex items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-semibold transition-colors hover:bg-accent"
+              className="flex flex-col items-center justify-center gap-1 rounded-xl border bg-white px-2 py-2.5 text-xs font-semibold transition-colors hover:bg-accent"
             >
-              <Icon className="size-4" /> {option.label}
+              <Icon className="size-4" />
+              <span>{option.label}</span>
             </button>
           )
         })}
@@ -471,14 +472,14 @@ export function TagesplanSection({
                 className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
             </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground">Von</label>
                 <input
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
               <div>
@@ -487,11 +488,11 @@ export function TagesplanSection({
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-1.5">
               {(["privat", "arbeit", "baustelle"] as const).map((type) => {
                 const visual = getEventVisual(type)
                 const active = eventType === type
@@ -505,13 +506,13 @@ export function TagesplanSection({
                       active ? `${visual.card} ${visual.text}` : "bg-white hover:bg-accent"
                     )}
                   >
-                    {visual.badge}
+                    {type === "privat" ? "Privat" : type === "arbeit" ? "Work" : "Baustelle"}
                   </button>
                 )
               })}
             </div>
             {saveError && <p className="text-sm text-destructive">{saveError}</p>}
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+            <div className="grid grid-cols-[1fr_auto] gap-2">
               <Button
                 size="touch"
                 className="flex-1"
@@ -560,14 +561,14 @@ export function TagesplanSection({
                   className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-muted-foreground">Von</label>
                   <input
                     type="time"
                     value={editStart}
                     onChange={(e) => setEditStart(e.target.value)}
-                    className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                   />
                 </div>
                 <div>
@@ -576,12 +577,12 @@ export function TagesplanSection({
                     type="time"
                     value={editEnd}
                     onChange={(e) => setEditEnd(e.target.value)}
-                    className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>
               {editError && <p className="text-sm text-destructive">{editError}</p>}
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+              <div className="grid grid-cols-[1fr_auto] gap-2">
                 <Button
                   size="touch"
                   className="flex-1"

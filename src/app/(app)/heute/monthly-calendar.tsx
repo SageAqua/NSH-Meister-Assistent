@@ -113,7 +113,7 @@ export function MonthlyCalendar({
 
         <div className="grid grid-cols-7 gap-1">
           {cells.map((day, i) => {
-            if (!day) return <div key={`e-${i}`} className="min-h-16 rounded-lg bg-muted/20 sm:min-h-20 lg:min-h-24" />
+            if (!day) return <div key={`e-${i}`} className="min-h-12 rounded-lg bg-muted/20 sm:min-h-16 lg:min-h-20" />
             const dateStr = `${yearStr}-${monthStr}-${String(day).padStart(2, "0")}`
             const isToday =
               year === parseInt(todayYear) &&
@@ -130,7 +130,7 @@ export function MonthlyCalendar({
               <div
                 key={dateStr}
                 className={cn(
-                  "min-h-16 rounded-lg border bg-background p-1.5 sm:min-h-20 lg:min-h-24 lg:p-2",
+                  "min-h-12 rounded-lg border bg-background p-1 sm:min-h-16 lg:min-h-20 sm:p-1.5 lg:p-2",
                   dayEvents.length > 0 && "border-primary/30 bg-primary/5",
                   isToday && "border-primary bg-primary/10",
                   isPast && dayEvents.length === 0 && "text-muted-foreground/50"

@@ -61,8 +61,8 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-5.5rem)] flex-col">
-      <div className="flex-1 p-4 pb-32 sm:p-6">
+    <div className="flex flex-col">
+      <div className="p-4 pb-36 sm:p-6">
         <div className="mx-auto max-w-xl">
           <Link
             href="/neuer-auftrag"

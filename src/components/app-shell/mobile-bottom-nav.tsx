@@ -3,7 +3,7 @@
 import type { ElementType } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Calendar, PlusCircle, Building2, Grid3x3, Users } from "lucide-react"
+import { Home, Calendar, PlusCircle, Building2, Grid3x3, Users, FileText } from "lucide-react"
 import { mainNav } from "@/data/navigation"
 import { cn } from "@/lib/utils"
 import { hapticLight } from "@/lib/haptic"
@@ -13,6 +13,7 @@ const iconMap: Record<string, ElementType> = {
   calendar: Calendar,
   "plus-circle": PlusCircle,
   building2: Building2,
+  "file-text": FileText,
   users: Users,
   grid: Grid3x3,
 }

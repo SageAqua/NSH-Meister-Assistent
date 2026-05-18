@@ -146,6 +146,51 @@ export async function saveNote(content: string, type: string, projectId?: string
   return { success: true }
 }
 
+export async function updateNote(data: {
+  id: string
+  content: string
+  type: string
+  projectId?: string
+  customerId?: string
+}): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { error } = await supabase
+    .from("notes")
+    .update({
+      content: data.content.trim(),
+      type: data.type,
+      project_id: data.type === "baustellen" ? data.projectId || null : null,
+      customer_id: data.type === "kunden" ? data.customerId || null : null,
+    })
+    .eq("id", data.id)
+    .eq("user_id", user.id)
+
+  if (error) return { error: "Notiz konnte nicht geaendert werden." }
+  revalidatePath("/notizen")
+  revalidatePath("/heute")
+  return {}
+}
+
+export async function deleteNote(noteId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { error } = await supabase
+    .from("notes")
+    .delete()
+    .eq("id", noteId)
+    .eq("user_id", user.id)
+
+  if (error) return { error: "Notiz konnte nicht geloescht werden." }
+  revalidatePath("/notizen")
+  revalidatePath("/heute")
+  return {}
+}
+
 export async function deleteCalendarEvent(eventId: string): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

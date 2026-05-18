@@ -47,6 +47,7 @@ export const SERVICES: ServiceItem[] = [
   { id: "fussleisten-demontieren", category: "leisten", labelDe: "Fußleisten demontieren", labelSq: "Çmontim listelash dyshemeje", rateNormal: 4, rateLow: 3, rateHigh: 7, unit: "lfm", daysPerUnit: 0.3 },
   { id: "sockelleisten-versiegeln", category: "leisten", labelDe: "Sockelleisten versiegeln", labelSq: "Mbyllje listelash me silikon/akril", rateNormal: 5, rateLow: 3, rateHigh: 8, unit: "lfm", daysPerUnit: 0.3 },
   { id: "uebergangsschienen", category: "leisten", labelDe: "Übergangsschienen setzen", labelSq: "Montim shina kalimi", rateNormal: 22, rateLow: 15, rateHigh: 35, unit: "stk", daysPerUnit: 0.4 },
+  { id: "tuerenmontage", category: "leisten", labelDe: "Türenmontage", labelSq: "Montim dyersh", rateNormal: 180, rateLow: 120, rateHigh: 280, unit: "stk", daysPerUnit: 0.8 },
   { id: "tueren-kuerzen", category: "leisten", labelDe: "Türen kürzen", labelSq: "Shkurtim dyersh", rateNormal: 80, rateLow: 60, rateHigh: 110, unit: "stk", daysPerUnit: 0.4 },
   // Trockenbau
   { id: "trockenbau-wand", category: "trockenbau", labelDe: "Trockenbau Wand", labelSq: "Ndërtim i thatë mur", rateNormal: 25, rateLow: 21, rateHigh: 31, unit: "m2", daysPerUnit: 1.5 },

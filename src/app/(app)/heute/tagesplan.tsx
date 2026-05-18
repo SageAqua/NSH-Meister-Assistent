@@ -66,7 +66,7 @@ export function TagesplanSection({
   const [startTime, setStartTime] = useState("08:00")
   const [endTime, setEndTime] = useState("16:00")
   const [saveError, setSaveError] = useState("")
-  const [eventType, setEventType] = useState<"privat" | "arbeit" | "baustelle">(autoOpenForm ? initialEventType : "arbeit")
+  const [eventType, setEventType] = useState<"privat" | "arbeit" | "baustelle">("arbeit")
   const submittingRef = useRef(false)
 
   // Edit / Verschieben modal
@@ -239,7 +239,7 @@ export function TagesplanSection({
                 setTitle(getDefaultTitle(option.type))
                 setFormOpen(true)
               }}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl border bg-white px-3 py-3 text-sm font-bold transition-colors hover:bg-accent"
+              className="flex items-center justify-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-semibold transition-colors hover:bg-accent"
             >
               <Icon className="size-4" /> {option.label}
             </button>

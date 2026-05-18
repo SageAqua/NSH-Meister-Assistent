@@ -105,7 +105,39 @@ function ActiveProjects({ projects }: { projects: ProjectFull[] }) {
   )
 }
 
-export default async function HeutePage({ searchParams }: { searchParams: Promise<{ "new-event"?: string; type?: "privat" | "arbeit" | "baustelle" }> }) {
+function QuickAction({
+  href,
+  icon: Icon,
+  title,
+  text,
+  primary = false,
+}: {
+  href: string
+  icon: typeof Plus
+  title: string
+  text: string
+  primary?: boolean
+}) {
+  return (
+    <Link href={href}>
+      <div className={`flex min-h-28 items-center gap-4 rounded-lg border p-4 shadow-sm transition-colors ${primary ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-card hover:bg-muted"}`}>
+        <div className={`flex size-12 shrink-0 items-center justify-center rounded-lg ${primary ? "bg-white/15" : "bg-muted"}`}>
+          <Icon className="size-6" />
+        </div>
+        <div>
+          <p className="text-lg font-black leading-tight">{title}</p>
+          <p className={`mt-1 text-sm ${primary ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{text}</p>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+export default async function HeutePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ "new-event"?: string; type?: "privat" | "arbeit" | "baustelle" }>
+}) {
   const params = await searchParams
   const supabase = await createClient()
   const today = new Date()
@@ -113,40 +145,74 @@ export default async function HeutePage({ searchParams }: { searchParams: Promis
   const startOfDay = `${todayStr}T00:00:00`
   const endOfDay = `${todayStr}T23:59:59`
 
-  const weekStart = new Date(today)
-  const day = weekStart.getDay()
-  weekStart.setDate(today.getDate() - (day === 0 ? 6 : day - 1))
-  weekStart.setHours(0, 0, 0, 0)
-  const weekEnd = new Date(weekStart)
-  weekEnd.setDate(weekStart.getDate() + 6)
-  weekEnd.setHours(23, 59, 59, 999)
-
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59)
-
-  const [{ data: todayEventsRaw }, { data: weekEventsRaw }, { data: monthEventsRaw }, { data: tasksRaw }, { data: projectsRaw }] = await Promise.all([
-    supabase.from("calendar_events").select("*, projects(*, customers(*))").gte("start_time", startOfDay).lte("start_time", endOfDay).neq("status", "abgesagt").order("start_time"),
-    supabase.from("calendar_events").select("*").gte("start_time", weekStart.toISOString()).lte("start_time", weekEnd.toISOString()).neq("status", "abgesagt").order("start_time"),
-    supabase.from("calendar_events").select("*").gte("start_time", monthStart.toISOString()).lte("start_time", monthEnd.toISOString()).neq("status", "abgesagt").order("start_time"),
-    supabase.from("tasks").select("*, projects(*)").eq("is_done", false).or(`due_date.is.null,due_date.eq.${todayStr}`).order("due_date", { ascending: true }).limit(6),
-    supabase.from("projects").select("*, customers(*)").in("status", ["in_arbeit", "geplant"]).order("created_at", { ascending: false }).limit(6),
-  ])
-
-  const todayEvents = (todayEventsRaw ?? []) as CalendarEvent[]
-  const weekEvents = (weekEventsRaw ?? []) as CalendarEvent[]
-  const monthEvents = (monthEventsRaw ?? []) as CalendarEvent[]
-  const tasks = (tasksRaw ?? []) as Task[]
-  const projects = (projectsRaw ?? []) as ProjectFull[]
 
   if (params["new-event"]) {
     const type = params.type === "privat" || params.type === "baustelle" || params.type === "arbeit" ? params.type : "arbeit"
     return (
-      <div className="nsh-page">
-        <header className="nsh-panel p-4 sm:p-5"><p className="nsh-eyebrow">Neuer Termin</p><h1 className="nsh-title">Eintragen in 20 Sekunden</h1></header>
-        <TagesplanSection events={todayEvents} freeSlots={[]} today={todayStr} autoOpenForm initialEventType={type} />
+      <div className="nsh-page max-w-3xl">
+        <div className="nsh-panel p-5 sm:p-6">
+          <p className="nsh-eyebrow">Neuer Termin</p>
+          <h1 className="nsh-title">Was moechtest du planen?</h1>
+          <p className="nsh-subtitle">Waehle den Typ: privat, Arbeit oder Baustelle. / Zgjidh tipin: privat, pune ose kantier.</p>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Link href="/notizen">
+              <div className="rounded-xl border border-violet-300 bg-violet-50 p-4 transition-colors hover:bg-violet-100">
+                <p className="text-sm font-black text-violet-800">Privat Termin</p>
+                <p className="mt-1 text-xs text-violet-700">Termin privat</p>
+              </div>
+            </Link>
+            <Link href="/neuer-auftrag">
+              <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 transition-colors hover:bg-blue-100">
+                <p className="text-sm font-black text-blue-800">Work Termin</p>
+                <p className="mt-1 text-xs text-blue-700">Termin pune</p>
+              </div>
+            </Link>
+            <Link href="/baustellen">
+              <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 transition-colors hover:bg-amber-100">
+                <p className="text-sm font-black text-amber-800">Baustelle planen</p>
+                <p className="mt-1 text-xs text-amber-700">Planifiko kantierin</p>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }
+  const [
+    { data: eventsRaw },
+    { data: tasksRaw },
+    { data: projectsRaw },
+  ] = await Promise.all([
+    supabase
+      .from("calendar_events")
+      .select("*, projects(*, customers(*))")
+      .gte("start_time", startOfDay)
+      .lte("start_time", endOfDay)
+      .neq("status", "abgesagt")
+      .order("start_time"),
+    supabase
+      .from("tasks")
+      .select("*, projects(*)")
+      .eq("is_done", false)
+      .order("due_date", { ascending: true })
+      .limit(6),
+    supabase
+      .from("projects")
+      .select("*, customers(*)")
+      .in("status", ["in_arbeit", "geplant"])
+      .order("created_at", { ascending: false })
+      .limit(6),
+  ])
+
+  const events = (eventsRaw ?? []) as CalendarEvent[]
+  const tasks = (tasksRaw ?? []) as Task[]
+  const projects = (projectsRaw ?? []) as ProjectFull[]
+  const dateStr = today.toLocaleDateString("de-DE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  })
 
   return (
     <div className="nsh-page">

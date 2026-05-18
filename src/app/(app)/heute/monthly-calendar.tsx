@@ -39,9 +39,11 @@ function nextMonthKey(key: string): string {
 export function MonthlyCalendar({
   monthEventsMap,
   today,
+  compact = false,
 }: {
   monthEventsMap: Record<string, MonthlyCalendarEvent[]>
   today: string
+  compact?: boolean
 }) {
   const todayMonthKey = today.slice(0, 7)
   const [viewedKey, setViewedKey] = useState(todayMonthKey)
@@ -113,7 +115,7 @@ export function MonthlyCalendar({
 
         <div className="grid grid-cols-7 gap-1">
           {cells.map((day, i) => {
-            if (!day) return <div key={`e-${i}`} className="min-h-12 rounded-lg bg-muted/20 sm:min-h-16 lg:min-h-20" />
+            if (!day) return <div key={`e-${i}`} className={cn("rounded-lg bg-muted/20", compact ? "min-h-9" : "min-h-12 sm:min-h-16 lg:min-h-20")} />
             const dateStr = `${yearStr}-${monthStr}-${String(day).padStart(2, "0")}`
             const isToday =
               year === parseInt(todayYear) &&
@@ -130,53 +132,64 @@ export function MonthlyCalendar({
               <div
                 key={dateStr}
                 className={cn(
-                  "min-h-12 rounded-lg border bg-background p-1 sm:min-h-16 lg:min-h-20 sm:p-1.5 lg:p-2",
+                  compact ? "min-h-9 rounded-lg border bg-background p-0.5" : "min-h-12 rounded-lg border bg-background p-1 sm:min-h-16 lg:min-h-20 sm:p-1.5 lg:p-2",
                   dayEvents.length > 0 && "border-primary/30 bg-primary/5",
                   isToday && "border-primary bg-primary/10",
                   isPast && dayEvents.length === 0 && "text-muted-foreground/50"
                 )}
               >
-                <div className="mb-1 flex items-center justify-between gap-1">
+                <div className={cn("flex items-center justify-between gap-0.5", compact ? "mb-0.5" : "mb-1")}>
                   <span
                     className={cn(
-                      "flex size-7 items-center justify-center rounded-full text-sm font-bold",
+                      "flex items-center justify-center rounded-full font-bold",
+                      compact ? "size-5 text-[10px]" : "size-7 text-sm",
                       isToday && "bg-primary text-primary-foreground"
                     )}
                   >
                     {day}
                   </span>
-                  {dayEvents.length > 0 && (
+                  {!compact && dayEvents.length > 0 && (
                     <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
                       {dayEvents.length}
                     </span>
                   )}
                 </div>
 
-                <div className="space-y-0.5">
-                  {dayEvents.slice(0, 2).map((event) => (
-                    <div
-                      key={event.id}
-                      className={cn(
-                        "rounded-md px-1.5 py-0.5 text-left text-[10px] leading-tight lg:px-2 lg:text-xs",
-                        event.status === "erledigt"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-primary text-primary-foreground"
-                      )}
-                    >
-                      <p className="font-bold truncate">
-                        {event.startTime} {event.title}
-                      </p>
+                {compact ? (
+                  dayEvents.length > 0 && (
+                    <div className="flex flex-wrap gap-0.5">
+                      {dayEvents.slice(0, 3).map((e) => (
+                        <span key={e.id} className="block size-1.5 rounded-full bg-primary" />
+                      ))}
                     </div>
-                  ))}
-                  {dayEvents.length > 2 && (
-                    <Link
-                      href="/kalender"
-                      className="block rounded-md border px-1.5 py-0.5 text-[10px] font-bold text-primary lg:px-2"
-                    >
-                      +{dayEvents.length - 2}
-                    </Link>
-                  )}
-                </div>
+                  )
+                ) : (
+                  <div className="space-y-0.5">
+                    {dayEvents.slice(0, 2).map((event) => (
+                      <div
+                        key={event.id}
+                        className={cn(
+                          "rounded-md px-1.5 py-0.5 text-left text-[10px] leading-tight lg:px-2 lg:text-xs",
+                          event.status === "erledigt"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-primary text-primary-foreground"
+                        )}
+                      >
+                        <p className="font-bold truncate">
+                          {event.startTime} {event.title}
+                        </p>
+                      </div>
+                    ))}
+                    {dayEvents.length > 2 && (
+                      <Link
+                        href="/kalender"
+                        className="block rounded-md border px-1.5 py-0.5 text-[10px] font-bold text-primary lg:px-2"
+                      >
+                        +{dayEvents.length - 2}
+                      </Link>
+                    )}
+                  </div>
+                )}
               </div>
             )
           })}

@@ -3,7 +3,7 @@ import { logoutAction } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { NotificationButton } from "@/components/notification-button"
-import { Bell, Info, LogOut, MapPin, Phone, Settings, User } from "lucide-react"
+import { Bell, LogOut, MapPin, Phone, Settings, User } from "lucide-react"
 
 export default async function EinstellungenPage() {
   const supabase = await createClient()
@@ -56,8 +56,8 @@ export default async function EinstellungenPage() {
             <CardContent className="space-y-1 p-4">
               {[
                 { label: "Version", value: "1.0.0" },
-                { label: "Sprache", value: "Deutsch (DE)" },
-                { label: "Datenbank", value: user ? "✓ Verbunden" : "Nicht verbunden" },
+                { label: "Sprache", value: "Deutsch" },
+                { label: "Datenbank", value: user ? "✓ Verbunden" : "Getrennt" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between border-b py-2 last:border-0">
                   <span className="text-sm text-muted-foreground">{label}</span>
@@ -80,23 +80,6 @@ export default async function EinstellungenPage() {
           </CardContent>
         </Card>
       </section>
-
-      {/* Supabase setup hint */}
-      <Card className="border-amber-200 bg-amber-50">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-2">
-            <Info className="mt-0.5 size-5 shrink-0 text-amber-600" />
-            <div>
-              <p className="text-sm font-semibold text-amber-800">Supabase konfigurieren</p>
-              <p className="mt-1 text-xs text-amber-700">
-                Setze <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_URL</code> und{" "}
-                <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{" "}
-                in <code className="rounded bg-amber-100 px-1">.env.local</code> und Vercel.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <form action={logoutAction} className="max-w-md">
         <Button type="submit" variant="destructive" size="touch" className="w-full gap-2">

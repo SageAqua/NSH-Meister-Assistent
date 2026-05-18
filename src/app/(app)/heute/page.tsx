@@ -271,59 +271,59 @@ export default async function HeutePage() {
   })
 
   return (
-    <div className="flex flex-col gap-4 md:gap-5">
+    <div className="flex flex-col gap-4 md:gap-5 lg:h-[calc(100dvh-3rem)] lg:overflow-hidden">
 
       {/* ── Header ── */}
-      <header className="flex items-center justify-between gap-4 rounded-2xl border bg-card p-4 sm:p-5">
+      <header className="shrink-0 flex items-center justify-between gap-4 rounded-2xl border bg-card p-4">
         <div className="min-w-0">
           <p className="text-[11px] font-black uppercase tracking-widest text-primary">Heute</p>
           <h1 className="text-2xl font-black leading-tight sm:text-3xl">Hallo Naim</h1>
           <p className="text-sm text-muted-foreground">{dateStr}</p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-3">
-          <img src="/logo.png" alt="NSH" className="size-10 rounded-lg bg-white object-contain ring-1 ring-border" />
+        <div className="flex shrink-0 items-center gap-3">
           <Link href="/neuer-auftrag">
             <button className="flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-primary-foreground shadow-md shadow-primary/20 transition-colors hover:bg-primary/90">
               <Plus className="size-4" /> Neuer Termin
             </button>
           </Link>
+          <img src="/logo.png" alt="NSH" className="hidden size-10 rounded-lg bg-white object-contain ring-1 ring-border lg:block" />
         </div>
       </header>
 
-      {/* ── Diese Woche ── */}
-      <section className="space-y-2">
+      {/* ── Diese Woche — mobile/tablet only ── */}
+      <section className="shrink-0 space-y-2 lg:hidden">
         <h2 className="flex items-center gap-1.5 text-sm font-black text-muted-foreground">
           <CalendarDays className="size-4" /> Diese Woche
         </h2>
         <WeekPreview events={weekEvents} today={today} />
       </section>
 
-      {/* ── Two-column body on lg+ ── */}
-      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+      {/* ── Two-column body ── */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
 
         {/* Left — Termine heute */}
-        <section className="space-y-2">
-          <h2 className="flex items-center gap-1.5 text-lg font-black">
+        <section className="flex min-h-0 flex-col gap-2 lg:overflow-y-auto lg:pr-1">
+          <h2 className="shrink-0 flex items-center gap-1.5 text-lg font-black">
             <CalendarDays className="size-5 text-primary" /> Termine heute
           </h2>
           <TagesplanSection events={todayEvents} freeSlots={[]} today={todayStr} compact />
         </section>
 
-        {/* Right — only on lg+, stacks below on mobile */}
-        <div className="flex flex-col gap-4 md:gap-5">
+        {/* Right — stacks on mobile, fixed height column on desktop */}
+        <div className="flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pb-1">
 
           {/* Month calendar — desktop right col */}
-          <section className="hidden lg:block space-y-2">
-            <h2 className="flex items-center gap-1.5 text-lg font-black">
-              <CalendarDays className="size-5 text-primary" /> Dieser Monat
+          <section className="hidden shrink-0 space-y-2 lg:block">
+            <h2 className="flex items-center gap-1.5 text-base font-black">
+              <CalendarDays className="size-4 text-primary" /> Dieser Monat
             </h2>
-            <MonthlyCalendar monthEventsMap={monthEventsMap} today={todayStr} />
+            <MonthlyCalendar monthEventsMap={monthEventsMap} today={todayStr} compact />
           </section>
 
           {/* Aufgaben */}
           <section className="space-y-2">
             <h2 className="flex items-center gap-1.5 text-base font-black">
-              <ClipboardList className="size-4 text-primary" /> Aufgaben heute
+              <ClipboardList className="size-4 text-primary" /> Aufgaben
             </h2>
             <OpenTasks tasks={tasks} />
           </section>
@@ -331,7 +331,7 @@ export default async function HeutePage() {
           {/* Baustellen */}
           <section className="space-y-2">
             <h2 className="flex items-center gap-1.5 text-base font-black">
-              <HardHat className="size-4 text-primary" /> Laufende Baustellen
+              <HardHat className="size-4 text-primary" /> Baustellen
             </h2>
             <ActiveProjects projects={projects} />
           </section>

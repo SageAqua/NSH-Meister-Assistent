@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, X, Phone, Navigation, CheckCircle2, CalendarClock, FileText } from "lucide-react"
+import { BriefcaseBusiness, Building2, CalendarClock, CheckCircle2, FileText, Navigation, Phone, Plus, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -48,22 +48,25 @@ export function TagesplanSection({
   freeSlots,
   today,
   autoOpenForm = false,
+  initialEventType = "arbeit",
 }: {
   events: CalendarEvent[]
   freeSlots: FreeSlot[]
   today: string
   autoOpenForm?: boolean
+  initialEventType?: "privat" | "arbeit" | "baustelle"
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   // Add-event form
   const [formOpen, setFormOpen] = useState(autoOpenForm)
-  const [title, setTitle] = useState("")
+  const [title, setTitle] = useState(autoOpenForm ? getDefaultTitle(initialEventType) : "")
   const [date, setDate] = useState(today)
   const [startTime, setStartTime] = useState("08:00")
   const [endTime, setEndTime] = useState("16:00")
   const [saveError, setSaveError] = useState("")
+  const [eventType, setEventType] = useState<"privat" | "arbeit" | "baustelle">(autoOpenForm ? initialEventType : "arbeit")
   const submittingRef = useRef(false)
 
   // Edit / Verschieben modal
@@ -102,23 +105,46 @@ export function TagesplanSection({
     })),
   ].sort((a, b) => a.sortMin - b.sortMin)
 
-  function openWithSlot(slot: FreeSlot) {
+  function openWithSlot(slot: FreeSlot, type: "privat" | "arbeit" | "baustelle" = "arbeit") {
     setStartTime(slot.startTime)
     setEndTime(slot.endTime)
+    setEventType(type)
     setFormOpen(true)
+  }
+
+  function getDefaultTitle(type: "privat" | "arbeit" | "baustelle") {
+    if (type === "privat") return "Privat Termin / Termin privat"
+    if (type === "baustelle") return "Baustelle planen / Planifiko kantierin"
+    return "Arbeitstermin / Termin pune"
+  }
+
+  function getEventVisual(type: "privat" | "arbeit" | "baustelle") {
+    if (type === "privat") return { badge: "Privat / Privat", dot: "bg-violet-500", card: "border-violet-300 bg-violet-50", text: "text-violet-800" }
+    if (type === "baustelle") return { badge: "Baustelle / Kantier", dot: "bg-amber-500", card: "border-amber-300 bg-amber-50", text: "text-amber-800" }
+    return { badge: "Arbeit / Punë", dot: "bg-blue-500", card: "border-blue-300 bg-blue-50", text: "text-blue-800" }
+  }
+
+  function detectEventType(event: CalendarEvent): "privat" | "arbeit" | "baustelle" {
+    const normalized = event.title.toLowerCase()
+    if (normalized.includes("[privat]")) return "privat"
+    if (normalized.includes("[baustelle]") || event.project_id) return "baustelle"
+    if (normalized.includes("[arbeit]")) return "arbeit"
+    return event.project_id ? "baustelle" : "arbeit"
   }
 
   function handleSave() {
     if (!title.trim() || submittingRef.current || isPending) return
     submittingRef.current = true
     startTransition(async () => {
-      const result = await saveCalendarEvent({ title, date, startTime, endTime })
+      const prefixedTitle = `[${eventType}] ${title}`
+      const result = await saveCalendarEvent({ title: prefixedTitle, date, startTime, endTime })
       submittingRef.current = false
       if (result?.error) {
         setSaveError(result.error)
       } else {
         setTitle("")
         setFormOpen(false)
+        setEventType("arbeit")
         setSaveError("")
         router.refresh()
       }
@@ -186,16 +212,48 @@ export function TagesplanSection({
             : `${events.length} Termin${events.length !== 1 ? "e" : ""} heute`}
         </p>
         <button
-          onClick={() => setFormOpen(true)}
+          onClick={() => {
+            setEventType("arbeit")
+            setTitle(getDefaultTitle("arbeit"))
+            setFormOpen(true)
+          }}
           className="flex items-center gap-1 text-xs font-semibold text-primary"
         >
           <Plus className="size-3" /> Termin eintragen
         </button>
       </div>
 
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {([
+          { key: "privat" as const, label: "Privat Termin / Termin privat", icon: User, type: "privat" as const },
+          { key: "arbeit" as const, label: "Work Termin / Termin pune", icon: BriefcaseBusiness, type: "arbeit" as const },
+          { key: "baustelle" as const, label: "Baustelle planen / Planifiko kantierin", icon: Building2, type: "baustelle" as const },
+        ]).map((option) => {
+          const Icon = option.icon
+          return (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => {
+                setEventType(option.type)
+                setTitle(getDefaultTitle(option.type))
+                setFormOpen(true)
+              }}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl border bg-white px-3 py-3 text-sm font-bold transition-colors hover:bg-accent"
+            >
+              <Icon className="size-4" /> {option.label}
+            </button>
+          )
+        })}
+      </div>
+
       {timeline.length === 0 ? (
         <button
-          onClick={() => setFormOpen(true)}
+          onClick={() => {
+            setEventType("arbeit")
+            setTitle(getDefaultTitle("arbeit"))
+            setFormOpen(true)
+          }}
           className="flex w-full flex-col items-center rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-5 hover:bg-primary/10 transition-colors"
         >
           <p className="text-base font-semibold text-primary">Ganzer Tag frei 🙌</p>
@@ -211,7 +269,9 @@ export function TagesplanSection({
               const city = customer?.city
               const locationStr = [address, city].filter(Boolean).join(", ")
               const phone = customer?.phone
-              const isPrivate = !event.project_id
+              const eventTypeDetected = detectEventType(event)
+              const eventVisual = getEventVisual(eventTypeDetected)
+              const isPrivate = eventTypeDetected === "privat"
 
               const endMin =
                 new Date(event.end_time).getHours() * 60 +
@@ -233,6 +293,7 @@ export function TagesplanSection({
                   <div
                     className={cn(
                       "rounded-xl border bg-card p-4 space-y-3",
+                      eventVisual.card,
                       isNow && "border-primary/40 bg-primary/5",
                       event.status === "erledigt" && "opacity-50",
                       isPast && event.status !== "erledigt" && "opacity-60"
@@ -257,7 +318,10 @@ export function TagesplanSection({
 
                     {/* Title + subtitle */}
                     <div>
-                      <p className="font-bold">{event.title}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-bold">{event.title.replace(/^\[(privat|arbeit|baustelle)\]\s*/i, "")}</p>
+                        <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", eventVisual.text, "bg-white/80")}>{eventVisual.badge}</span>
+                      </div>
                       {subtitle && (
                         <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
                       )}
@@ -362,7 +426,7 @@ export function TagesplanSection({
               return (
                 <button
                   key={`free-${slot.startTime}`}
-                  onClick={() => openWithSlot(slot)}
+                  onClick={() => openWithSlot(slot, "arbeit")}
                   className="flex w-full items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-2 text-left transition-colors hover:bg-green-100"
                 >
                   <div className="size-2 shrink-0 rounded-full bg-green-400" />
@@ -396,7 +460,7 @@ export function TagesplanSection({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Was? (z.B. Vinyl verlegen, Müller)"
               autoFocus
-              className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+              className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
             />
             <div>
               <label className="mb-1 block text-xs font-semibold text-muted-foreground">Datum</label>
@@ -404,7 +468,7 @@ export function TagesplanSection({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -414,7 +478,7 @@ export function TagesplanSection({
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
               <div>
@@ -423,9 +487,28 @@ export function TagesplanSection({
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {(["privat", "arbeit", "baustelle"] as const).map((type) => {
+                const visual = getEventVisual(type)
+                const active = eventType === type
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setEventType(type)}
+                    className={cn(
+                      "rounded-xl border px-2 py-2 text-xs font-semibold transition-colors",
+                      active ? `${visual.card} ${visual.text}` : "bg-white hover:bg-accent"
+                    )}
+                  >
+                    {visual.badge}
+                  </button>
+                )
+              })}
             </div>
             {saveError && <p className="text-sm text-destructive">{saveError}</p>}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
@@ -466,7 +549,7 @@ export function TagesplanSection({
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
               <div>
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground">Datum</label>
@@ -474,7 +557,7 @@ export function TagesplanSection({
                   type="date"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -484,7 +567,7 @@ export function TagesplanSection({
                     type="time"
                     value={editStart}
                     onChange={(e) => setEditStart(e.target.value)}
-                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                   />
                 </div>
                 <div>
@@ -493,7 +576,7 @@ export function TagesplanSection({
                     type="time"
                     value={editEnd}
                     onChange={(e) => setEditEnd(e.target.value)}
-                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>

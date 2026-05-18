@@ -473,7 +473,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href="/heute?new-event=1"
+            href="/heute?new-event=1&type=arbeit"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <CalendarPlus className="size-4" /> Neuer Termin

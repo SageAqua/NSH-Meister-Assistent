@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//NSH Meister-Assistent//DE",
+    "PRODID:-//NSH Dashboard//DE",
     "X-WR-CALNAME:NSH Termine",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",

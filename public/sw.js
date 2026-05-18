@@ -39,7 +39,7 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("push", (event) => {
   if (!event.data) return
 
-  let data = { title: "NSH Meister", body: "Neuer Termin", url: "/heute" }
+  let data = { title: "NSH Dashboard", body: "Neuer Termin", url: "/heute" }
   try {
     data = { ...data, ...event.data.json() }
   } catch {}

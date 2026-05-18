@@ -3,16 +3,16 @@
 import { useState, useTransition, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { BriefcaseBusiness, Building2, CalendarClock, CheckCircle2, FileText, Navigation, Phone, Plus, User, X } from "lucide-react"
+import { BriefcaseBusiness, Building2, CalendarClock, CheckCircle2, FileText, Navigation, Pencil, Phone, Plus, Trash2, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DaySchedulePreview } from "@/components/day-schedule-preview"
 import { cn } from "@/lib/utils"
 import { SwipeToReveal } from "@/components/swipe-to-reveal"
 import {
-  markEventDone,
+  markEventDoneWithResult,
   saveCalendarEvent,
-  deleteCalendarEvent,
+  deleteCalendarEventWithResult,
   updateCalendarEvent,
   saveNote,
 } from "@/app/actions/orders"
@@ -70,7 +70,8 @@ export function TagesplanSection({
   const [startTime, setStartTime] = useState("08:00")
   const [endTime, setEndTime] = useState("16:00")
   const [saveError, setSaveError] = useState("")
-  const [eventType, setEventType] = useState<"privat" | "arbeit" | "baustelle">("arbeit")
+  const [eventType, setEventType] = useState<"privat" | "arbeit" | "baustelle">(initialEventType)
+  const [actionError, setActionError] = useState<{ eventId: string; message: string } | null>(null)
   const submittingRef = useRef(false)
 
   // Edit / Verschieben modal
@@ -156,20 +157,33 @@ export function TagesplanSection({
   }
 
   function handleMarkDone(eventId: string) {
+    setActionError(null)
     startTransition(async () => {
-      await markEventDone(eventId)
-      router.refresh()
+      const result = await markEventDoneWithResult(eventId)
+      if (result?.error) {
+        setActionError({ eventId, message: result.error })
+      } else {
+        router.refresh()
+      }
     })
   }
 
   function handleDelete(eventId: string) {
+    const confirmed = window.confirm("Termin wirklich loeschen?")
+    if (!confirmed) return
+    setActionError(null)
     startTransition(async () => {
-      await deleteCalendarEvent(eventId)
-      router.refresh()
+      const result = await deleteCalendarEventWithResult(eventId)
+      if (result?.error) {
+        setActionError({ eventId, message: result.error })
+      } else {
+        router.refresh()
+      }
     })
   }
 
   function openEdit(event: CalendarEvent) {
+    setActionError(null)
     setEditing(event)
     setEditTitle(event.title)
     setEditDate(isoToDate(event.start_time))
@@ -208,7 +222,7 @@ export function TagesplanSection({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="min-w-0 max-w-full space-y-2">
       {!compact && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -314,11 +328,11 @@ export function TagesplanSection({
                   key={event.id}
                   onEdit={() => openEdit(event)}
                   onDelete={() => handleDelete(event.id)}
-                  className="rounded-xl"
+                  className="w-full max-w-full rounded-xl"
                 >
                   <div
                     className={cn(
-                      "rounded-xl border bg-card p-4 space-y-3",
+                      "min-w-0 space-y-3 rounded-xl border bg-card p-3 sm:p-4",
                       eventVisual.card,
                       isNow && "border-primary/40 bg-primary/5",
                       event.status === "erledigt" && "opacity-50",
@@ -344,8 +358,8 @@ export function TagesplanSection({
 
                     {/* Title + subtitle */}
                     <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-bold">{event.title.replace(/^\[(privat|arbeit|baustelle)\]\s*/i, "")}</p>
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <p className="min-w-0 max-w-full break-words font-bold">{event.title.replace(/^\[(privat|arbeit|baustelle)\]\s*/i, "")}</p>
                         <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", eventVisual.text, "bg-white/80")}>{eventVisual.badge}</span>
                       </div>
                       {subtitle && (
@@ -355,23 +369,24 @@ export function TagesplanSection({
 
                     {/* Action buttons */}
                     {event.status !== "erledigt" && (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                         {locationStr && (
                           <a
                             href={`https://maps.google.com/?q=${encodeURIComponent(locationStr)}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="min-w-0"
                           >
-                            <Button size="sm" className="h-9 gap-1.5 text-xs">
+                            <Button size="sm" className="h-9 w-full gap-1.5 text-xs sm:w-auto">
                               <Navigation className="size-3.5" /> Navigation
                             </Button>
                           </a>
                         )}
                         {phone && (
-                          <a href={`tel:${phone}`}>
+                          <a href={`tel:${phone}`} className="min-w-0">
                             <Button
                               size="sm"
-                              className="h-9 gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700"
+                              className="h-9 w-full gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700 sm:w-auto"
                             >
                               <Phone className="size-3.5" /> Anrufen
                             </Button>
@@ -381,7 +396,7 @@ export function TagesplanSection({
                           type="button"
                           size="sm"
                           variant="outline"
-                          className="h-9 gap-1.5 text-xs"
+                          className="h-9 min-w-0 gap-1.5 text-xs"
                           onClick={() => {
                             setNotizOpen(notizOpen === event.id ? null : event.id)
                             setNotizText("")
@@ -394,7 +409,7 @@ export function TagesplanSection({
                           type="button"
                           size="sm"
                           variant="outline"
-                          className="h-9 gap-1.5 text-xs"
+                          className="h-9 min-w-0 gap-1.5 text-xs"
                           onClick={() => openEdit(event)}
                         >
                           <CalendarClock className="size-3.5" />
@@ -403,7 +418,29 @@ export function TagesplanSection({
                         <Button
                           type="button"
                           size="sm"
-                          className="h-9 gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700"
+                          variant="outline"
+                          className="h-9 min-w-0 gap-1.5 text-xs"
+                          onClick={() => openEdit(event)}
+                          disabled={isPending}
+                        >
+                          <Pencil className="size-3.5" />
+                          <span className="nsh-i18n nsh-i18n-button" data-sq="Ndrysho">Ändern</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          className="h-9 min-w-0 gap-1.5 text-xs"
+                          onClick={() => handleDelete(event.id)}
+                          disabled={isPending}
+                        >
+                          <Trash2 className="size-3.5" />
+                          <span className="nsh-i18n nsh-i18n-button" data-sq="Fshi">Löschen</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-9 min-w-0 gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700"
                           onClick={() => handleMarkDone(event.id)}
                           disabled={isPending}
                         >
@@ -411,6 +448,12 @@ export function TagesplanSection({
                           <span className="nsh-i18n nsh-i18n-button" data-sq="Kryer">Erledigt</span>
                         </Button>
                       </div>
+                    )}
+
+                    {actionError?.eventId === event.id && (
+                      <p className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">
+                        {actionError.message}
+                      </p>
                     )}
 
                     {/* Inline Notiz form */}

@@ -30,7 +30,7 @@ export default function LoginPage() {
           </div>
           <div>
             <p className="text-xl font-black">
-              <span className="nsh-i18n" data-sq="Mjeshtër">NSH Meister</span>
+              <span className="nsh-i18n" data-sq="Paneli NSH">NSH Dashboard</span>
             </p>
             <p className="text-sm text-sidebar-foreground/55">
               <span className="nsh-i18n" data-sq="Rinovim Vechta">Renovierung Vechta</span>
@@ -56,7 +56,7 @@ export default function LoginPage() {
         </div>
         <div className="text-center">
           <h1 className="text-2xl font-bold">
-            <span className="nsh-i18n nsh-i18n-center" data-sq="Asistent mjeshtri">NSH Meister-Assistent</span>
+            <span className="nsh-i18n nsh-i18n-center" data-sq="Paneli NSH">NSH Dashboard</span>
           </h1>
           <p className="text-muted-foreground">
             <span className="nsh-i18n nsh-i18n-center" data-sq="Rinovim · Vechta">Naim Shala Renovierung · Vechta</span>

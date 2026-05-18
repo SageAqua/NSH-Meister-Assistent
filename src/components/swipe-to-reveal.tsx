@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
+import { Pencil, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const BTN_W = 76
+const MIN_ACTION_W = 56
+const MAX_ACTION_W = 76
 
 interface SwipeToRevealProps {
   onDelete?: () => void
@@ -15,22 +17,31 @@ interface SwipeToRevealProps {
 export function SwipeToReveal({ onDelete, onEdit, children, className }: SwipeToRevealProps) {
   const [offset, setOffset] = useState(0)
   const [transitioning, setTransitioning] = useState(false)
+  const [containerWidth, setContainerWidth] = useState(0)
   const startX = useRef(0)
   const startY = useRef(0)
+  const startOffset = useRef(0)
   const dir = useRef<"h" | "v" | null>(null)
+  const pointerId = useRef<number | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const totalW = (onEdit ? BTN_W : 0) + (onDelete ? BTN_W : 0)
-  const isOpen = offset < -totalW / 3
+  const actionCount = Number(Boolean(onEdit)) + Number(Boolean(onDelete))
+  const actionWidth =
+    containerWidth > 0 && actionCount > 0
+      ? Math.max(MIN_ACTION_W, Math.min(MAX_ACTION_W, containerWidth * 0.19))
+      : MAX_ACTION_W
+  const totalW = actionCount * actionWidth
+  const isOpen = totalW > 0 && offset < -totalW / 3
 
-  // Close when tapping outside
   useEffect(() => {
     if (!isOpen) return
+
     function handleOutside(e: MouseEvent | TouchEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         snap(0)
       }
     }
+
     document.addEventListener("mousedown", handleOutside)
     document.addEventListener("touchstart", handleOutside)
     return () => {
@@ -39,70 +50,133 @@ export function SwipeToReveal({ onDelete, onEdit, children, className }: SwipeTo
     }
   }, [isOpen])
 
+  useEffect(() => {
+    const node = containerRef.current
+    if (!node) return
+
+    setContainerWidth(node.clientWidth)
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width)
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
   function snap(target: number) {
     setTransitioning(true)
     setOffset(target)
-    setTimeout(() => setTransitioning(false), 260)
+    window.setTimeout(() => setTransitioning(false), 260)
   }
 
-  function close() { snap(0) }
+  function close() {
+    snap(0)
+  }
 
-  function onTouchStart(e: React.TouchEvent) {
-    startX.current = e.touches[0].clientX
-    startY.current = e.touches[0].clientY
+  function open() {
+    if (totalW > 0) snap(-totalW)
+  }
+
+  function finishDrag() {
+    if (dir.current !== "h") return
+    snap(offset < -totalW * 0.35 ? -totalW : 0)
+  }
+
+  function beginDrag(clientX: number, clientY: number) {
+    startX.current = clientX
+    startY.current = clientY
+    startOffset.current = isOpen ? -totalW : 0
     dir.current = null
   }
 
-  function onTouchMove(e: React.TouchEvent) {
-    const dx = e.touches[0].clientX - startX.current
-    const dy = e.touches[0].clientY - startY.current
+  function moveDrag(clientX: number, clientY: number) {
+    const dx = clientX - startX.current
+    const dy = clientY - startY.current
     if (!dir.current) {
       if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return
       dir.current = Math.abs(dx) > Math.abs(dy) ? "h" : "v"
     }
     if (dir.current === "v") return
-    const base = isOpen ? -totalW : 0
-    setOffset(Math.max(-totalW, Math.min(0, base + dx)))
+    setOffset(Math.max(-totalW, Math.min(0, startOffset.current + dx)))
   }
 
-  function onTouchEnd() {
-    if (dir.current !== "h") return
-    snap(offset < -totalW * 0.35 ? -totalW : 0)
+  function onTouchStart(e: React.TouchEvent) {
+    beginDrag(e.touches[0].clientX, e.touches[0].clientY)
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    moveDrag(e.touches[0].clientX, e.touches[0].clientY)
+  }
+
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === "touch") return
+    pointerId.current = e.pointerId
+    beginDrag(e.clientX, e.clientY)
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (pointerId.current !== e.pointerId) return
+    moveDrag(e.clientX, e.clientY)
+  }
+
+  function onPointerEnd(e: React.PointerEvent<HTMLDivElement>) {
+    if (pointerId.current !== e.pointerId) return
+    pointerId.current = null
+    finishDrag()
   }
 
   return (
     <div ref={containerRef} className={cn("relative overflow-hidden", className)}>
-      {/* Action buttons revealed on swipe */}
-      <div className="absolute inset-y-0 right-0 flex" style={{ width: totalW }}>
+      <div className="absolute inset-y-0 right-0 z-0 flex" style={{ width: totalW }}>
         {onEdit && (
           <button
-            onClick={() => { close(); onEdit() }}
-            className="flex w-[76px] flex-col items-center justify-center gap-0.5 bg-blue-500 text-white active:bg-blue-700"
+            type="button"
+            aria-label="Termin aendern"
+            onClick={() => {
+              close()
+              onEdit()
+            }}
+            className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1 bg-blue-500 px-1 text-white active:bg-blue-700"
           >
-            <span className="text-xl">✏️</span>
-            <span className="nsh-i18n nsh-i18n-center text-xs font-semibold" data-sq="Ndrysho">Ändern</span>
+            <Pencil className="size-4" />
+            <span className="nsh-i18n nsh-i18n-center text-[11px] font-semibold leading-tight" data-sq="Ndrysho">
+              Ändern
+            </span>
           </button>
         )}
         {onDelete && (
           <button
-            onClick={() => { close(); onDelete() }}
-            className="flex w-[76px] flex-col items-center justify-center gap-0.5 bg-red-500 text-white active:bg-red-700"
+            type="button"
+            aria-label="Termin loeschen"
+            onClick={() => {
+              close()
+              onDelete()
+            }}
+            className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1 bg-red-500 px-1 text-white active:bg-red-700"
           >
-            <span className="text-xl">🗑️</span>
-            <span className="nsh-i18n nsh-i18n-center text-xs font-semibold" data-sq="Fshi">Löschen</span>
+            <Trash2 className="size-4" />
+            <span className="nsh-i18n nsh-i18n-center text-[11px] font-semibold leading-tight" data-sq="Fshi">
+              Löschen
+            </span>
           </button>
         )}
       </div>
 
-      {/* Swipeable content layer */}
       <div
+        className="relative z-10"
         style={{
           transform: `translateX(${offset}px)`,
           transition: transitioning ? "transform 0.25s ease" : "none",
+          touchAction: "pan-y",
         }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
+        onTouchEnd={finishDrag}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerEnd}
+        onPointerCancel={onPointerEnd}
+        onDoubleClick={isOpen ? close : open}
       >
         {children}
       </div>

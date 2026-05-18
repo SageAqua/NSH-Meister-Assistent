@@ -87,14 +87,32 @@ export async function markEventDone(eventId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  await supabase
+  const { error } = await supabase
     .from("calendar_events")
     .update({ status: "erledigt" })
     .eq("id", eventId)
     .eq("user_id", user.id)
 
+  if (error) return
   revalidatePath("/heute")
   revalidatePath("/kalender")
+}
+
+export async function markEventDoneWithResult(eventId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { error } = await supabase
+    .from("calendar_events")
+    .update({ status: "erledigt" })
+    .eq("id", eventId)
+    .eq("user_id", user.id)
+
+  if (error) return { error: "Termin konnte nicht erledigt werden." }
+  revalidatePath("/heute")
+  revalidatePath("/kalender")
+  return {}
 }
 
 export async function markTaskDone(taskId: string): Promise<void> {
@@ -133,14 +151,32 @@ export async function deleteCalendarEvent(eventId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  await supabase
+  const { error } = await supabase
     .from("calendar_events")
     .delete()
     .eq("id", eventId)
     .eq("user_id", user.id)
 
+  if (error) return
   revalidatePath("/heute")
   revalidatePath("/kalender")
+}
+
+export async function deleteCalendarEventWithResult(eventId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { error } = await supabase
+    .from("calendar_events")
+    .delete()
+    .eq("id", eventId)
+    .eq("user_id", user.id)
+
+  if (error) return { error: "Termin konnte nicht geloescht werden." }
+  revalidatePath("/heute")
+  revalidatePath("/kalender")
+  return {}
 }
 
 export async function updateCalendarEvent(data: {
@@ -164,7 +200,7 @@ export async function updateCalendarEvent(data: {
     .eq("id", data.id)
     .eq("user_id", user.id)
 
-  if (error) return { error: "Änderung fehlgeschlagen." }
+  if (error) return { error: "Aenderung fehlgeschlagen." }
   revalidatePath("/heute")
   revalidatePath("/kalender")
   return {}

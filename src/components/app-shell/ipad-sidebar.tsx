@@ -36,7 +36,7 @@ export function IpadSidebar() {
           </div>
           <div className="min-w-0">
             <p className="text-lg font-black leading-tight text-sidebar-foreground">
-              <span className="nsh-i18n" data-sq="Mjeshtër">NSH Meister</span>
+              <span className="nsh-i18n" data-sq="Paneli NSH">NSH Dashboard</span>
             </p>
             <p className="truncate text-sm text-sidebar-foreground/60">
               <span className="nsh-i18n" data-sq="Rinovim Vechta">Renovierung Vechta</span>
@@ -120,7 +120,7 @@ export function IpadSidebar() {
           <span className="nsh-i18n" data-sq="Rinovim">NSH Renovierung</span>
         </p>
         <p className="text-xs text-sidebar-foreground/35">
-          <span className="nsh-i18n" data-sq="Asistent mjeshtri">Meister-Assistent</span>
+          <span className="nsh-i18n" data-sq="Paneli">Dashboard</span>
         </p>
       </div>
     </aside>

@@ -1,6 +1,6 @@
 {
-  "name": "NSH Meister-Assistent",
-  "short_name": "NSH Meister",
+  "name": "NSH Dashboard",
+  "short_name": "NSH Dashboard",
   "description": "Digitale Assistenz für Naim Shala Renovierung — Baustellen, Aufträge, Kunden",
   "start_url": "/heute",
   "display": "standalone",

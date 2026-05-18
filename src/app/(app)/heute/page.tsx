@@ -305,10 +305,10 @@ export default async function HeutePage() {
       </section>
 
       {/* ── Two-column body ── */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
 
         {/* Left — Termine heute */}
-        <section className="flex min-h-0 flex-col gap-2 lg:overflow-y-auto lg:pr-1">
+        <section className="flex min-h-0 min-w-0 flex-col gap-2 lg:overflow-y-auto lg:pr-1">
           <h2 className="shrink-0 flex items-center gap-1.5 text-lg font-black">
             <CalendarDays className="size-5 text-primary" />
             <span className="nsh-i18n" data-sq="Terminet sot">Termine heute</span>

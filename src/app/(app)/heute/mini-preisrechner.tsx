@@ -22,10 +22,13 @@ export function MiniPreisrechner() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Calculator className="size-4 text-primary" />
-            <h3 className="font-bold">Schnell-Preis</h3>
+            <h3 className="font-bold">
+              <span className="nsh-i18n" data-sq="Çmim i shpejtë">Schnell-Preis</span>
+            </h3>
           </div>
           <Link href="/preisrechner" className="flex items-center gap-1 text-xs text-primary font-semibold">
-            Vollständig <ArrowRight className="size-3" />
+            <span className="nsh-i18n" data-sq="I plotë">Vollständig</span>
+            <ArrowRight className="size-3" />
           </Link>
         </div>
 
@@ -70,14 +73,16 @@ export function MiniPreisrechner() {
 
         {result ? (
           <div className="rounded-xl bg-primary p-3 text-center text-primary-foreground">
-            <p className="text-2xl font-black sm:text-3xl">ca. {result.normal.toLocaleString("de-DE")} €</p>
+            <p className="text-2xl font-black sm:text-3xl">
+              <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={`afërsisht ${result.normal.toLocaleString("de-DE")} €`}>ca. {result.normal.toLocaleString("de-DE")} €</span>
+            </p>
             <p className="mt-0.5 text-sm opacity-80">
               {result.low.toLocaleString("de-DE")} – {result.high.toLocaleString("de-DE")} €
             </p>
           </div>
         ) : (
           <div className="rounded-xl bg-muted/60 p-3 text-center text-sm text-muted-foreground">
-            m² eingeben → Preis erscheint sofort
+            <span className="nsh-i18n nsh-i18n-center" data-sq="Shkruaj m² → çmimi shfaqet menjëherë">m² eingeben → Preis erscheint sofort</span>
           </div>
         )}
       </CardContent>

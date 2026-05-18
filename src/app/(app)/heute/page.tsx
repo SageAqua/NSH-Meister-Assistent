@@ -108,7 +108,7 @@ function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }
   if (!hasAny) {
     return (
       <p className="rounded-xl border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-        Keine Termine diese Woche.
+        <span className="nsh-i18n" data-sq="Nuk ka termine këtë javë.">Keine Termine diese Woche.</span>
       </p>
     )
   }
@@ -139,7 +139,7 @@ function OpenTasks({ tasks }: { tasks: Task[] }) {
   if (tasks.length === 0)
     return (
       <p className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-        Keine offenen Aufgaben.
+        <span className="nsh-i18n" data-sq="Nuk ka detyra të hapura.">Keine offenen Aufgaben.</span>
       </p>
     )
   return (
@@ -169,7 +169,7 @@ function ActiveProjects({ projects }: { projects: ProjectFull[] }) {
   if (projects.length === 0)
     return (
       <p className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-        Keine aktiven Baustellen.
+        <span className="nsh-i18n" data-sq="Nuk ka kantiere aktive.">Keine aktiven Baustellen.</span>
       </p>
     )
   return (
@@ -276,14 +276,19 @@ export default async function HeutePage() {
       {/* ── Header ── */}
       <header className="shrink-0 flex items-center justify-between gap-4 rounded-2xl border bg-card p-4">
         <div className="min-w-0">
-          <p className="text-[11px] font-black uppercase tracking-widest text-primary">Heute</p>
-          <h1 className="text-2xl font-black leading-tight sm:text-3xl">Hallo Naim</h1>
+          <p className="text-[11px] font-black uppercase tracking-widest text-primary">
+            <span className="nsh-i18n" data-sq="Sot">Heute</span>
+          </p>
+          <h1 className="text-2xl font-black leading-tight sm:text-3xl">
+            <span className="nsh-i18n" data-sq="Përshëndetje Naim">Hallo Naim</span>
+          </h1>
           <p className="text-sm text-muted-foreground">{dateStr}</p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
           <Link href="/neuer-auftrag">
             <button className="flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-primary-foreground shadow-md shadow-primary/20 transition-colors hover:bg-primary/90">
-              <Plus className="size-4" /> Neuer Termin
+              <Plus className="size-4" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq="Termin i ri">Neuer Termin</span>
             </button>
           </Link>
           <img src="/logo.png" alt="NSH" className="hidden size-10 rounded-lg bg-white object-contain ring-1 ring-border lg:block" />
@@ -293,7 +298,8 @@ export default async function HeutePage() {
       {/* ── Diese Woche — mobile/tablet only ── */}
       <section className="shrink-0 space-y-2 lg:hidden">
         <h2 className="flex items-center gap-1.5 text-sm font-black text-muted-foreground">
-          <CalendarDays className="size-4" /> Diese Woche
+          <CalendarDays className="size-4" />
+          <span className="nsh-i18n" data-sq="Kjo javë">Diese Woche</span>
         </h2>
         <WeekPreview events={weekEvents} today={today} />
       </section>
@@ -304,7 +310,8 @@ export default async function HeutePage() {
         {/* Left — Termine heute */}
         <section className="flex min-h-0 flex-col gap-2 lg:overflow-y-auto lg:pr-1">
           <h2 className="shrink-0 flex items-center gap-1.5 text-lg font-black">
-            <CalendarDays className="size-5 text-primary" /> Termine heute
+            <CalendarDays className="size-5 text-primary" />
+            <span className="nsh-i18n" data-sq="Terminet sot">Termine heute</span>
           </h2>
           <TagesplanSection events={todayEvents} freeSlots={[]} today={todayStr} compact />
         </section>
@@ -315,7 +322,8 @@ export default async function HeutePage() {
           {/* Month calendar — desktop right col */}
           <section className="hidden shrink-0 space-y-2 lg:block">
             <h2 className="flex items-center gap-1.5 text-base font-black">
-              <CalendarDays className="size-4 text-primary" /> Dieser Monat
+              <CalendarDays className="size-4 text-primary" />
+              <span className="nsh-i18n" data-sq="Ky muaj">Dieser Monat</span>
             </h2>
             <MonthlyCalendar monthEventsMap={monthEventsMap} today={todayStr} compact />
           </section>
@@ -323,7 +331,8 @@ export default async function HeutePage() {
           {/* Aufgaben */}
           <section className="space-y-2">
             <h2 className="flex items-center gap-1.5 text-base font-black">
-              <ClipboardList className="size-4 text-primary" /> Aufgaben
+              <ClipboardList className="size-4 text-primary" />
+              <span className="nsh-i18n" data-sq="Detyra">Aufgaben</span>
             </h2>
             <OpenTasks tasks={tasks} />
           </section>
@@ -331,7 +340,8 @@ export default async function HeutePage() {
           {/* Baustellen */}
           <section className="space-y-2">
             <h2 className="flex items-center gap-1.5 text-base font-black">
-              <HardHat className="size-4 text-primary" /> Baustellen
+              <HardHat className="size-4 text-primary" />
+              <span className="nsh-i18n" data-sq="Kantiere">Baustellen</span>
             </h2>
             <ActiveProjects projects={projects} />
           </section>

@@ -19,11 +19,13 @@ export function CalendarCopyButton({ url }: { url: string }) {
     >
       {copied ? (
         <>
-          <Check className="size-4" /> Link kopiert!
+          <Check className="size-4" />
+          <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Linku u kopjua!">Link kopiert!</span>
         </>
       ) : (
         <>
-          <Copy className="size-4" /> Link kopieren
+          <Copy className="size-4" />
+          <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Kopjo linkun">Link kopieren</span>
         </>
       )}
     </button>

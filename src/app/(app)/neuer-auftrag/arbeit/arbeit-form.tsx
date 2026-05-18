@@ -8,10 +8,10 @@ import { saveCalendarEvent } from "@/app/actions/orders"
 import type { Customer } from "@/types"
 
 const PRESETS = [
-  { label: "Morgens", sub: "08:00 – 10:00", start: "08:00", end: "10:00" },
-  { label: "Mittag", sub: "12:00 – 14:00", start: "12:00", end: "14:00" },
-  { label: "Nachmittag", sub: "14:00 – 17:00", start: "14:00", end: "17:00" },
-  { label: "Abend", sub: "18:00 – 20:00", start: "18:00", end: "20:00" },
+  { label: "Morgens", sq: "Në mëngjes", sub: "08:00 – 10:00", start: "08:00", end: "10:00" },
+  { label: "Mittag", sq: "Në drekë", sub: "12:00 – 14:00", start: "12:00", end: "14:00" },
+  { label: "Nachmittag", sq: "Pasdite", sub: "14:00 – 17:00", start: "14:00", end: "17:00" },
+  { label: "Abend", sq: "Në mbrëmje", sub: "18:00 – 20:00", start: "18:00", end: "20:00" },
 ]
 
 function todayStr() {
@@ -67,17 +67,22 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
             href="/neuer-auftrag"
             className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="size-4" /> Zurück
+            <ArrowLeft className="size-4" />
+            <span className="nsh-i18n" data-sq="Mbrapa">Zurück</span>
           </Link>
 
           <div className="mb-6">
-            <p className="text-xs font-black uppercase tracking-widest text-blue-600">Work Termin</p>
-            <h1 className="mt-1 text-3xl font-black">Was ist die Arbeit?</h1>
+            <p className="text-xs font-black uppercase tracking-widest text-blue-600">
+              <span className="nsh-i18n" data-sq="Termin pune">Work Termin</span>
+            </p>
+            <h1 className="mt-1 text-3xl font-black">
+              <span className="nsh-i18n" data-sq="Çfarë është puna?">Was ist die Arbeit?</span>
+            </h1>
           </div>
 
           <div className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-black text-muted-foreground">WAS?</label>
+              <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="ÇFARË?">WAS?</span></label>
               <input
                 ref={titleRef}
                 type="text"
@@ -91,7 +96,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
 
             {customers.length > 0 && (
               <div>
-                <label className="mb-2 block text-sm font-black text-muted-foreground">WELCHER KUNDE? (optional)</label>
+                <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="CILI KLIENT? (opsionale)">WELCHER KUNDE? (optional)</span></label>
                 <select
                   onChange={(e) => {
                     const name = e.target.value
@@ -100,7 +105,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
                   className="h-16 w-full rounded-xl border-2 bg-card px-4 text-lg font-bold focus:border-blue-500 focus:outline-none"
                   defaultValue=""
                 >
-                  <option value="">Kein Kunde ausgewählt</option>
+                  <option value="">Kein Kunde ausgewählt / Asnjë klient i zgjedhur</option>
                   {customers.map((c) => (
                     <option key={c.id} value={c.name}>
                       {c.name}
@@ -111,7 +116,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
             )}
 
             <div>
-              <label className="mb-2 block text-sm font-black text-muted-foreground">WANN?</label>
+              <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="KUR?">WANN?</span></label>
               <input
                 type="date"
                 value={date}
@@ -121,7 +126,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-black text-muted-foreground">UM WIEVIEL UHR?</label>
+              <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="NË ÇFARË ORE?">UM WIEVIEL UHR?</span></label>
               <div className="grid grid-cols-2 gap-3">
                 {PRESETS.map((p) => (
                   <button
@@ -134,7 +139,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
                         : "border-border bg-card hover:bg-muted"
                     }`}
                   >
-                    <p className="text-base font-black">{p.label}</p>
+                    <p className="text-base font-black"><span className="nsh-i18n" data-sq={p.sq}>{p.label}</span></p>
                     <p className="text-xs text-muted-foreground">{p.sub}</p>
                   </button>
                 ))}
@@ -142,10 +147,10 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-black text-muted-foreground">GENAUE UHRZEIT (optional)</label>
+              <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="ORA E SAKTË (opsionale)">GENAUE UHRZEIT (optional)</span></label>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="mb-1 text-xs text-muted-foreground">Von</p>
+                  <p className="mb-1 text-xs text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></p>
                   <input
                     type="time"
                     value={startTime}
@@ -154,7 +159,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
                   />
                 </div>
                 <div>
-                  <p className="mb-1 text-xs text-muted-foreground">Bis</p>
+                  <p className="mb-1 text-xs text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></p>
                   <input
                     type="time"
                     value={endTime}
@@ -186,7 +191,9 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
             ) : (
               <Check className="size-6" />
             )}
-            {isPending ? "Wird gespeichert..." : "Termin speichern"}
+            <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={isPending ? "Duke ruajtur..." : "Ruaj termin"}>
+              {isPending ? "Wird gespeichert..." : "Termin speichern"}
+            </span>
           </button>
         </div>
       </div>

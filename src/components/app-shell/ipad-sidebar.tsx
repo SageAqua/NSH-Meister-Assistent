@@ -35,15 +35,19 @@ export function IpadSidebar() {
             <img src="/logo.png" alt="NSH Renovierung" className="size-12 object-contain" />
           </div>
           <div className="min-w-0">
-            <p className="text-lg font-black leading-tight text-sidebar-foreground">NSH Meister</p>
-            <p className="truncate text-sm text-sidebar-foreground/60">Renovierung Vechta</p>
+            <p className="text-lg font-black leading-tight text-sidebar-foreground">
+              <span className="nsh-i18n" data-sq="Mjeshtër">NSH Meister</span>
+            </p>
+            <p className="truncate text-sm text-sidebar-foreground/60">
+              <span className="nsh-i18n" data-sq="Rinovim Vechta">Renovierung Vechta</span>
+            </p>
           </div>
         </div>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 pb-4">
         <p className="px-3 pb-2 text-[11px] font-black uppercase tracking-[0.16em] text-sidebar-foreground/38">
-          Arbeit
+          <span className="nsh-i18n" data-sq="Punë">Arbeit</span>
         </p>
         {mainNav.map((item) => {
           const Icon = iconMap[item.icon ?? ""] ?? Home
@@ -83,7 +87,7 @@ export function IpadSidebar() {
 
         <div className="my-4 border-t border-sidebar-border" />
         <p className="px-3 pb-2 text-[11px] font-black uppercase tracking-[0.16em] text-sidebar-foreground/38">
-          Werkzeuge
+          <span className="nsh-i18n" data-sq="Mjete">Werkzeuge</span>
         </p>
         {moreNav.map((item) => {
           const Icon = iconMap[item.icon ?? ""] ?? Settings
@@ -112,8 +116,12 @@ export function IpadSidebar() {
       </nav>
 
       <div className="border-t border-sidebar-border px-5 py-4">
-        <p className="text-xs font-semibold text-sidebar-foreground/55">NSH Renovierung</p>
-        <p className="text-xs text-sidebar-foreground/35">Meister-Assistent</p>
+        <p className="text-xs font-semibold text-sidebar-foreground/55">
+          <span className="nsh-i18n" data-sq="Rinovim">NSH Renovierung</span>
+        </p>
+        <p className="text-xs text-sidebar-foreground/35">
+          <span className="nsh-i18n" data-sq="Asistent mjeshtri">Meister-Assistent</span>
+        </p>
       </div>
     </aside>
   )

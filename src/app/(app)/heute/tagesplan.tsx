@@ -261,8 +261,12 @@ export function TagesplanSection({
             href="/neuer-auftrag"
             className="flex w-full flex-col items-center rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-5 hover:bg-primary/10 transition-colors"
           >
-            <p className="text-base font-semibold text-primary">Ganzer Tag frei 🙌</p>
-            <p className="mt-0.5 text-sm text-muted-foreground">Tippen um Termin einzutragen</p>
+            <p className="text-base font-semibold text-primary">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Gjithë dita e lirë 🙌">Ganzer Tag frei 🙌</span>
+            </p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Shtyp për të regjistruar termin">Tippen um Termin einzutragen</span>
+            </p>
           </Link>
         ) : (
           <button
@@ -273,8 +277,12 @@ export function TagesplanSection({
             }}
             className="flex w-full flex-col items-center rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-5 hover:bg-primary/10 transition-colors"
           >
-            <p className="text-base font-semibold text-primary">Ganzer Tag frei 🙌</p>
-            <p className="mt-0.5 text-sm text-muted-foreground">Tippen um Termin einzutragen</p>
+            <p className="text-base font-semibold text-primary">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Gjithë dita e lirë 🙌">Ganzer Tag frei 🙌</span>
+            </p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Shtyp për të regjistruar termin">Tippen um Termin einzutragen</span>
+            </p>
           </button>
         )
       ) : (
@@ -447,7 +455,9 @@ export function TagesplanSection({
                   <p className="flex-1 text-xs font-semibold text-green-700">
                     {slot.startTime} – {slot.endTime} frei · {durLabel(slot.durationHours)}
                   </p>
-                  <span className="shrink-0 text-xs font-semibold text-green-600">+ Termin</span>
+                  <span className="shrink-0 text-xs font-semibold text-green-600">
+                    <span className="nsh-i18n" data-sq="+ Termin">+ Termin</span>
+                  </span>
                 </>
               )
               return compact ? (
@@ -477,7 +487,9 @@ export function TagesplanSection({
         <Card className="border-primary/30">
           <CardContent className="space-y-3 p-4">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="font-bold">Neuer Termin / Termin i ri</h3>
+              <h3 className="font-bold">
+                <span className="nsh-i18n" data-sq="Termin i ri">Neuer Termin</span>
+              </h3>
               <button
                 onClick={() => setFormOpen(false)}
                 className="flex size-8 items-center justify-center rounded-full hover:bg-accent"
@@ -494,7 +506,7 @@ export function TagesplanSection({
               className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
             />
             <div>
-              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Datum</label>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Data">Datum</span></label>
               <input
                 type="date"
                 value={date}
@@ -504,7 +516,7 @@ export function TagesplanSection({
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Von</label>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></label>
                 <input
                   type="time"
                   value={startTime}
@@ -513,7 +525,7 @@ export function TagesplanSection({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Bis</label>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></label>
                 <input
                   type="time"
                   value={endTime}
@@ -568,7 +580,9 @@ export function TagesplanSection({
           <Card className="w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
             <CardContent className="space-y-3 p-5">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="font-bold">Termin verschieben / Shtyj terminin</h3>
+                <h3 className="font-bold">
+                  <span className="nsh-i18n" data-sq="Shtyj terminin">Termin verschieben</span>
+                </h3>
                 <button
                   onClick={() => setEditing(null)}
                   className="flex size-8 items-center justify-center rounded-full hover:bg-accent"
@@ -583,7 +597,7 @@ export function TagesplanSection({
                 className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
               <div>
-                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Datum</label>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Data">Datum</span></label>
                 <input
                   type="date"
                   value={editDate}
@@ -593,7 +607,7 @@ export function TagesplanSection({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Von</label>
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></label>
                   <input
                     type="time"
                     value={editStart}
@@ -602,7 +616,7 @@ export function TagesplanSection({
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Bis</label>
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></label>
                   <input
                     type="time"
                     value={editEnd}

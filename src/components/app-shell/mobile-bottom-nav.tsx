@@ -54,12 +54,12 @@ export function MobileBottomNav() {
             )}
             <span
               className={cn(
-                "text-[10px] font-bold leading-none tracking-tight transition-all duration-200",
-                isNewAuftrag && "sr-only",
+                "text-center text-[10px] font-bold leading-none tracking-tight transition-all duration-200",
                 isActive ? "opacity-100" : "opacity-60"
               )}
             >
               {item.labelDe}
+              {item.labelSq && <span className="mt-0.5 block text-[9px] font-semibold text-muted-foreground">{item.labelSq}</span>}
             </span>
           </Link>
         )

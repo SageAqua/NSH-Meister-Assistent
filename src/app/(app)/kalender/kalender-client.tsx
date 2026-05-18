@@ -82,18 +82,22 @@ function detectEventType(title: string) {
 function EventTypeBadge({ title }: { title: string }) {
   const type = detectEventType(title)
   const cfg =
-    type === "privat" ? { label: "Privat", cls: "bg-violet-100 text-violet-800" }
-    : type === "baustelle" ? { label: "Baustelle", cls: "bg-amber-100 text-amber-800" }
-    : { label: "Work", cls: "bg-blue-100 text-blue-800" }
-  return <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold", cfg.cls)}>{cfg.label}</span>
+    type === "privat" ? { label: "Privat", sq: "Privat", cls: "bg-violet-100 text-violet-800" }
+    : type === "baustelle" ? { label: "Baustelle", sq: "Kantier", cls: "bg-amber-100 text-amber-800" }
+    : { label: "Work", sq: "Punë", cls: "bg-blue-100 text-blue-800" }
+  return <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold", cfg.cls)}><span className="nsh-i18n" data-sq={cfg.sq}>{cfg.label}</span></span>
 }
 
 function EmptyState({ month, year }: { month: number; year: number }) {
   return (
     <Card className="border-dashed">
       <CardContent className="py-12 text-center text-muted-foreground">
-        <p className="text-lg font-bold text-foreground">Keine Termine im {MONTHS_DE[month]} {year}</p>
-        <p className="text-sm">Mit &quot;Neuer Termin&quot; kannst du direkt einen Termin eintragen.</p>
+        <p className="text-lg font-bold text-foreground">
+          <span className="nsh-i18n nsh-i18n-center" data-sq={`Nuk ka termine në ${MONTHS_DE[month]} ${year}`}>Keine Termine im {MONTHS_DE[month]} {year}</span>
+        </p>
+        <p className="text-sm">
+          <span className="nsh-i18n nsh-i18n-center" data-sq="Me “Termin i ri” mund të shtosh direkt një termin.">Mit &quot;Neuer Termin&quot; kannst du direkt einen Termin eintragen.</span>
+        </p>
       </CardContent>
     </Card>
   )
@@ -128,7 +132,7 @@ function EventCard({
             <Clock className="size-4" />
             <span>{formatTime(event.start_time)} – {formatTime(event.end_time)}</span>
             <EventTypeBadge title={event.title} />
-            {event.status === "erledigt" && <Badge variant="secondary" className="text-xs">Erledigt</Badge>}
+            {event.status === "erledigt" && <Badge variant="secondary" className="text-xs"><span className="nsh-i18n" data-sq="Kryer">Erledigt</span></Badge>}
           </div>
           <h3 className={cn("mt-1 font-black", dense ? "text-base" : "text-lg")}>
             {event.title.replace(/^\[.*?\]\s*/, "")}
@@ -147,21 +151,25 @@ function EventCard({
 
         <div className="flex flex-wrap gap-2 sm:justify-end">
           <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs" onClick={onEdit}>
-            <Pencil className="size-3.5" /> Ändern
+            <Pencil className="size-3.5" />
+            <span className="nsh-i18n nsh-i18n-button" data-sq="Ndrysho">Ändern</span>
           </Button>
           <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs text-destructive" onClick={onDelete}>
-            <Trash2 className="size-3.5" /> Löschen
+            <Trash2 className="size-3.5" />
+            <span className="nsh-i18n nsh-i18n-button" data-sq="Fshi">Löschen</span>
           </Button>
           {event.status !== "erledigt" && (
             <form action={markEventDone.bind(null, event.id)}>
               <Button size="sm" type="submit" className="h-9 gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700">
-                <CheckCircle2 className="size-3.5" /> Erledigt
+                <CheckCircle2 className="size-3.5" />
+                <span className="nsh-i18n nsh-i18n-button" data-sq="Kryer">Erledigt</span>
               </Button>
             </form>
           )}
           {customer?.phone && (
             <a href={`tel:${customer.phone}`} className="inline-flex h-9 items-center gap-1.5 rounded-lg border bg-background px-2.5 text-xs font-medium transition-colors hover:bg-muted">
-              <Phone className="size-3.5" /> Anrufen
+              <Phone className="size-3.5" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq="Telefono">Anrufen</span>
             </a>
           )}
           {location && (
@@ -171,12 +179,14 @@ function EventCard({
               rel="noopener noreferrer"
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border bg-background px-2.5 text-xs font-medium transition-colors hover:bg-muted"
             >
-              <Navigation className="size-3.5" /> Navi
+              <Navigation className="size-3.5" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq="Navigim">Navi</span>
             </a>
           )}
           {project && (
             <Link href={`/baustellen/${project.id}`} className="inline-flex h-9 items-center gap-1.5 rounded-lg border bg-background px-2.5 text-xs font-medium transition-colors hover:bg-muted">
-              <Building2 className="size-3.5" /> Baustelle
+              <Building2 className="size-3.5" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq="Kantier">Baustelle</span>
             </Link>
           )}
         </div>
@@ -233,8 +243,8 @@ function DayDetailSheet({
             </p>
             <p className="text-xs text-muted-foreground">
               {day.events.length === 0
-                ? "Kein Termin"
-                : `${day.events.length} Termin${day.events.length !== 1 ? "e" : ""}`}
+                ? <span className="nsh-i18n" data-sq="Nuk ka termin">Kein Termin</span>
+                : <span className="nsh-i18n" data-sq={`${day.events.length} termine`}>{day.events.length} Termin{day.events.length !== 1 ? "e" : ""}</span>}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -243,7 +253,8 @@ function DayDetailSheet({
               onClick={onClose}
               className="flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              <CalendarPlus className="size-3.5" /> Neu
+              <CalendarPlus className="size-3.5" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq="E re">Neu</span>
             </Link>
             <button
               onClick={onClose}
@@ -258,13 +269,16 @@ function DayDetailSheet({
         <div className="space-y-3 p-4">
           {day.events.length === 0 ? (
             <div className="py-10 text-center">
-              <p className="text-muted-foreground">Kein Termin an diesem Tag.</p>
+              <p className="text-muted-foreground">
+                <span className="nsh-i18n nsh-i18n-center" data-sq="Nuk ka termin në këtë ditë.">Kein Termin an diesem Tag.</span>
+              </p>
               <Link
                 href="/neuer-auftrag"
                 onClick={onClose}
                 className="mt-3 inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground"
               >
-                <CalendarPlus className="size-4" /> Termin eintragen
+                <CalendarPlus className="size-4" />
+                <span className="nsh-i18n nsh-i18n-button" data-sq="Regjistro termin">Termin eintragen</span>
               </Link>
             </div>
           ) : (
@@ -289,7 +303,7 @@ function DayDetailSheet({
                     <EventTypeBadge title={event.title} />
                     {event.status === "erledigt" && (
                       <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700">
-                        ✓ Erledigt
+                        <span className="nsh-i18n" data-sq="✓ Kryer">✓ Erledigt</span>
                       </span>
                     )}
                   </div>
@@ -316,14 +330,16 @@ function DayDetailSheet({
                       onClick={() => { onClose(); onEdit(event) }}
                       className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold transition-colors hover:bg-accent"
                     >
-                      <Pencil className="size-3.5" /> Ändern
+                      <Pencil className="size-3.5" />
+                      <span className="nsh-i18n nsh-i18n-button" data-sq="Ndrysho">Ändern</span>
                     </button>
                     <button
                       onClick={() => { onDelete(event.id); onClose() }}
                       disabled={isPending}
                       className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
                     >
-                      <Trash2 className="size-3.5" /> Löschen
+                      <Trash2 className="size-3.5" />
+                      <span className="nsh-i18n nsh-i18n-button" data-sq="Fshi">Löschen</span>
                     </button>
                     {event.status !== "erledigt" && (
                       <form action={markEventDone.bind(null, event.id)}>
@@ -332,13 +348,15 @@ function DayDetailSheet({
                           disabled={isPending}
                           className="flex h-9 items-center gap-1.5 rounded-lg bg-green-600 px-3 text-xs font-bold text-white transition-colors hover:bg-green-700 disabled:opacity-60"
                         >
-                          <CheckCircle2 className="size-3.5" /> Erledigt
+                          <CheckCircle2 className="size-3.5" />
+                          <span className="nsh-i18n nsh-i18n-button" data-sq="Kryer">Erledigt</span>
                         </button>
                       </form>
                     )}
                     {customer?.phone && (
                       <a href={`tel:${customer.phone}`} className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold transition-colors hover:bg-accent">
-                        <Phone className="size-3.5" /> Anrufen
+                        <Phone className="size-3.5" />
+                        <span className="nsh-i18n nsh-i18n-button" data-sq="Telefono">Anrufen</span>
                       </a>
                     )}
                     {location && (
@@ -348,12 +366,14 @@ function DayDetailSheet({
                         rel="noopener noreferrer"
                         className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold transition-colors hover:bg-accent"
                       >
-                        <Navigation className="size-3.5" /> Navi
+                        <Navigation className="size-3.5" />
+                        <span className="nsh-i18n nsh-i18n-button" data-sq="Navigim">Navi</span>
                       </a>
                     )}
                     {project && (
                       <Link href={`/baustellen/${project.id}`} onClick={onClose} className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold transition-colors hover:bg-accent">
-                        <Building2 className="size-3.5" /> Baustelle
+                        <Building2 className="size-3.5" />
+                        <span className="nsh-i18n nsh-i18n-button" data-sq="Kantier">Baustelle</span>
                       </Link>
                     )}
                   </div>
@@ -639,16 +659,23 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
     <div className="nsh-page">
       <div className="nsh-page-header flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="nsh-eyebrow">Termine</p>
-          <h1 className="nsh-title">Kalender</h1>
-          <p className="nsh-subtitle">Alle Termine klar sehen, ändern und abhaken.</p>
+          <p className="nsh-eyebrow">
+            <span className="nsh-i18n" data-sq="Termine">Termine</span>
+          </p>
+          <h1 className="nsh-title">
+            <span className="nsh-i18n" data-sq="Kalendari">Kalender</span>
+          </h1>
+          <p className="nsh-subtitle">
+            <span className="nsh-i18n" data-sq="Shiko, ndrysho dhe shëno terminet qartë.">Alle Termine klar sehen, ändern und abhaken.</span>
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/neuer-auftrag"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            <CalendarPlus className="size-4" /> Neuer Termin
+            <CalendarPlus className="size-4" />
+            <span className="nsh-i18n nsh-i18n-button" data-sq="Termin i ri">Neuer Termin</span>
           </Link>
           <div className="flex gap-1 rounded-xl border bg-card p-1">
             {(["monat", "liste", "woche"] as View[]).map((item) => (
@@ -660,7 +687,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
                   view === item ? "bg-primary text-primary-foreground" : "hover:bg-accent"
                 )}
               >
-                {item}
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={item === "monat" ? "muaj" : item === "liste" ? "listë" : "javë"}>{item}</span>
               </button>
             ))}
           </div>
@@ -675,7 +702,9 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
           <div className="text-center">
             <h2 className="text-xl font-black sm:text-2xl">{MONTHS_DE[month]} {year}</h2>
             <p className="text-sm font-semibold text-muted-foreground">
-              {activeEvents.length} Termine · {openCount} offen · {doneCount} erledigt
+              <span className="nsh-i18n nsh-i18n-center" data-sq={`${activeEvents.length} termine · ${openCount} hapur · ${doneCount} kryer`}>
+                {activeEvents.length} Termine · {openCount} offen · {doneCount} erledigt
+              </span>
             </p>
           </div>
           <button onClick={nextMonth} className="flex size-11 items-center justify-center rounded-xl border transition-colors hover:bg-accent" aria-label="Nächster Monat">
@@ -721,17 +750,19 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
           <Card className="w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
             <CardContent className="space-y-4 p-5">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-black">Termin ändern</h3>
+                <h3 className="text-lg font-black">
+                  <span className="nsh-i18n" data-sq="Ndrysho termin">Termin ändern</span>
+                </h3>
                 <button
                   onClick={() => setEditing(null)}
                   className="flex size-9 items-center justify-center rounded-xl hover:bg-accent"
-                  aria-label="Schließen"
+                  aria-label="Schließen / Mbyll"
                 >
                   <X className="size-5" />
                 </button>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-muted-foreground">Titel</label>
+                <label className="mb-1 block text-xs font-bold text-muted-foreground"><span className="nsh-i18n" data-sq="Titulli">Titel</span></label>
                 <input
                   type="text"
                   value={editTitle}
@@ -740,7 +771,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-muted-foreground">Datum</label>
+                <label className="mb-1 block text-xs font-bold text-muted-foreground"><span className="nsh-i18n" data-sq="Data">Datum</span></label>
                 <input
                   type="date"
                   value={editDate}
@@ -750,7 +781,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-muted-foreground">Von</label>
+                  <label className="mb-1 block text-xs font-bold text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></label>
                   <input
                     type="time"
                     value={editStart}
@@ -759,7 +790,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-muted-foreground">Bis</label>
+                  <label className="mb-1 block text-xs font-bold text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></label>
                   <input
                     type="time"
                     value={editEnd}
@@ -771,10 +802,12 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
               {editError && <p className="text-sm font-semibold text-destructive">{editError}</p>}
               <div className="flex gap-2">
                 <Button size="touch" className="flex-1" onClick={handleEditSave} disabled={isPending}>
-                  {isPending ? "Speichert..." : "Speichern"}
+                  <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={isPending ? "Duke ruajtur..." : "Ruaj"}>
+                    {isPending ? "Speichert..." : "Speichern"}
+                  </span>
                 </Button>
                 <Button size="touch" variant="outline" onClick={() => setEditing(null)}>
-                  Abbrechen
+                  <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Anulo">Abbrechen</span>
                 </Button>
               </div>
             </CardContent>

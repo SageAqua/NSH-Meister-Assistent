@@ -34,6 +34,13 @@ const STATUS_LABELS: Record<ProjectStatus, string> = {
   abgesagt: "Abgesagt",
 }
 
+const STATUS_LABELS_SQ: Record<ProjectStatus, string> = {
+  geplant: "Planifikuar",
+  in_arbeit: "Në punë",
+  fertig: "Gati",
+  abgesagt: "Anuluar",
+}
+
 const STATUS_COLORS: Record<ProjectStatus, string> = {
   geplant: "bg-blue-100 text-blue-700 border-blue-200",
   in_arbeit: "bg-orange-100 text-orange-700 border-orange-200",
@@ -51,15 +58,26 @@ const SERVICE_LABELS: Record<string, string> = {
   decke: "Decke streichen",
 }
 
+const SERVICE_LABELS_SQ: Record<string, string> = {
+  vinyl: "Vendosje vinyl",
+  laminat: "Vendosje laminat",
+  parkett: "Vendosje parket",
+  spachtel: "Nivelim me masë",
+  trockenbau: "Ndërtim i thatë",
+  waende: "Lyerje muresh",
+  decke: "Lyerje tavani",
+  sonstiges: "Tjetër",
+}
+
 const SERVICE_OPTIONS = [
-  { value: "vinyl", label: "Vinyl verlegen" },
-  { value: "laminat", label: "Laminat verlegen" },
-  { value: "parkett", label: "Parkett verlegen" },
-  { value: "spachtel", label: "Spachtelarbeiten" },
-  { value: "trockenbau", label: "Trockenbau" },
-  { value: "waende", label: "Wände streichen" },
-  { value: "decke", label: "Decke streichen" },
-  { value: "sonstiges", label: "Sonstiges" },
+  { value: "vinyl", label: "Vinyl verlegen", sq: "Vendosje vinyl" },
+  { value: "laminat", label: "Laminat verlegen", sq: "Vendosje laminat" },
+  { value: "parkett", label: "Parkett verlegen", sq: "Vendosje parket" },
+  { value: "spachtel", label: "Spachtelarbeiten", sq: "Nivelim me masë" },
+  { value: "trockenbau", label: "Trockenbau", sq: "Ndërtim i thatë" },
+  { value: "waende", label: "Wände streichen", sq: "Lyerje muresh" },
+  { value: "decke", label: "Decke streichen", sq: "Lyerje tavani" },
+  { value: "sonstiges", label: "Sonstiges", sq: "Tjetër" },
 ]
 
 const STATUSES: ProjectStatus[] = ["geplant", "in_arbeit", "fertig", "abgesagt"]
@@ -68,8 +86,16 @@ function statusLabel(status: ProjectStatus) {
   return STATUS_LABELS[status] ?? status
 }
 
+function statusLabelSq(status: ProjectStatus) {
+  return STATUS_LABELS_SQ[status] ?? status
+}
+
 function serviceLabel(service: string) {
   return SERVICE_LABELS[service] ?? service
+}
+
+function serviceLabelSq(service: string) {
+  return SERVICE_LABELS_SQ[service] ?? service
 }
 
 function getCustomerName(project: ProjectWithCustomer) {
@@ -89,9 +115,9 @@ export function BaustellenClient({
 
   const stats = useMemo(
     () => [
-      { label: "In Arbeit", value: active.length, className: "border-orange-200 bg-orange-50 text-orange-700" },
-      { label: "Geplant", value: planned.length, className: "border-blue-200 bg-blue-50 text-blue-700" },
-      { label: "Fertig", value: projects.filter((p) => p.status === "fertig").length, className: "border-green-200 bg-green-50 text-green-700" },
+      { label: "In Arbeit", sq: "Në punë", value: active.length, className: "border-orange-200 bg-orange-50 text-orange-700" },
+      { label: "Geplant", sq: "Planifikuar", value: planned.length, className: "border-blue-200 bg-blue-50 text-blue-700" },
+      { label: "Fertig", sq: "Gati", value: projects.filter((p) => p.status === "fertig").length, className: "border-green-200 bg-green-50 text-green-700" },
     ],
     [active.length, planned.length, projects]
   )
@@ -100,13 +126,20 @@ export function BaustellenClient({
     <div className="nsh-page">
       <div className="nsh-page-header flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="nsh-eyebrow">Arbeit</p>
-          <h1 className="nsh-title">Baustellen</h1>
-          <p className="nsh-subtitle">Kantieret - {projects.length} gesamt</p>
+          <p className="nsh-eyebrow">
+            <span className="nsh-i18n" data-sq="Punë">Arbeit</span>
+          </p>
+          <h1 className="nsh-title">
+            <span className="nsh-i18n" data-sq="Kantiere">Baustellen</span>
+          </h1>
+          <p className="nsh-subtitle">
+            <span className="nsh-i18n" data-sq={`${projects.length} gjithsej`}>{projects.length} gesamt</span>
+          </p>
         </div>
         <Link href="/neuer-auftrag">
           <Button size="touch" className="gap-2">
-            <Plus className="size-4" /> Neu
+            <Plus className="size-4" />
+            <span className="nsh-i18n nsh-i18n-button" data-sq="E re">Neu</span>
           </Button>
         </Link>
       </div>
@@ -116,7 +149,9 @@ export function BaustellenClient({
           {stats.map((stat) => (
             <div key={stat.label} className={cn("rounded-lg border p-4", stat.className)}>
               <p className="text-2xl font-black">{stat.value}</p>
-              <p className="text-xs font-bold">{stat.label}</p>
+              <p className="text-xs font-bold">
+                <span className="nsh-i18n" data-sq={stat.sq}>{stat.label}</span>
+              </p>
             </div>
           ))}
         </div>
@@ -126,18 +161,21 @@ export function BaustellenClient({
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
             <Building2 className="mx-auto mb-3 size-10 text-muted-foreground" />
-            <p className="text-lg font-semibold text-muted-foreground">Noch keine Baustellen.</p>
-            <p className="text-sm text-muted-foreground mb-4">Nuk ka kantiere akoma.</p>
+            <p className="text-lg font-semibold text-muted-foreground">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Nuk ka kantiere akoma.">Noch keine Baustellen.</span>
+            </p>
             <Link href="/neuer-auftrag">
-              <Button size="touch">Ersten Auftrag anlegen</Button>
+              <Button size="touch">
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Krijo porosinë e parë">Ersten Auftrag anlegen</span>
+              </Button>
             </Link>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-          {active.length > 0 && <ProjectSection title="In Arbeit" projects={active} customers={customers} />}
-          {planned.length > 0 && <ProjectSection title="Geplant" projects={planned} customers={customers} />}
-          {done.length > 0 && <ProjectSection title="Abgeschlossen" projects={done} customers={customers} />}
+          {active.length > 0 && <ProjectSection title="In Arbeit" titleSq="Në punë" projects={active} customers={customers} />}
+          {planned.length > 0 && <ProjectSection title="Geplant" titleSq="Planifikuar" projects={planned} customers={customers} />}
+          {done.length > 0 && <ProjectSection title="Abgeschlossen" titleSq="Mbyllur" projects={done} customers={customers} />}
         </div>
       )}
     </div>
@@ -146,17 +184,21 @@ export function BaustellenClient({
 
 function ProjectSection({
   title,
+  titleSq,
   projects,
   customers,
 }: {
   title: string
+  titleSq: string
   projects: ProjectWithCustomer[]
   customers: Customer[]
 }) {
   return (
     <section className="min-w-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold">{title}</h2>
+        <h2 className="text-lg font-bold">
+          <span className="nsh-i18n" data-sq={titleSq}>{title}</span>
+        </h2>
         <Badge variant="secondary">{projects.length}</Badge>
       </div>
       <div className="space-y-3">
@@ -206,7 +248,7 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
   }
 
   function remove() {
-    if (!window.confirm("Diese Baustelle wirklich löschen? Termine, Aufgaben und Material dazu werden auch gelöscht.")) return
+    if (!window.confirm("Diese Baustelle wirklich löschen?\nA ta fshijmë vërtet këtë kantier?\n\nTermine, Aufgaben und Material dazu werden auch gelöscht.\nTerminet, detyrat dhe materialet do të fshihen gjithashtu.")) return
     startTransition(async () => {
       const result = await deleteProject(project.id)
       if (result.error) setError(result.error)
@@ -219,12 +261,14 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
       <Card className="border-primary/30 bg-primary/5">
         <CardContent className="space-y-3 p-4">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="font-bold">Baustelle bearbeiten</h3>
+            <h3 className="font-bold">
+              <span className="nsh-i18n" data-sq="Ndrysho kantierin">Baustelle bearbeiten</span>
+            </h3>
             <button
               type="button"
               onClick={() => setIsEditing(false)}
               className="flex size-8 items-center justify-center rounded-lg hover:bg-accent"
-              aria-label="Schließen"
+              aria-label="Schließen / Mbyll"
             >
               <X className="size-4" />
             </button>
@@ -232,13 +276,15 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <label className="space-y-1">
-              <span className="text-xs font-bold text-muted-foreground">Kunde</span>
+              <span className="text-xs font-bold text-muted-foreground">
+                <span className="nsh-i18n" data-sq="Klient">Kunde</span>
+              </span>
               <select
                 value={form.customerId}
                 onChange={(event) => setForm((value) => ({ ...value, customerId: event.target.value }))}
                 className="h-11 w-full rounded-lg border-2 border-border bg-background px-3 text-sm focus:border-primary focus:outline-none"
               >
-                <option value="">Kein Kunde</option>
+                <option value="">Kein Kunde / Pa klient</option>
                 {customers.map((customer) => (
                   <option key={customer.id} value={customer.id}>{customer.name}</option>
                 ))}
@@ -246,14 +292,16 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
             </label>
 
             <label className="space-y-1">
-              <span className="text-xs font-bold text-muted-foreground">Leistung</span>
+              <span className="text-xs font-bold text-muted-foreground">
+                <span className="nsh-i18n" data-sq="Shërbimi">Leistung</span>
+              </span>
               <select
                 value={form.serviceType}
                 onChange={(event) => setForm((value) => ({ ...value, serviceType: event.target.value }))}
                 className="h-11 w-full rounded-lg border-2 border-border bg-background px-3 text-sm focus:border-primary focus:outline-none"
               >
                 {SERVICE_OPTIONS.map((service) => (
-                  <option key={service.value} value={service.value}>{service.label}</option>
+                  <option key={service.value} value={service.value}>{service.label} / {service.sq}</option>
                 ))}
               </select>
             </label>
@@ -261,20 +309,24 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <label className="space-y-1">
-              <span className="text-xs font-bold text-muted-foreground">Status</span>
+              <span className="text-xs font-bold text-muted-foreground">
+                <span className="nsh-i18n" data-sq="Statusi">Status</span>
+              </span>
               <select
                 value={form.status}
                 onChange={(event) => setForm((value) => ({ ...value, status: event.target.value as ProjectStatus }))}
                 className="h-11 w-full rounded-lg border-2 border-border bg-background px-3 text-sm focus:border-primary focus:outline-none"
               >
                 {STATUSES.map((status) => (
-                  <option key={status} value={status}>{statusLabel(status)}</option>
+                  <option key={status} value={status}>{statusLabel(status)} / {statusLabelSq(status)}</option>
                 ))}
               </select>
             </label>
 
             <label className="space-y-1">
-              <span className="text-xs font-bold text-muted-foreground">Fläche m²</span>
+              <span className="text-xs font-bold text-muted-foreground">
+                <span className="nsh-i18n" data-sq="Sipërfaqe m²">Fläche m²</span>
+              </span>
               <input
                 type="number"
                 min="0"
@@ -285,7 +337,9 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
             </label>
 
             <label className="space-y-1">
-              <span className="text-xs font-bold text-muted-foreground">Helfer</span>
+              <span className="text-xs font-bold text-muted-foreground">
+                <span className="nsh-i18n" data-sq="Ndihmës">Helfer</span>
+              </span>
               <input
                 type="number"
                 min="0"
@@ -297,7 +351,9 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
           </div>
 
           <label className="space-y-1">
-            <span className="text-xs font-bold text-muted-foreground">Adresse</span>
+            <span className="text-xs font-bold text-muted-foreground">
+              <span className="nsh-i18n" data-sq="Adresa">Adresse</span>
+            </span>
             <input
               value={form.address}
               onChange={(event) => setForm((value) => ({ ...value, address: event.target.value }))}
@@ -306,7 +362,9 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
           </label>
 
           <label className="space-y-1">
-            <span className="text-xs font-bold text-muted-foreground">Notizen</span>
+            <span className="text-xs font-bold text-muted-foreground">
+              <span className="nsh-i18n" data-sq="Shënime">Notizen</span>
+            </span>
             <textarea
               value={form.notes}
               onChange={(event) => setForm((value) => ({ ...value, notes: event.target.value }))}
@@ -319,13 +377,17 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto]">
             <Button size="touch" className="gap-2" onClick={save} disabled={isPending}>
-              <Save className="size-4" /> {isPending ? "Speichert..." : "Speichern"}
+              <Save className="size-4" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq={isPending ? "Duke ruajtur..." : "Ruaj"}>
+                {isPending ? "Speichert..." : "Speichern"}
+              </span>
             </Button>
             <Button size="touch" variant="outline" onClick={() => setIsEditing(false)}>
-              Abbrechen
+              <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Anulo">Abbrechen</span>
             </Button>
             <Button size="touch" variant="destructive" className="gap-2" onClick={remove} disabled={isPending}>
-              <Trash2 className="size-4" /> Löschen
+              <Trash2 className="size-4" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq="Fshi">Löschen</span>
             </Button>
           </div>
         </CardContent>
@@ -340,9 +402,11 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold", STATUS_COLORS[project.status])}>
-                {statusLabel(project.status)}
+                <span className="nsh-i18n" data-sq={statusLabelSq(project.status)}>{statusLabel(project.status)}</span>
               </span>
-              <span className="text-xs font-semibold text-muted-foreground">{serviceLabel(project.service_type)}</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                <span className="nsh-i18n" data-sq={serviceLabelSq(project.service_type)}>{serviceLabel(project.service_type)}</span>
+              </span>
             </div>
             <h3 className="truncate text-lg font-bold">{getCustomerName(project)}</h3>
             {(project.address || project.customers?.city) && (
@@ -356,17 +420,17 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
             type="button"
             onClick={() => setIsEditing(true)}
             className="flex size-10 shrink-0 items-center justify-center rounded-lg border hover:bg-accent"
-            aria-label="Baustelle bearbeiten"
+            aria-label="Baustelle bearbeiten / Ndrysho kantierin"
           >
             <Edit3 className="size-4" />
           </button>
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <InfoTile icon={Building2} label="Fläche" value={project.area_m2 ? `${project.area_m2} m²` : "-"} />
-          <InfoTile icon={UserRound} label="Helfer" value={`${project.helpers_count ?? 0}`} />
-          <InfoTile icon={CalendarDays} label="Seit" value={new Date(project.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })} />
-          <InfoTile icon={MoreHorizontal} label="Typ" value={project.vinyl_type ?? project.object_type ?? "-"} />
+          <InfoTile icon={Building2} label="Fläche" labelSq="Sipërfaqe" value={project.area_m2 ? `${project.area_m2} m²` : "-"} />
+          <InfoTile icon={UserRound} label="Helfer" labelSq="Ndihmës" value={`${project.helpers_count ?? 0}`} />
+          <InfoTile icon={CalendarDays} label="Seit" labelSq="Që prej" value={new Date(project.created_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })} />
+          <InfoTile icon={MoreHorizontal} label="Typ" labelSq="Lloji" value={project.vinyl_type ?? project.object_type ?? "-"} />
         </div>
 
         {project.notes && (
@@ -376,18 +440,21 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
         <div className="flex flex-wrap gap-2">
           <Link href={`/baustellen/${project.id}`}>
             <Button size="sm" className="gap-2">
-              <CheckCircle2 className="size-4" /> Öffnen
+              <CheckCircle2 className="size-4" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq="Hap">Öffnen</span>
             </Button>
           </Link>
           {project.customers?.phone && (
             <a href={`tel:${project.customers.phone}`}>
               <Button size="sm" variant="outline" className="gap-2">
-                <Phone className="size-4" /> Anrufen
+                <Phone className="size-4" />
+                <span className="nsh-i18n nsh-i18n-button" data-sq="Telefono">Anrufen</span>
               </Button>
             </a>
           )}
           <Button size="sm" variant="outline" className="gap-2" onClick={() => setIsEditing(true)}>
-            <Edit3 className="size-4" /> Bearbeiten
+            <Edit3 className="size-4" />
+            <span className="nsh-i18n nsh-i18n-button" data-sq="Ndrysho">Bearbeiten</span>
           </Button>
         </div>
 
@@ -400,17 +467,19 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
 function InfoTile({
   icon: Icon,
   label,
+  labelSq,
   value,
 }: {
   icon: ComponentType<{ className?: string }>
   label: string
+  labelSq: string
   value: string
 }) {
   return (
     <div className="rounded-lg border bg-muted/30 p-2">
       <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase text-muted-foreground">
         <Icon className="size-3" />
-        {label}
+        <span className="nsh-i18n" data-sq={labelSq}>{label}</span>
       </div>
       <p className="truncate text-sm font-bold">{value}</p>
     </div>

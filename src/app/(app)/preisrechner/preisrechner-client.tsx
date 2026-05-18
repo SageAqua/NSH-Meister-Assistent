@@ -64,15 +64,20 @@ export function PreisrechnerClient() {
           <Calculator className="size-5 text-primary-foreground" />
         </div>
         <div>
-          <p className="nsh-eyebrow">Kalkulation</p>
-          <h1 className="nsh-title">Preisrechner</h1>
-          <p className="nsh-subtitle">Kalkulatori i cmimeve</p>
+          <p className="nsh-eyebrow">
+            <span className="nsh-i18n" data-sq="Llogaritje">Kalkulation</span>
+          </p>
+          <h1 className="nsh-title">
+            <span className="nsh-i18n" data-sq="Llogaritësi i çmimeve">Preisrechner</span>
+          </h1>
         </div>
       </div>
 
       {/* Step 1: Category */}
       <div className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">1. Kategorie</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          <span className="nsh-i18n" data-sq="1. Kategoria">1. Kategorie</span>
+        </p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {CATEGORIES.map((cat) => {
             const meta = CATEGORY_META[cat]
@@ -88,7 +93,9 @@ export function PreisrechnerClient() {
                 )}
               >
                 <p className="text-2xl">{meta.emoji}</p>
-                <p className="mt-1 text-sm font-bold">{meta.labelDe}</p>
+                <p className="mt-1 text-sm font-bold">
+                  <span className="nsh-i18n nsh-i18n-center" data-sq={meta.labelSq}>{meta.labelDe}</span>
+                </p>
               </button>
             )
           })}
@@ -97,7 +104,9 @@ export function PreisrechnerClient() {
 
       {/* Step 2: Service */}
       <div className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">2. Leistung</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          <span className="nsh-i18n" data-sq="2. Shërbimi">2. Leistung</span>
+        </p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {servicesForCategory.map((service) => (
             <button
@@ -110,7 +119,9 @@ export function PreisrechnerClient() {
                   : "border-border hover:border-primary/40"
               )}
             >
-              <p className="text-sm font-bold leading-tight">{service.labelDe}</p>
+              <p className="text-sm font-bold leading-tight">
+                <span className="nsh-i18n" data-sq={service.labelSq}>{service.labelDe}</span>
+              </p>
               <p className="mt-0.5 text-xs text-muted-foreground">{service.rateNormal} €/m²</p>
             </button>
           ))}
@@ -119,7 +130,9 @@ export function PreisrechnerClient() {
 
       {/* Step 3: Area + difficulty */}
       <div className="space-y-3">
-        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">3. Fläche / Siperfaqja</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          <span className="nsh-i18n" data-sq="3. Sipërfaqja">3. Fläche</span>
+        </p>
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             onClick={() => setArea(Math.max(0, area - 5))}
@@ -154,7 +167,7 @@ export function PreisrechnerClient() {
                 : "border-border hover:border-primary/40"
             )}
           >
-            Standard
+            <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Standard">Standard</span>
           </button>
           <button
             onClick={() => setAufwaendig(true)}
@@ -165,7 +178,7 @@ export function PreisrechnerClient() {
                 : "border-border hover:border-primary/40"
             )}
           >
-            Aufwändig +25%
+            <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Më e vështirë +25%">Aufwändig +25%</span>
           </button>
         </div>
       </div>
@@ -174,20 +187,24 @@ export function PreisrechnerClient() {
       {result ? (
         <Card className="overflow-hidden border-primary/30">
           <div className="bg-primary p-5 text-center text-primary-foreground">
-            <p className="text-sm font-medium opacity-80">ca.</p>
+            <p className="text-sm font-medium opacity-80">
+              <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="afërsisht">ca.</span>
+            </p>
             <p className="mt-1 text-3xl font-black sm:text-5xl">{result.normal.toLocaleString("de-DE")} €</p>
             <p className="mt-2 text-base opacity-80">
               {result.low.toLocaleString("de-DE")} – {result.high.toLocaleString("de-DE")} €
             </p>
             {days && (
               <p className="mt-1 text-sm opacity-70">
-                ca. {days} Tag{days !== 1 ? "e" : ""} Arbeit
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={`afërsisht ${days} ditë punë`}>
+                  ca. {days} Tag{days !== 1 ? "e" : ""} Arbeit
+                </span>
               </p>
             )}
           </div>
           <CardContent className="space-y-2 p-4">
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              Preis nach Besichtigung bestätigt / Cmimi konfirmohet pas shikimit
+              <span className="nsh-i18n" data-sq="Çmimi konfirmohet pas shikimit">Preis nach Besichtigung bestätigt</span>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <a
@@ -196,21 +213,22 @@ export function PreisrechnerClient() {
                 rel="noopener noreferrer"
               >
                 <Button size="touch" className="w-full gap-1.5 bg-green-600 text-white hover:bg-green-700">
-                  <MessageCircle className="size-4" /> WhatsApp
+                  <MessageCircle className="size-4" />
+                  <span className="nsh-i18n nsh-i18n-button" data-sq="WhatsApp">WhatsApp</span>
                 </Button>
               </a>
               <Button size="touch" variant="outline" className="gap-1.5" onClick={copyPrice}>
                 {copied ? (
-                  <><Check className="size-4" /> Kopiert!</>
+                  <><Check className="size-4" /> <span className="nsh-i18n nsh-i18n-button" data-sq="U kopjua!">Kopiert!</span></>
                 ) : (
-                  <><Copy className="size-4" /> Kopieren</>
+                  <><Copy className="size-4" /> <span className="nsh-i18n nsh-i18n-button" data-sq="Kopjo">Kopieren</span></>
                 )}
               </Button>
               <Button size="touch" variant="outline" className="gap-1.5" onClick={handleSave}>
                 {saved ? (
-                  <><Check className="size-4" /> Gespeichert</>
+                  <><Check className="size-4" /> <span className="nsh-i18n nsh-i18n-button" data-sq="U ruajt">Gespeichert</span></>
                 ) : (
-                  <><Save className="size-4" /> Speichern</>
+                  <><Save className="size-4" /> <span className="nsh-i18n nsh-i18n-button" data-sq="Ruaj">Speichern</span></>
                 )}
               </Button>
             </div>
@@ -219,8 +237,9 @@ export function PreisrechnerClient() {
       ) : (
         <div className="rounded-2xl border-2 border-dashed border-border p-8 text-center text-muted-foreground">
           <p className="text-4xl">💰</p>
-          <p className="mt-2 font-medium">m² eingeben → Preis erscheint sofort</p>
-          <p className="mt-1 text-sm">Shkruaj m² → Cmimi shfaqet menjehere</p>
+          <p className="mt-2 font-medium">
+            <span className="nsh-i18n nsh-i18n-center" data-sq="Shkruaj m² → çmimi shfaqet menjëherë">m² eingeben → Preis erscheint sofort</span>
+          </p>
         </div>
       )}
     </div>

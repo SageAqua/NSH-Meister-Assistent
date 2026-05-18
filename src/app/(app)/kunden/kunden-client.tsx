@@ -53,12 +53,19 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
     <div className="nsh-page max-w-5xl">
       <div className="nsh-page-header flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="nsh-eyebrow">Kontakte</p>
-          <h1 className="nsh-title">Kunden</h1>
-          <p className="text-sm text-muted-foreground">Klientet - {customers.length} gesamt</p>
+          <p className="nsh-eyebrow">
+            <span className="nsh-i18n" data-sq="Kontakte">Kontakte</span>
+          </p>
+          <h1 className="nsh-title">
+            <span className="nsh-i18n" data-sq="Klientë">Kunden</span>
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            <span className="nsh-i18n" data-sq={`${customers.length} gjithsej`}>{customers.length} gesamt</span>
+          </p>
         </div>
         <Button size="touch" className="gap-2" onClick={() => setShowForm(true)}>
-          <Plus className="size-4" /> Neuer Kontakt
+          <Plus className="size-4" />
+          <span className="nsh-i18n nsh-i18n-button" data-sq="Kontakt i ri">Neuer Kontakt</span>
         </Button>
       </div>
 
@@ -67,12 +74,13 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
           <CardContent className="space-y-3 p-4">
             <div className="flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 font-bold">
-                <User className="size-4 text-primary" /> Neuer Kontakt
+                <User className="size-4 text-primary" />
+                <span className="nsh-i18n" data-sq="Kontakt i ri">Neuer Kontakt</span>
               </h3>
               <button
                 onClick={() => setShowForm(false)}
                 className="flex size-8 items-center justify-center rounded-lg hover:bg-accent"
-                aria-label="Formular schließen"
+                aria-label="Formular schließen / Mbyll formularin"
               >
                 <X className="size-4" />
               </button>
@@ -86,6 +94,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
               autoFocus
               className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
             />
+            <p className="-mt-2 text-xs text-muted-foreground">Emri *</p>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <input
@@ -95,6 +104,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                 placeholder="Telefon"
                 className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
+              <p className="-mt-1 text-xs text-muted-foreground sm:hidden">Telefoni</p>
               <input
                 type="text"
                 value={city}
@@ -102,6 +112,10 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                 placeholder="Stadt"
                 className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
+            </div>
+            <div className="-mt-2 hidden grid-cols-2 gap-2 text-xs text-muted-foreground sm:grid">
+              <p>Telefoni</p>
+              <p>Qyteti</p>
             </div>
 
             <input
@@ -111,6 +125,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
               placeholder="Adresse"
               className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
             />
+            <p className="-mt-2 text-xs text-muted-foreground">Adresa</p>
 
             <textarea
               value={notes}
@@ -119,6 +134,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
               rows={3}
               className="w-full resize-none rounded-lg border-2 border-border bg-background p-3 text-base focus:border-primary focus:outline-none"
             />
+            <p className="-mt-2 text-xs text-muted-foreground">Shënim për kontaktin (opsionale)</p>
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
@@ -129,10 +145,12 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                 onClick={handleSave}
                 disabled={isPending || !name.trim()}
               >
-                {isPending ? "Speichert..." : "Speichern"}
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={isPending ? "Duke ruajtur..." : "Ruaj"}>
+                  {isPending ? "Speichert..." : "Speichern"}
+                </span>
               </Button>
               <Button size="touch" variant="outline" onClick={() => setShowForm(false)}>
-                Abbrechen
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Anulo">Abbrechen</span>
               </Button>
             </div>
           </CardContent>
@@ -143,13 +161,14 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
         <Card className="border-dashed">
           <CardContent className="py-12 text-center text-muted-foreground">
             <Users className="mx-auto mb-3 size-10 opacity-40" />
-            <p className="text-lg">Noch keine Kunden.</p>
-            <p className="text-sm">Ende nuk ka kliente.</p>
+            <p className="text-lg">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Ende nuk ka klientë.">Noch keine Kunden.</span>
+            </p>
             <button
               onClick={() => setShowForm(true)}
               className="mt-3 text-sm font-semibold text-primary"
             >
-              + Ersten Kontakt anlegen
+              <span className="nsh-i18n nsh-i18n-center" data-sq="+ Krijo kontaktin e parë">+ Ersten Kontakt anlegen</span>
             </button>
           </CardContent>
         </Card>
@@ -176,11 +195,11 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                         <div className="mt-1 flex gap-1.5">
                           {activeProjects > 0 && (
                             <Badge className={cn("text-xs", "bg-primary/10 text-primary border-primary/20")}>
-                              {activeProjects} aktiv
+                              <span className="nsh-i18n" data-sq="aktivë">{activeProjects} aktiv</span>
                             </Badge>
                           )}
                           <Badge variant="secondary" className="text-xs">
-                            {totalProjects} Auftraege
+                            <span className="nsh-i18n" data-sq="porosi">{totalProjects} Aufträge</span>
                           </Badge>
                         </div>
                       )}
@@ -191,7 +210,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                     <a
                       href={`tel:${customer.phone}`}
                       className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted hover:bg-accent"
-                      aria-label={`${customer.name} anrufen`}
+                      aria-label={`${customer.name} anrufen / telefono`}
                     >
                       <Phone className="size-4" />
                     </a>

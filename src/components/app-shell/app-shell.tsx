@@ -12,8 +12,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="NSH Renovierung" className="size-10 rounded-lg bg-white object-contain ring-1 ring-border" />
               <div>
-                <p className="text-sm font-black leading-tight">NSH Meister</p>
-                <p className="text-xs text-muted-foreground">Baustellen, Kunden, Termine</p>
+                <p className="text-sm font-black leading-tight">
+                  <span className="nsh-i18n" data-sq="Mjeshtër">NSH Meister</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  <span className="nsh-i18n" data-sq="Kantiere, klientë, termine">Baustellen, Kunden, Termine</span>
+                </p>
               </div>
             </div>
           </div>

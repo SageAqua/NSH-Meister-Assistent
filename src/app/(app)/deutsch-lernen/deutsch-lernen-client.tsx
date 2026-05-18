@@ -38,7 +38,9 @@ function FlashCard({ term }: { term: DictionaryTerm }) {
     <Card className="w-full">
       <CardContent className="space-y-4 p-4 sm:p-6">
         <div className="rounded-lg bg-primary/10 p-5 text-center">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Deutsch</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <span className="nsh-i18n nsh-i18n-center" data-sq="Gjermanisht">Deutsch</span>
+          </p>
           <p className="text-xl font-bold leading-snug text-foreground">{term.german}</p>
           {term.example_de && (
             <p className="mt-3 text-sm italic text-muted-foreground">{`"${term.example_de}"`}</p>
@@ -46,7 +48,9 @@ function FlashCard({ term }: { term: DictionaryTerm }) {
         </div>
 
         <div className="rounded-lg bg-muted p-5 text-center">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Shqip (Albanisch)</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <span className="nsh-i18n nsh-i18n-center" data-sq="Shqip">Albanisch</span>
+          </p>
           <p className="text-xl font-bold leading-snug">{term.albanian}</p>
           {term.example_al && (
             <p className="mt-3 text-sm italic text-muted-foreground">{`"${term.example_al}"`}</p>
@@ -55,10 +59,10 @@ function FlashCard({ term }: { term: DictionaryTerm }) {
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Button size="touch" variant="outline" className="flex-1 gap-2" onClick={copyDE}>
-            {copied ? <><Check className="size-4" /> Kopiert!</> : <><Copy className="size-4" /> Kopieren</>}
+            {copied ? <><Check className="size-4" /> <span className="nsh-i18n nsh-i18n-button" data-sq="U kopjua!">Kopiert!</span></> : <><Copy className="size-4" /> <span className="nsh-i18n nsh-i18n-button" data-sq="Kopjo">Kopieren</span></>}
           </Button>
           <Button size="touch" variant="outline" className="flex-1 gap-2" onClick={sendWhatsApp}>
-            {whatsapp ? <><Check className="size-4" /> Geöffnet!</> : <><MessageCircle className="size-4" /> WhatsApp</>}
+            {whatsapp ? <><Check className="size-4" /> <span className="nsh-i18n nsh-i18n-button" data-sq="U hap!">Geöffnet!</span></> : <><MessageCircle className="size-4" /> <span className="nsh-i18n nsh-i18n-button" data-sq="WhatsApp">WhatsApp</span></>}
           </Button>
         </div>
       </CardContent>
@@ -97,7 +101,9 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
             <ChevronLeft className="size-5" />
           </button>
           <div>
-            <h2 className="text-lg font-bold">{SECTIONS[section]?.label ?? section}</h2>
+            <h2 className="text-lg font-bold">
+              <span className="nsh-i18n" data-sq={SECTIONS[section]?.sq ?? section}>{SECTIONS[section]?.label ?? section}</span>
+            </h2>
             <p className="text-sm text-muted-foreground">
               {cardIndex + 1} / {sectionTerms.length}
             </p>
@@ -114,10 +120,13 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
           <Button size="touch" variant="outline" onClick={prev} disabled={cardIndex === 0} className="flex-1 gap-2">
-            <ChevronLeft className="size-5" /> Zurück
+            <ChevronLeft className="size-5" />
+            <span className="nsh-i18n nsh-i18n-button" data-sq="Mbrapa">Zurück</span>
           </Button>
           <Button size="touch" onClick={next} className="flex-1 gap-2">
-            {cardIndex === sectionTerms.length - 1 ? "Fertig" : "Weiter"}
+            <span className="nsh-i18n nsh-i18n-button" data-sq={cardIndex === sectionTerms.length - 1 ? "Gati" : "Vazhdo"}>
+              {cardIndex === sectionTerms.length - 1 ? "Fertig" : "Weiter"}
+            </span>
             {cardIndex < sectionTerms.length - 1 && <ChevronRight className="size-5" />}
           </Button>
         </div>
@@ -132,9 +141,12 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
           <BookOpen className="size-5 text-primary-foreground" />
         </div>
         <div>
-          <p className="nsh-eyebrow">Sprache</p>
-          <h1 className="nsh-title">Deutsch lernen</h1>
-          <p className="nsh-subtitle">Meso Gjermanisht</p>
+          <p className="nsh-eyebrow">
+            <span className="nsh-i18n" data-sq="Gjuha">Sprache</span>
+          </p>
+          <h1 className="nsh-title">
+            <span className="nsh-i18n" data-sq="Mëso gjermanisht">Deutsch lernen</span>
+          </h1>
         </div>
       </div>
 
@@ -147,9 +159,12 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
               onClick={() => openSection(key)}
               className="flex min-h-[100px] flex-col items-start gap-2 rounded-lg border-2 border-border bg-card p-4 text-left transition-all hover:border-primary hover:bg-accent"
             >
-              <p className="text-base font-bold">{label}</p>
-              <p className="text-xs text-muted-foreground">{sq}</p>
-              <p className="text-sm font-semibold text-primary">{count} Karten</p>
+              <p className="text-base font-bold">
+                <span className="nsh-i18n" data-sq={sq}>{label}</span>
+              </p>
+              <p className="text-sm font-semibold text-primary">
+                <span className="nsh-i18n" data-sq={`${count} karta`}>{count} Karten</span>
+              </p>
             </button>
           )
         })}
@@ -157,7 +172,9 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="p-4">
-          <p className="mb-1 text-sm font-semibold text-primary">Wichtigster Satz / Fraza me e rendesishme:</p>
+          <p className="mb-1 text-sm font-semibold text-primary">
+            <span className="nsh-i18n" data-sq="Fraza më e rëndësishme:">Wichtigster Satz:</span>
+          </p>
           <p className="text-base font-bold">
             &quot;Der genaue Preis kann erst nach Besichtigung bestätigt werden.&quot;
           </p>

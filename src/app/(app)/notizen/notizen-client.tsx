@@ -18,6 +18,9 @@ const TYPE_COLORS: Record<string, string> = {
 const TYPE_LABELS: Record<string, string> = {
   privat: "Privat", kunden: "Kunde", baustellen: "Baustelle"
 }
+const TYPE_LABELS_SQ: Record<string, string> = {
+  privat: "Private", kunden: "Klient", baustellen: "Kantier"
+}
 
 export function NotizenClient({
   notes,
@@ -58,11 +61,16 @@ export function NotizenClient({
     <div className="nsh-page max-w-5xl">
       <div className="nsh-page-header flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="nsh-eyebrow">Merken</p>
-          <h1 className="nsh-title">Notizen</h1>
+          <p className="nsh-eyebrow">
+            <span className="nsh-i18n" data-sq="Mbaj mend">Merken</span>
+          </p>
+          <h1 className="nsh-title">
+            <span className="nsh-i18n" data-sq="Shënime">Notizen</span>
+          </h1>
         </div>
         <Button size="touch" onClick={() => setShowNew(true)} className="gap-2">
-          <Plus className="size-4" /> Neue Notiz
+          <Plus className="size-4" />
+          <span className="nsh-i18n nsh-i18n-button" data-sq="Shënim i ri">Neue Notiz</span>
         </Button>
       </div>
 
@@ -71,7 +79,9 @@ export function NotizenClient({
         <Card className="border-primary/30">
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="font-bold">Neue Notiz</h3>
+              <h3 className="font-bold">
+                <span className="nsh-i18n" data-sq="Shënim i ri">Neue Notiz</span>
+              </h3>
               <button onClick={() => setShowNew(false)} className="flex size-8 items-center justify-center rounded-full hover:bg-accent">
                 <X className="size-4" />
               </button>
@@ -88,7 +98,7 @@ export function NotizenClient({
                     type === t ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-accent"
                   )}
                 >
-                  {TYPE_LABELS[t]}
+                  <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={TYPE_LABELS_SQ[t]}>{TYPE_LABELS[t]}</span>
                 </button>
               ))}
             </div>
@@ -100,7 +110,7 @@ export function NotizenClient({
                 onChange={(e) => setCustomerId(e.target.value)}
                 className="h-11 w-full rounded-xl border-2 border-border bg-background px-3 text-sm focus:border-primary focus:outline-none"
               >
-                <option value="">Kunde auswählen (optional)</option>
+                <option value="">Kunde auswählen (optional) / Zgjidh klientin (opsionale)</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
@@ -114,7 +124,7 @@ export function NotizenClient({
                 onChange={(e) => setProjectId(e.target.value)}
                 className="h-11 w-full rounded-xl border-2 border-border bg-background px-3 text-sm focus:border-primary focus:outline-none"
               >
-                <option value="">Baustelle auswählen (optional)</option>
+                <option value="">Baustelle auswählen (optional) / Zgjidh kantierin (opsionale)</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.customers?.name ?? "Unbekannt"} — {p.address ?? p.service_type}
@@ -131,12 +141,17 @@ export function NotizenClient({
               rows={4}
               className="w-full rounded-xl border-2 border-border bg-background p-3 text-base focus:border-primary focus:outline-none resize-none"
             />
+            <p className="-mt-2 text-xs text-muted-foreground">Shkruaj shënimin...</p>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
               <Button size="touch" className="flex-1" onClick={handleSave} disabled={isPending || !content.trim()}>
-                {isPending ? "Speichert..." : "Speichern"}
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={isPending ? "Duke ruajtur..." : "Ruaj"}>
+                  {isPending ? "Speichert..." : "Speichern"}
+                </span>
               </Button>
-              <Button size="touch" variant="outline" onClick={() => setShowNew(false)}>Abbrechen</Button>
+              <Button size="touch" variant="outline" onClick={() => setShowNew(false)}>
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="Anulo">Abbrechen</span>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -153,7 +168,9 @@ export function NotizenClient({
               filter === f ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-accent"
             )}
           >
-            {f === "alle" ? "Alle" : TYPE_LABELS[f]}
+            <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={f === "alle" ? "Të gjitha" : TYPE_LABELS_SQ[f]}>
+              {f === "alle" ? "Alle" : TYPE_LABELS[f]}
+            </span>
             {f !== "alle" && <span className="ml-1.5 text-xs opacity-70">({notes.filter((n) => n.type === f).length})</span>}
           </button>
         ))}
@@ -164,8 +181,9 @@ export function NotizenClient({
         <Card className="border-dashed">
           <CardContent className="py-12 text-center text-muted-foreground">
             <FileText className="mx-auto mb-3 size-10 opacity-40" />
-            <p className="text-lg">Keine Notizen.</p>
-            <p className="text-sm">Nuk ka shënime.</p>
+            <p className="text-lg">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Nuk ka shënime.">Keine Notizen.</span>
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -175,7 +193,7 @@ export function NotizenClient({
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <Badge className={cn("text-xs border", TYPE_COLORS[note.type])}>
-                    {TYPE_LABELS[note.type]}
+                    <span className="nsh-i18n" data-sq={TYPE_LABELS_SQ[note.type]}>{TYPE_LABELS[note.type]}</span>
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {new Date(note.created_at).toLocaleDateString("de-DE", { day: "numeric", month: "short", year: "numeric" })}

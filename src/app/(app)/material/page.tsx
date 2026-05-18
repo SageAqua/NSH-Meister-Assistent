@@ -6,12 +6,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { Material } from "@/types"
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  benoetigt: { label: "Benötigt", color: "bg-red-100 text-red-700 border-red-200" },
-  bestellt: { label: "Bestellt", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
-  vorhanden: { label: "Vorhanden", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  abgeholt: { label: "Abgeholt", color: "bg-purple-100 text-purple-700 border-purple-200" },
-  erledigt: { label: "Erledigt", color: "bg-green-100 text-green-700 border-green-200" },
+const STATUS_CONFIG: Record<string, { label: string; labelSq: string; color: string }> = {
+  benoetigt: { label: "Benötigt", labelSq: "Nevojitet", color: "bg-red-100 text-red-700 border-red-200" },
+  bestellt: { label: "Bestellt", labelSq: "Porositur", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+  vorhanden: { label: "Vorhanden", labelSq: "Në dispozicion", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  abgeholt: { label: "Abgeholt", labelSq: "Marrë", color: "bg-purple-100 text-purple-700 border-purple-200" },
+  erledigt: { label: "Erledigt", labelSq: "Kryer", color: "bg-green-100 text-green-700 border-green-200" },
 }
 
 type MaterialWithProject = Material & {
@@ -42,17 +42,29 @@ export default async function MaterialPage() {
   return (
     <div className="nsh-page">
       <div className="nsh-page-header">
-        <p className="nsh-eyebrow">Listen</p>
-        <h1 className="nsh-title">Material</h1>
-        <p className="nsh-subtitle">Materiali - {allMaterials.length} Einträge nach Baustellen sortiert.</p>
+        <p className="nsh-eyebrow">
+          <span className="nsh-i18n" data-sq="Lista">Listen</span>
+        </p>
+        <h1 className="nsh-title">
+          <span className="nsh-i18n" data-sq="Materiali">Material</span>
+        </h1>
+        <p className="nsh-subtitle">
+          <span className="nsh-i18n" data-sq={`${allMaterials.length} hyrje të renditura sipas kantiereve`}>
+            {allMaterials.length} Einträge nach Baustellen sortiert.
+          </span>
+        </p>
       </div>
 
       {allMaterials.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-12 text-center text-muted-foreground">
             <Package className="mx-auto mb-3 size-10 opacity-40" />
-            <p className="text-lg font-semibold text-foreground">Noch kein Material erfasst.</p>
-            <p className="text-sm">Material wird beim Anlegen von Aufträgen hinzugefügt.</p>
+            <p className="text-lg font-semibold text-foreground">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Ende nuk është regjistruar material.">Noch kein Material erfasst.</span>
+            </p>
+            <p className="text-sm">
+              <span className="nsh-i18n nsh-i18n-center" data-sq="Materiali shtohet kur krijohen porosi.">Material wird beim Anlegen von Aufträgen hinzugefügt.</span>
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -69,7 +81,11 @@ export default async function MaterialPage() {
                       <p className="font-bold">{project?.customers?.name ?? "Unbekannt"}</p>
                       <p className="truncate text-xs text-muted-foreground">{project?.address ?? project?.service_type}</p>
                     </div>
-                    {pending > 0 && <Badge variant="secondary">{pending} offen</Badge>}
+                    {pending > 0 && (
+                      <Badge variant="secondary">
+                        <span className="nsh-i18n" data-sq="hapur">{pending} offen</span>
+                      </Badge>
+                    )}
                   </div>
                 </Link>
                 <div className="space-y-2">
@@ -82,7 +98,9 @@ export default async function MaterialPage() {
                         )}
                       </div>
                       <span className={cn("shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold", STATUS_CONFIG[material.status]?.color)}>
-                        {STATUS_CONFIG[material.status]?.label ?? material.status}
+                        <span className="nsh-i18n" data-sq={STATUS_CONFIG[material.status]?.labelSq ?? material.status}>
+                          {STATUS_CONFIG[material.status]?.label ?? material.status}
+                        </span>
                       </span>
                     </div>
                   ))}

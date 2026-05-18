@@ -96,7 +96,8 @@ export function NotificationButton() {
   if (status === "loading") {
     return (
       <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" /> Wird geladen...
+        <Loader2 className="size-4 animate-spin" />
+        <span className="nsh-i18n" data-sq="Duke u ngarkuar...">Wird geladen...</span>
       </div>
     )
   }
@@ -104,7 +105,9 @@ export function NotificationButton() {
   if (status === "unsupported") {
     return (
       <div className="rounded-xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
-        Dein Browser unterstützt keine Push-Benachrichtigungen. Installiere die App oder nutze Chrome auf Android.
+        <span className="nsh-i18n" data-sq="Shfletuesi yt nuk mbështet njoftimet push. Instalo app-in ose përdor Chrome në Android.">
+          Dein Browser unterstützt keine Push-Benachrichtigungen. Installiere die App oder nutze Chrome auf Android.
+        </span>
       </div>
     )
   }
@@ -112,7 +115,9 @@ export function NotificationButton() {
   if (status === "denied") {
     return (
       <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-        Benachrichtigungen sind blockiert. Bitte in den Browser-Einstellungen freigeben und dann die Seite neu laden.
+        <span className="nsh-i18n" data-sq="Njoftimet janë bllokuar. Lejoji në cilësimet e shfletuesit dhe ringarko faqen.">
+          Benachrichtigungen sind blockiert. Bitte in den Browser-Einstellungen freigeben und dann die Seite neu laden.
+        </span>
       </div>
     )
   }
@@ -143,12 +148,14 @@ export function NotificationButton() {
         </div>
         <div>
           <p className="font-bold">
-            {isSubscribed ? "Benachrichtigungen aktiv" : "Benachrichtigungen aktivieren"}
+            <span className="nsh-i18n" data-sq={isSubscribed ? "Njoftimet aktive" : "Aktivizo njoftimet"}>
+              {isSubscribed ? "Benachrichtigungen aktiv" : "Benachrichtigungen aktivieren"}
+            </span>
           </p>
           <p className="text-xs text-muted-foreground">
             {isSubscribed
-              ? "Tippen zum Deaktivieren"
-              : "Erinnerungen vor Terminen auf diesem Gerät erhalten"}
+              ? <span className="nsh-i18n" data-sq="Shtyp për t'i çaktivizuar">Tippen zum Deaktivieren</span>
+              : <span className="nsh-i18n" data-sq="Merr kujtime për terminet në këtë pajisje">Erinnerungen vor Terminen auf diesem Gerät erhalten</span>}
           </p>
         </div>
       </button>
@@ -157,18 +164,18 @@ export function NotificationButton() {
         <div className="space-y-2">
           {(
             [
-              { key: "notify_1day" as const, label: "1 Tag vorher", sub: "Erinnerung am Vortag" },
-              { key: "notify_1hour" as const, label: "1 Stunde vorher", sub: "Erinnerung kurz davor" },
+              { key: "notify_1day" as const, label: "1 Tag vorher", labelSq: "1 ditë përpara", sub: "Erinnerung am Vortag", subSq: "Kujtim një ditë më parë" },
+              { key: "notify_1hour" as const, label: "1 Stunde vorher", labelSq: "1 orë përpara", sub: "Erinnerung kurz davor", subSq: "Kujtim pak para terminit" },
             ] as const
-          ).map(({ key, label, sub: subLabel }) => (
+          ).map(({ key, label, labelSq, sub: subLabel, subSq }) => (
             <button
               key={key}
               onClick={() => togglePref(key)}
               className="flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 transition-colors hover:bg-accent"
             >
               <div className="text-left">
-                <p className="text-sm font-bold">{label}</p>
-                <p className="text-xs text-muted-foreground">{subLabel}</p>
+                <p className="text-sm font-bold"><span className="nsh-i18n" data-sq={labelSq}>{label}</span></p>
+                <p className="text-xs text-muted-foreground"><span className="nsh-i18n" data-sq={subSq}>{subLabel}</span></p>
               </div>
               <div className={cn("relative h-6 w-11 rounded-full transition-colors", prefs[key] ? "bg-primary" : "bg-muted")}>
                 <div

@@ -7,10 +7,10 @@ import { ArrowLeft, Check, Loader2 } from "lucide-react"
 import { saveCalendarEvent } from "@/app/actions/orders"
 
 const PRESETS = [
-  { label: "Morgens", sub: "08:00 – 10:00", start: "08:00", end: "10:00" },
-  { label: "Mittag", sub: "12:00 – 14:00", start: "12:00", end: "14:00" },
-  { label: "Nachmittag", sub: "14:00 – 17:00", start: "14:00", end: "17:00" },
-  { label: "Abend", sub: "18:00 – 20:00", start: "18:00", end: "20:00" },
+  { label: "Morgens", sq: "Në mëngjes", sub: "08:00 – 10:00", start: "08:00", end: "10:00" },
+  { label: "Mittag", sq: "Në drekë", sub: "12:00 – 14:00", start: "12:00", end: "14:00" },
+  { label: "Nachmittag", sq: "Pasdite", sub: "14:00 – 17:00", start: "14:00", end: "17:00" },
+  { label: "Abend", sq: "Në mbrëmje", sub: "18:00 – 20:00", start: "18:00", end: "20:00" },
 ]
 
 function todayStr() {
@@ -66,17 +66,22 @@ export default function PrivatTerminPage() {
             href="/neuer-auftrag"
             className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="size-4" /> Zurück
+            <ArrowLeft className="size-4" />
+            <span className="nsh-i18n" data-sq="Mbrapa">Zurück</span>
           </Link>
 
           <div className="mb-6">
-            <p className="text-xs font-black uppercase tracking-widest text-violet-600">Privat Termin</p>
-            <h1 className="mt-1 text-3xl font-black">Was ist der Termin?</h1>
+            <p className="text-xs font-black uppercase tracking-widest text-violet-600">
+              <span className="nsh-i18n" data-sq="Termin privat">Privat Termin</span>
+            </p>
+            <h1 className="mt-1 text-3xl font-black">
+              <span className="nsh-i18n" data-sq="Çfarë termini është?">Was ist der Termin?</span>
+            </h1>
           </div>
 
           <div className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-black text-muted-foreground">WAS?</label>
+              <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="ÇFARË?">WAS?</span></label>
               <input
                 ref={titleRef}
                 type="text"
@@ -89,7 +94,7 @@ export default function PrivatTerminPage() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-black text-muted-foreground">WANN?</label>
+              <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="KUR?">WANN?</span></label>
               <input
                 type="date"
                 value={date}
@@ -99,7 +104,7 @@ export default function PrivatTerminPage() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-black text-muted-foreground">UM WIEVIEL UHR?</label>
+              <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="NË ÇFARË ORE?">UM WIEVIEL UHR?</span></label>
               <div className="grid grid-cols-2 gap-3">
                 {PRESETS.map((p) => (
                   <button
@@ -112,7 +117,7 @@ export default function PrivatTerminPage() {
                         : "border-border bg-card hover:bg-muted"
                     }`}
                   >
-                    <p className="text-base font-black">{p.label}</p>
+                    <p className="text-base font-black"><span className="nsh-i18n" data-sq={p.sq}>{p.label}</span></p>
                     <p className="text-xs text-muted-foreground">{p.sub}</p>
                   </button>
                 ))}
@@ -120,10 +125,10 @@ export default function PrivatTerminPage() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-black text-muted-foreground">GENAUE UHRZEIT (optional)</label>
+              <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="ORA E SAKTË (opsionale)">GENAUE UHRZEIT (optional)</span></label>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="mb-1 text-xs text-muted-foreground">Von</p>
+                  <p className="mb-1 text-xs text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></p>
                   <input
                     type="time"
                     value={startTime}
@@ -132,7 +137,7 @@ export default function PrivatTerminPage() {
                   />
                 </div>
                 <div>
-                  <p className="mb-1 text-xs text-muted-foreground">Bis</p>
+                  <p className="mb-1 text-xs text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></p>
                   <input
                     type="time"
                     value={endTime}
@@ -164,7 +169,9 @@ export default function PrivatTerminPage() {
             ) : (
               <Check className="size-6" />
             )}
-            {isPending ? "Wird gespeichert..." : "Termin speichern"}
+            <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={isPending ? "Duke ruajtur..." : "Ruaj termin"}>
+              {isPending ? "Wird gespeichert..." : "Termin speichern"}
+            </span>
           </button>
         </div>
       </div>

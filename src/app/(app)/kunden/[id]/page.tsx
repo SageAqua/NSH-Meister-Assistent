@@ -63,7 +63,7 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
             </a>
             <a href={`https://wa.me/${c.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
               <Button size="touch" variant="outline" className="gap-2">
-                💬 WhatsApp
+                💬 <span className="nsh-i18n nsh-i18n-button" data-sq="WhatsApp">WhatsApp</span>
               </Button>
             </a>
           </>
@@ -71,12 +71,15 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
         {(c.address || c.city) && (
           <a href={`https://maps.google.com/?q=${encodeURIComponent([c.address, c.city].filter(Boolean).join(", "))}`} target="_blank" rel="noopener noreferrer">
             <Button size="touch" variant="outline" className="gap-2">
-              <Navigation className="size-4" /> Navigation
+              <Navigation className="size-4" />
+              <span className="nsh-i18n nsh-i18n-button" data-sq="Navigim">Navigation</span>
             </Button>
           </a>
         )}
         <Link href={`/neuer-auftrag?customerId=${c.id}`}>
-          <Button size="touch" className="gap-2">+ Neuer Auftrag</Button>
+          <Button size="touch" className="gap-2">
+            <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq="+ Porosi e re">+ Neuer Auftrag</span>
+          </Button>
         </Link>
       </div>
 
@@ -84,7 +87,9 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
       {c.notes && (
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm font-semibold mb-1">Notizen zum Kunden</p>
+            <p className="text-sm font-semibold mb-1">
+              <span className="nsh-i18n" data-sq="Shënime për klientin">Notizen zum Kunden</span>
+            </p>
             <p className="text-sm text-muted-foreground">{c.notes}</p>
           </CardContent>
         </Card>
@@ -93,10 +98,13 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
       {/* Projects */}
       <section>
         <h2 className="mb-3 font-bold text-lg flex items-center gap-2">
-          <Building2 className="size-5" /> Baustellen ({(projects ?? []).length})
+          <Building2 className="size-5" />
+          <span className="nsh-i18n" data-sq={`Kantiere (${(projects ?? []).length})`}>Baustellen ({(projects ?? []).length})</span>
         </h2>
         {(projects ?? []).length === 0 ? (
-          <p className="text-muted-foreground text-sm">Noch keine Baustellen.</p>
+          <p className="text-muted-foreground text-sm">
+            <span className="nsh-i18n" data-sq="Ende nuk ka kantiere.">Noch keine Baustellen.</span>
+          </p>
         ) : (
           <div className="space-y-2">
             {(projects as Project[]).map((p) => (
@@ -108,7 +116,7 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm">{p.service_type}</p>
-                      <p className="text-xs text-muted-foreground truncate">{p.address ?? "Keine Adresse"}</p>
+                      <p className="text-xs text-muted-foreground truncate">{p.address ?? "Keine Adresse / Pa adresë"}</p>
                       {p.area_m2 && <p className="text-xs text-muted-foreground">{p.area_m2} m²</p>}
                     </div>
                     <p className="text-xs text-muted-foreground sm:shrink-0">
@@ -125,7 +133,9 @@ export default async function KundeDetailPage({ params }: { params: Promise<{ id
       {/* Notes section */}
       {notes && notes.length > 0 && (
         <section>
-          <h2 className="mb-3 font-bold text-lg">Notizen ({notes.length})</h2>
+          <h2 className="mb-3 font-bold text-lg">
+            <span className="nsh-i18n" data-sq={`Shënime (${notes.length})`}>Notizen ({notes.length})</span>
+          </h2>
           <div className="space-y-2">
             {(notes as Note[]).map((n) => (
               <Card key={n.id}>

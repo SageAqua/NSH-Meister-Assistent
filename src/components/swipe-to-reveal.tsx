@@ -80,7 +80,7 @@ export function SwipeToReveal({ onDelete, onEdit, children, className }: SwipeTo
             className="flex w-[76px] flex-col items-center justify-center gap-0.5 bg-blue-500 text-white active:bg-blue-700"
           >
             <span className="text-xl">✏️</span>
-            <span className="text-xs font-semibold">Ändern</span>
+            <span className="nsh-i18n nsh-i18n-center text-xs font-semibold" data-sq="Ndrysho">Ändern</span>
           </button>
         )}
         {onDelete && (
@@ -89,7 +89,7 @@ export function SwipeToReveal({ onDelete, onEdit, children, className }: SwipeTo
             className="flex w-[76px] flex-col items-center justify-center gap-0.5 bg-red-500 text-white active:bg-red-700"
           >
             <span className="text-xl">🗑️</span>
-            <span className="text-xs font-semibold">Löschen</span>
+            <span className="nsh-i18n nsh-i18n-center text-xs font-semibold" data-sq="Fshi">Löschen</span>
           </button>
         )}
       </div>

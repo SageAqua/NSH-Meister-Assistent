@@ -19,14 +19,14 @@ import { saveSimpleOrder } from "@/app/actions/orders"
 import type { Customer } from "@/types"
 
 const QUICK_WORK = [
-  "Vinyl verlegen",
-  "Laminat verlegen",
-  "Wände streichen",
-  "Decke streichen",
-  "Spachteln",
-  "Trockenbau",
-  "Bad renovieren",
-  "Reparatur",
+  { de: "Vinyl verlegen", sq: "Vendosje vinyl" },
+  { de: "Laminat verlegen", sq: "Vendosje laminat" },
+  { de: "Wände streichen", sq: "Lyerje muresh" },
+  { de: "Decke streichen", sq: "Lyerje tavani" },
+  { de: "Spachteln", sq: "Nivelim me masë" },
+  { de: "Trockenbau", sq: "Ndërtim i thatë" },
+  { de: "Bad renovieren", sq: "Rinovim banjoje" },
+  { de: "Reparatur", sq: "Riparim" },
 ]
 
 type CustomerMode = "existing" | "new" | "later"
@@ -105,8 +105,12 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <Hammer className="size-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black leading-tight">Was ist die Arbeit?</h2>
-            <p className="text-sm text-muted-foreground">Ein Satz reicht. Er kann frei schreiben.</p>
+            <h2 className="text-xl font-black leading-tight">
+              <span className="nsh-i18n" data-sq="Çfarë është puna?">Was ist die Arbeit?</span>
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              <span className="nsh-i18n" data-sq="Mjafton një fjali. Mund të shkruajë lirshëm.">Ein Satz reicht. Er kann frei schreiben.</span>
+            </p>
           </div>
         </div>
 
@@ -122,17 +126,17 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
         <div className="mt-3 flex flex-wrap gap-2">
           {QUICK_WORK.map((work) => (
             <button
-              key={work}
+              key={work.de}
               type="button"
-              onClick={() => setWorkTitle(work)}
+              onClick={() => setWorkTitle(work.de)}
               className={cn(
                 "rounded-lg border px-3 py-2 text-sm font-bold transition-colors",
-                workTitle === work
+                workTitle === work.de
                   ? "border-primary bg-primary text-primary-foreground"
                   : "bg-background hover:bg-muted"
               )}
             >
-              {work}
+              <span className="nsh-i18n nsh-i18n-button" data-sq={work.sq}>{work.de}</span>
             </button>
           ))}
         </div>
@@ -144,16 +148,20 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <UserRound className="size-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black leading-tight">Wer ist der Kunde?</h2>
-            <p className="text-sm text-muted-foreground">Bestehend wählen, neu eintragen oder später machen.</p>
+            <h2 className="text-xl font-black leading-tight">
+              <span className="nsh-i18n" data-sq="Kush është klienti?">Wer ist der Kunde?</span>
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              <span className="nsh-i18n" data-sq="Zgjidh ekzistues, regjistro të ri ose bëje më vonë.">Bestehend wählen, neu eintragen oder später machen.</span>
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {[
-            { value: "existing" as const, label: "Kunde wählen", disabled: customers.length === 0 },
-            { value: "new" as const, label: "Neuer Kunde" },
-            { value: "later" as const, label: "Später" },
+            { value: "existing" as const, label: "Kunde wählen", sq: "Zgjidh klientin", disabled: customers.length === 0 },
+            { value: "new" as const, label: "Neuer Kunde", sq: "Klient i ri" },
+            { value: "later" as const, label: "Später", sq: "Më vonë" },
           ].map((option) => (
             <button
               key={option.value}
@@ -167,7 +175,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
                   : "border-border bg-background hover:bg-muted"
               )}
             >
-              {option.label}
+              <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={option.sq}>{option.label}</span>
             </button>
           ))}
         </div>
@@ -211,6 +219,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
               placeholder="Name *"
               className="h-14 rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
             />
+            <p className="-mt-1 text-xs text-muted-foreground">Emri *</p>
             <input
               value={customerPhone}
               onChange={(event) => setCustomerPhone(event.target.value)}
@@ -218,18 +227,21 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
               type="tel"
               className="h-14 rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
             />
+            <p className="-mt-1 text-xs text-muted-foreground">Telefoni</p>
             <input
               value={customerAddress}
               onChange={(event) => setCustomerAddress(event.target.value)}
               placeholder="Adresse"
               className="h-14 rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary sm:col-span-2"
             />
+            <p className="-mt-1 text-xs text-muted-foreground sm:col-span-2">Adresa</p>
             <input
               value={customerCity}
               onChange={(event) => setCustomerCity(event.target.value)}
               placeholder="Ort"
               className="h-14 rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
             />
+            <p className="-mt-1 text-xs text-muted-foreground">Vendi</p>
           </div>
         )}
       </section>
@@ -240,14 +252,18 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <CalendarDays className="size-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black leading-tight">Wann und wie groß?</h2>
-            <p className="text-sm text-muted-foreground">Nur ausfüllen, was schon bekannt ist.</p>
+            <h2 className="text-xl font-black leading-tight">
+              <span className="nsh-i18n" data-sq="Kur dhe sa e madhe?">Wann und wie groß?</span>
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              <span className="nsh-i18n" data-sq="Plotëso vetëm atë që dihet tashmë.">Nur ausfüllen, was schon bekannt ist.</span>
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
           <label className="space-y-1 sm:col-span-2">
-            <span className="text-xs font-bold uppercase text-muted-foreground">Start</span>
+            <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Fillimi">Start</span></span>
             <input
               type="date"
               value={startDate}
@@ -256,7 +272,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             />
           </label>
           <label className="space-y-1">
-            <span className="text-xs font-bold uppercase text-muted-foreground">Von</span>
+            <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></span>
             <input
               type="time"
               value={startTime}
@@ -265,7 +281,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             />
           </label>
           <label className="space-y-1">
-            <span className="text-xs font-bold uppercase text-muted-foreground">Bis</span>
+            <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></span>
             <input
               type="time"
               value={endTime}
@@ -274,7 +290,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             />
           </label>
           <label className="space-y-1 sm:col-span-2">
-            <span className="text-xs font-bold uppercase text-muted-foreground">Fläche m²</span>
+            <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Sipërfaqe m²">Fläche m²</span></span>
             <input
               type="number"
               min="0"
@@ -285,7 +301,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             />
           </label>
           <div className="space-y-1 sm:col-span-2">
-            <span className="text-xs font-bold uppercase text-muted-foreground">Helfer</span>
+            <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Ndihmës">Helfer</span></span>
             <div className="grid grid-cols-3 gap-2">
               {[0, 1, 2].map((count) => (
                 <button
@@ -313,8 +329,12 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <ClipboardList className="size-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black leading-tight">Noch etwas merken?</h2>
-            <p className="text-sm text-muted-foreground">Notiz und automatische Aufgaben.</p>
+            <h2 className="text-xl font-black leading-tight">
+              <span className="nsh-i18n" data-sq="Të mbahet mend diçka tjetër?">Noch etwas merken?</span>
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              <span className="nsh-i18n" data-sq="Shënim dhe detyra automatike.">Notiz und automatische Aufgaben.</span>
+            </p>
           </div>
         </div>
 
@@ -324,12 +344,14 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             onClick={() => setOfferNeeded((value) => !value)}
             icon={Check}
             label="Angebot schicken"
+            labelSq="Dërgo ofertën"
           />
           <ToggleButton
             checked={materialNeeded}
             onClick={() => setMaterialNeeded((value) => !value)}
             icon={PackageCheck}
             label="Material prüfen"
+            labelSq="Kontrollo materialin"
           />
         </div>
 
@@ -347,7 +369,9 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
       <div className="sticky bottom-20 z-10 rounded-lg border bg-background/95 p-3 shadow-lg backdrop-blur md:bottom-4">
         <Button size="touch-xl" className="w-full gap-2" onClick={save} disabled={!canSave || isPending}>
           <Save className="size-5" />
-          {isPending ? "Speichert..." : "Auftrag speichern"}
+          <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={isPending ? "Duke ruajtur..." : "Ruaj porosinë"}>
+            {isPending ? "Speichert..." : "Auftrag speichern"}
+          </span>
         </Button>
       </div>
     </div>
@@ -359,11 +383,13 @@ function ToggleButton({
   onClick,
   icon: Icon,
   label,
+  labelSq,
 }: {
   checked: boolean
   onClick: () => void
   icon: typeof Check
   label: string
+  labelSq: string
 }) {
   return (
     <button
@@ -382,7 +408,7 @@ function ToggleButton({
       >
         {checked && <Icon className="size-4" />}
       </span>
-      {label}
+      <span className="nsh-i18n nsh-i18n-button" data-sq={labelSq}>{label}</span>
     </button>
   )
 }

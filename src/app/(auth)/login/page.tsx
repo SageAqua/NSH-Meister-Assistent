@@ -29,15 +29,25 @@ export default function LoginPage() {
             <img src="/logo.png" alt="NSH Renovierung" className="size-14 object-contain" />
           </div>
           <div>
-            <p className="text-xl font-black">NSH Meister</p>
-            <p className="text-sm text-sidebar-foreground/55">Renovierung Vechta</p>
+            <p className="text-xl font-black">
+              <span className="nsh-i18n" data-sq="Mjeshtër">NSH Meister</span>
+            </p>
+            <p className="text-sm text-sidebar-foreground/55">
+              <span className="nsh-i18n" data-sq="Rinovim Vechta">Renovierung Vechta</span>
+            </p>
           </div>
         </div>
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.16em] text-sidebar-primary">Assistent</p>
-          <h1 className="mt-3 max-w-xl text-5xl font-black leading-tight">Alles für Baustellen, Kunden und Termine an einem Ort.</h1>
+          <p className="text-sm font-black uppercase tracking-[0.16em] text-sidebar-primary">
+            <span className="nsh-i18n" data-sq="Asistent">Assistent</span>
+          </p>
+          <h1 className="mt-3 max-w-xl text-5xl font-black leading-tight">
+            <span className="nsh-i18n" data-sq="Gjithçka për kantieret, klientët dhe terminet në një vend.">Alles für Baustellen, Kunden und Termine an einem Ort.</span>
+          </h1>
         </div>
-        <p className="text-sm text-sidebar-foreground/45">NSH Renovierung</p>
+        <p className="text-sm text-sidebar-foreground/45">
+          <span className="nsh-i18n" data-sq="Rinovim">NSH Renovierung</span>
+        </p>
       </div>
       <div className="flex min-h-dvh flex-col items-center justify-center p-4">
       <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
@@ -45,14 +55,20 @@ export default function LoginPage() {
           <img src="/logo.png" alt="NSH Renovierung" className="size-20 object-contain" />
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold">NSH Meister-Assistent</h1>
-          <p className="text-muted-foreground">Naim Shala Renovierung · Vechta</p>
+          <h1 className="text-2xl font-bold">
+            <span className="nsh-i18n nsh-i18n-center" data-sq="Asistent mjeshtri">NSH Meister-Assistent</span>
+          </h1>
+          <p className="text-muted-foreground">
+            <span className="nsh-i18n nsh-i18n-center" data-sq="Rinovim · Vechta">Naim Shala Renovierung · Vechta</span>
+          </p>
         </div>
       </div>
 
       <Card className="w-full max-w-sm shadow-lg">
         <CardHeader className="pb-2">
-          <CardTitle className="text-xl">Anmelden / Hyrje</CardTitle>
+          <CardTitle className="text-xl">
+            <span className="nsh-i18n" data-sq="Hyrje">Anmelden</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-3">
@@ -86,7 +102,9 @@ export default function LoginPage() {
               className="w-full"
               disabled={isPending}
             >
-              {isPending ? "Lädt..." : "Anmelden"}
+              <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={isPending ? "Duke u ngarkuar..." : "Hyrje"}>
+                {isPending ? "Lädt..." : "Anmelden"}
+              </span>
             </Button>
           </form>
         </CardContent>

@@ -210,6 +210,40 @@
     @apply mt-1 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base;
   }
 
+  .nsh-i18n {
+    display: inline-flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.08rem;
+    line-height: 1.12;
+  }
+
+  .nsh-i18n::after {
+    content: attr(data-sq);
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.72em;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--muted-foreground);
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 0.78;
+  }
+
+  .nsh-i18n-center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .nsh-i18n-button::after {
+    color: currentColor;
+    opacity: 0.68;
+  }
+
   .nsh-panel {
     @apply rounded-lg border border-border/80 bg-card/95 shadow-sm;
   }

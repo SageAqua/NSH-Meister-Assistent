@@ -5,9 +5,15 @@ export default async function NeuerAuftragPage() {
   return (
     <div className="flex min-h-[calc(100dvh-5.5rem)] w-full flex-col justify-center p-4 sm:p-6 md:justify-start md:pt-8">
       <div className="mx-auto w-full max-w-5xl">
-        <p className="nsh-eyebrow">Schnell starten / Fillo shpejt</p>
-        <h1 className="nsh-title mt-1">Was willst du eintragen?</h1>
-        <p className="nsh-subtitle">Wähle den Typ und füll das Formular aus.</p>
+        <p className="nsh-eyebrow">
+          <span className="nsh-i18n" data-sq="Fillo shpejt">Schnell starten</span>
+        </p>
+        <h1 className="nsh-title mt-1">
+          <span className="nsh-i18n" data-sq="Çfarë do të regjistrosh?">Was willst du eintragen?</span>
+        </h1>
+        <p className="nsh-subtitle">
+          <span className="nsh-i18n" data-sq="Zgjidh llojin dhe plotëso formularin.">Wähle den Typ und füll das Formular aus.</span>
+        </p>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Link
@@ -16,8 +22,12 @@ export default async function NeuerAuftragPage() {
           >
             <User className="size-12 text-violet-700" />
             <div>
-              <p className="text-2xl font-black text-violet-900">Privat Termin</p>
-              <p className="mt-1 text-base text-violet-700">Arzt, Familie, Persönliches</p>
+              <p className="text-2xl font-black text-violet-900">
+                <span className="nsh-i18n" data-sq="Termin privat">Privat Termin</span>
+              </p>
+              <p className="mt-1 text-base text-violet-700">
+                <span className="nsh-i18n" data-sq="Mjek, familje, personale">Arzt, Familie, Persönliches</span>
+              </p>
             </div>
           </Link>
 
@@ -27,8 +37,12 @@ export default async function NeuerAuftragPage() {
           >
             <BriefcaseBusiness className="size-12 text-blue-700" />
             <div>
-              <p className="text-2xl font-black text-blue-900">Work Termin</p>
-              <p className="mt-1 text-base text-blue-700">Kundentermin, Besichtigung</p>
+              <p className="text-2xl font-black text-blue-900">
+                <span className="nsh-i18n" data-sq="Termin pune">Work Termin</span>
+              </p>
+              <p className="mt-1 text-base text-blue-700">
+                <span className="nsh-i18n" data-sq="Takim me klientin, shikim objekti">Kundentermin, Besichtigung</span>
+              </p>
             </div>
           </Link>
 
@@ -38,8 +52,12 @@ export default async function NeuerAuftragPage() {
           >
             <Building2 className="size-12 text-amber-700" />
             <div>
-              <p className="text-2xl font-black text-amber-900">Baustelle planen</p>
-              <p className="mt-1 text-base text-amber-700">Auftrag, Projekt, Renovierung</p>
+              <p className="text-2xl font-black text-amber-900">
+                <span className="nsh-i18n" data-sq="Planifiko kantierin">Baustelle planen</span>
+              </p>
+              <p className="mt-1 text-base text-amber-700">
+                <span className="nsh-i18n" data-sq="Porosi, projekt, rinovim">Auftrag, Projekt, Renovierung</span>
+              </p>
             </div>
           </Link>
         </div>

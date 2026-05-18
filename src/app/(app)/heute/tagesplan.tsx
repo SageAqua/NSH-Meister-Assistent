@@ -3,12 +3,11 @@
 import { useState, useTransition, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { BriefcaseBusiness, Building2, CalendarClock, CheckCircle2, FileText, Navigation, Pencil, Phone, Plus, Trash2, User, X } from "lucide-react"
+import { AlertTriangle, BriefcaseBusiness, Building2, CalendarClock, CheckCircle2, FileText, Loader2, Navigation, Pencil, Phone, Plus, Trash2, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DaySchedulePreview } from "@/components/day-schedule-preview"
 import { cn } from "@/lib/utils"
-import { SwipeToReveal } from "@/components/swipe-to-reveal"
 import {
   markEventDoneWithResult,
   saveCalendarEvent,
@@ -72,6 +71,7 @@ export function TagesplanSection({
   const [saveError, setSaveError] = useState("")
   const [eventType, setEventType] = useState<"privat" | "arbeit" | "baustelle">(initialEventType)
   const [actionError, setActionError] = useState<{ eventId: string; message: string } | null>(null)
+  const [pendingAction, setPendingAction] = useState<{ eventId: string; type: "done" | "delete" | "edit" } | null>(null)
   const submittingRef = useRef(false)
 
   // Edit / Verschieben modal
@@ -81,6 +81,8 @@ export function TagesplanSection({
   const [editStart, setEditStart] = useState("")
   const [editEnd, setEditEnd] = useState("")
   const [editError, setEditError] = useState("")
+  const [deleting, setDeleting] = useState<CalendarEvent | null>(null)
+  const [deleteError, setDeleteError] = useState("")
 
   // Inline Notiz form
   const [notizOpen, setNotizOpen] = useState<string | null>(null)
@@ -137,6 +139,10 @@ export function TagesplanSection({
     return event.project_id ? "baustelle" : "arbeit"
   }
 
+  function cleanTitle(event: CalendarEvent) {
+    return event.title.replace(/^\[(privat|arbeit|baustelle)\]\s*/i, "")
+  }
+
   function handleSave() {
     if (!title.trim() || submittingRef.current || isPending) return
     submittingRef.current = true
@@ -158,6 +164,7 @@ export function TagesplanSection({
 
   function handleMarkDone(eventId: string) {
     setActionError(null)
+    setPendingAction({ eventId, type: "done" })
     startTransition(async () => {
       const result = await markEventDoneWithResult(eventId)
       if (result?.error) {
@@ -165,20 +172,30 @@ export function TagesplanSection({
       } else {
         router.refresh()
       }
+      setPendingAction(null)
     })
   }
 
-  function handleDelete(eventId: string) {
-    const confirmed = window.confirm("Termin wirklich loeschen?")
-    if (!confirmed) return
+  function openDelete(event: CalendarEvent) {
     setActionError(null)
+    setDeleteError("")
+    setDeleting(event)
+  }
+
+  function handleDeleteConfirm() {
+    if (!deleting) return
+    const eventId = deleting.id
+    setDeleteError("")
+    setPendingAction({ eventId, type: "delete" })
     startTransition(async () => {
       const result = await deleteCalendarEventWithResult(eventId)
       if (result?.error) {
-        setActionError({ eventId, message: result.error })
+        setDeleteError(result.error)
       } else {
+        setDeleting(null)
         router.refresh()
       }
+      setPendingAction(null)
     })
   }
 
@@ -194,9 +211,11 @@ export function TagesplanSection({
 
   function handleEditSave() {
     if (!editTitle.trim() || !editing) return
+    const eventId = editing.id
+    setPendingAction({ eventId, type: "edit" })
     startTransition(async () => {
       const result = await updateCalendarEvent({
-        id: editing.id,
+        id: eventId,
         title: editTitle,
         date: editDate,
         startTime: editStart,
@@ -208,6 +227,7 @@ export function TagesplanSection({
         setEditing(null)
         router.refresh()
       }
+      setPendingAction(null)
     })
   }
 
@@ -323,43 +343,69 @@ export function TagesplanSection({
                 ? [customer.name, locationStr].filter(Boolean).join(" · ")
                 : locationStr || null
 
+              const pendingThis = pendingAction?.eventId === event.id ? pendingAction.type : null
+
               return (
-                <SwipeToReveal
+                <div
                   key={event.id}
-                  onEdit={() => openEdit(event)}
-                  onDelete={() => handleDelete(event.id)}
-                  className="w-full max-w-full rounded-xl"
+                  className={cn(
+                    "group relative min-w-0 overflow-hidden rounded-xl border bg-card p-3 shadow-sm transition-all duration-200 ease-out sm:p-4",
+                    "hover:-translate-y-0.5 hover:shadow-md",
+                    eventVisual.card,
+                    isNow && "border-primary/40 bg-primary/5",
+                    event.status === "erledigt" && "opacity-55",
+                    isPast && event.status !== "erledigt" && "opacity-70",
+                    pendingThis === "delete" && "scale-[0.99] opacity-60"
+                  )}
                 >
-                  <div
-                    className={cn(
-                      "min-w-0 space-y-3 rounded-xl border bg-card p-3 sm:p-4",
-                      eventVisual.card,
-                      isNow && "border-primary/40 bg-primary/5",
-                      event.status === "erledigt" && "opacity-50",
-                      isPast && event.status !== "erledigt" && "opacity-60"
-                    )}
-                  >
+                  <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white/70 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                  <div className="relative space-y-3">
                     {/* Time + status badges */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-bold text-primary">
-                        {formatTime(event.start_time)} – {formatTime(event.end_time)}
-                      </span>
-                      {isNow && (
-                        <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
-                          Jetzt
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <span className="text-sm font-bold text-primary">
+                          {formatTime(event.start_time)} – {formatTime(event.end_time)}
                         </span>
-                      )}
-                      {event.status === "erledigt" && (
-                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-                          ✓ Erledigt
-                        </span>
-                      )}
+                        {isNow && (
+                          <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+                            Jetzt
+                          </span>
+                        )}
+                        {event.status === "erledigt" && (
+                          <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
+                            ✓ Erledigt
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-1 rounded-lg border border-border/80 bg-white/85 p-1 shadow-sm backdrop-blur">
+                        <button
+                          type="button"
+                          title="Termin bearbeiten"
+                          aria-label="Termin bearbeiten"
+                          onClick={() => openEdit(event)}
+                          disabled={isPending}
+                          className="flex size-8 items-center justify-center rounded-md text-blue-700 transition-all duration-150 hover:scale-105 hover:bg-blue-50 active:scale-95 disabled:opacity-50"
+                        >
+                          {pendingThis === "edit" ? <Loader2 className="size-4 animate-spin" /> : <Pencil className="size-4" />}
+                        </button>
+                        <button
+                          type="button"
+                          title="Termin löschen"
+                          aria-label="Termin löschen"
+                          onClick={() => openDelete(event)}
+                          disabled={isPending}
+                          className="flex size-8 items-center justify-center rounded-md text-destructive transition-all duration-150 hover:scale-105 hover:bg-destructive/10 active:scale-95 disabled:opacity-50"
+                        >
+                          {pendingThis === "delete" ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Title + subtitle */}
                     <div>
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
-                        <p className="min-w-0 max-w-full break-words font-bold">{event.title.replace(/^\[(privat|arbeit|baustelle)\]\s*/i, "")}</p>
+                        <p className="min-w-0 max-w-full break-words font-bold">{cleanTitle(event)}</p>
                         <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", eventVisual.text, "bg-white/80")}>{eventVisual.badge}</span>
                       </div>
                       {subtitle && (
@@ -418,33 +464,11 @@ export function TagesplanSection({
                         <Button
                           type="button"
                           size="sm"
-                          variant="outline"
-                          className="h-9 min-w-0 gap-1.5 text-xs"
-                          onClick={() => openEdit(event)}
-                          disabled={isPending}
-                        >
-                          <Pencil className="size-3.5" />
-                          <span className="nsh-i18n nsh-i18n-button" data-sq="Ndrysho">Ändern</span>
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          className="h-9 min-w-0 gap-1.5 text-xs"
-                          onClick={() => handleDelete(event.id)}
-                          disabled={isPending}
-                        >
-                          <Trash2 className="size-3.5" />
-                          <span className="nsh-i18n nsh-i18n-button" data-sq="Fshi">Löschen</span>
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
                           className="h-9 min-w-0 gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700"
                           onClick={() => handleMarkDone(event.id)}
                           disabled={isPending}
                         >
-                          <CheckCircle2 className="size-3.5" />
+                          {pendingThis === "done" ? <Loader2 className="size-3.5 animate-spin" /> : <CheckCircle2 className="size-3.5" />}
                           <span className="nsh-i18n nsh-i18n-button" data-sq="Kryer">Erledigt</span>
                         </Button>
                       </div>
@@ -491,7 +515,7 @@ export function TagesplanSection({
                       </div>
                     )}
                   </div>
-                </SwipeToReveal>
+                </div>
               )
             } else {
               const { slot } = item
@@ -618,72 +642,149 @@ export function TagesplanSection({
         </Card>
       )}
 
-      {/* Edit / Verschieben modal */}
+      {/* Edit modal */}
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
           onClick={() => setEditing(null)}
         >
-          <Card className="w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
-            <CardContent className="space-y-3 p-5">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="font-bold">
-                  <span className="nsh-i18n" data-sq="Shtyj terminin">Termin verschieben</span>
-                </h3>
+          <Card className="w-full max-w-lg animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 overflow-hidden shadow-2xl duration-200" onClick={(e) => e.stopPropagation()}>
+            <CardContent className="space-y-4 p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                    <Pencil className="size-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-black leading-tight">
+                      <span className="nsh-i18n" data-sq="Ndrysho terminin">Termin bearbeiten</span>
+                    </h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatTime(editing.start_time)} – {formatTime(editing.end_time)}
+                    </p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setEditing(null)}
-                  className="flex size-8 items-center justify-center rounded-full hover:bg-accent"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-accent"
                 >
                   <X className="size-4" />
                 </button>
               </div>
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
-              />
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Data">Datum</span></label>
+
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                  <span className="nsh-i18n" data-sq="Titulli">Titel</span>
+                </span>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base transition-colors focus:border-primary focus:outline-none"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                  <span className="nsh-i18n" data-sq="Data">Datum</span>
+                </span>
                 <input
                   type="date"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
-                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base transition-colors focus:border-primary focus:outline-none"
                 />
-              </div>
+              </label>
+
               <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></label>
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                    <span className="nsh-i18n" data-sq="Nga">Von</span>
+                  </span>
                   <input
                     type="time"
                     value={editStart}
                     onChange={(e) => setEditStart(e.target.value)}
-                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base transition-colors focus:border-primary focus:outline-none"
                   />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></label>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                    <span className="nsh-i18n" data-sq="Deri">Bis</span>
+                  </span>
                   <input
                     type="time"
                     value={editEnd}
                     onChange={(e) => setEditEnd(e.target.value)}
-                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base transition-colors focus:border-primary focus:outline-none"
                   />
-                </div>
+                </label>
               </div>
+
+              <DaySchedulePreview date={editDate} startTime={editStart} endTime={editEnd} />
+
               {editError && <p className="text-sm text-destructive">{editError}</p>}
-              <div className="grid grid-cols-[1fr_auto] gap-2">
-                <Button
-                  size="touch"
-                  className="flex-1"
-                  onClick={handleEditSave}
-                  disabled={isPending}
-                >
-                  {isPending ? "Speichert..." : "Speichern"}
-                </Button>
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <Button size="touch" variant="outline" onClick={() => setEditing(null)}>
                   Abbrechen
+                </Button>
+                <Button
+                  size="touch"
+                  className="gap-2"
+                  onClick={handleEditSave}
+                  disabled={isPending || !editTitle.trim()}
+                >
+                  {pendingAction?.type === "edit" ? <Loader2 className="size-4 animate-spin" /> : <Pencil className="size-4" />}
+                  Speichern
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Delete confirmation */}
+      {deleting && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          onClick={() => setDeleting(null)}
+        >
+          <Card className="w-full max-w-md animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 overflow-hidden shadow-2xl duration-200" onClick={(e) => e.stopPropagation()}>
+            <CardContent className="space-y-4 p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                  <AlertTriangle className="size-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-black leading-tight">
+                    <span className="nsh-i18n" data-sq="Fshi terminin">Termin löschen?</span>
+                  </h3>
+                  <p className="mt-2 break-words text-sm font-semibold">{cleanTitle(deleting)}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {formatTime(deleting.start_time)} – {formatTime(deleting.end_time)}
+                  </p>
+                </div>
+              </div>
+
+              {deleteError && (
+                <p className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive">
+                  {deleteError}
+                </p>
+              )}
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <Button size="touch" variant="outline" onClick={() => setDeleting(null)} disabled={isPending}>
+                  Abbrechen
+                </Button>
+                <Button
+                  size="touch"
+                  variant="destructive"
+                  className="gap-2 bg-destructive text-white hover:bg-destructive/90"
+                  onClick={handleDeleteConfirm}
+                  disabled={isPending}
+                >
+                  {pendingAction?.type === "delete" ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                  Löschen
                 </Button>
               </div>
             </CardContent>

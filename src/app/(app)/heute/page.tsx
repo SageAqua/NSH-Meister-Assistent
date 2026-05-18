@@ -27,7 +27,7 @@ function time(iso: string) {
 function serviceName(service: string) {
   const labels: Record<string, string> = {
     vinyl: "Vinyl verlegen", klickvinyl: "Klickvinyl", klebevinyl: "Klebevinyl", laminat: "Laminat",
-    waende: "Waende streichen", decke: "Decke streichen", spachtel: "Spachteln", trockenbau: "Trockenbau",
+    waende: "Wände streichen", decke: "Decke streichen", spachtel: "Spachteln", trockenbau: "Trockenbau",
   }
   return labels[service] ?? service
 }

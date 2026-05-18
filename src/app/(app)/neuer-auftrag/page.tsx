@@ -7,7 +7,7 @@ export default async function NeuerAuftragPage() {
       <div className="mx-auto w-full max-w-5xl">
         <p className="nsh-eyebrow">Schnell starten / Fillo shpejt</p>
         <h1 className="nsh-title mt-1">Was willst du eintragen?</h1>
-        <p className="nsh-subtitle">Waehle den Typ und fuell das Formular aus.</p>
+        <p className="nsh-subtitle">Wähle den Typ und füll das Formular aus.</p>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Link
@@ -17,7 +17,7 @@ export default async function NeuerAuftragPage() {
             <User className="size-12 text-violet-700" />
             <div>
               <p className="text-2xl font-black text-violet-900">Privat Termin</p>
-              <p className="mt-1 text-base text-violet-700">Arzt, Familie, Persoenliches</p>
+              <p className="mt-1 text-base text-violet-700">Arzt, Familie, Persönliches</p>
             </div>
           </Link>
 

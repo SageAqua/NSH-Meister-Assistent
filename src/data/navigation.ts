@@ -12,7 +12,7 @@ export const moreNav: NavItem[] = [
   { href: "/kalender", labelDe: "Kalender", labelSq: "Termine", icon: "calendar" },
   { href: "/preisrechner", labelDe: "Preisrechner", labelSq: "Grobe Preise", icon: "calculator" },
   { href: "/notizen", labelDe: "Notizen", labelSq: "Merken", icon: "file-text" },
-  { href: "/deutsch-lernen", labelDe: "Deutsch lernen", labelSq: "Saetze", icon: "book-open" },
+  { href: "/deutsch-lernen", labelDe: "Deutsch lernen", labelSq: "Sätze", icon: "book-open" },
   { href: "/material", labelDe: "Material", labelSq: "Listen", icon: "package" },
   { href: "/einstellungen", labelDe: "Einstellungen", labelSq: "Konto", icon: "settings" },
 ]

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 const SECTIONS: Record<string, { label: string; sq: string }> = {
   baustelle: { label: "Baustelle", sq: "Kantier" },
   kunden: { label: "Kunde sprechen", sq: "Klienti" },
-  preise: { label: "Preise erklaeren", sq: "Cmimet" },
+  preise: { label: "Preise erklären", sq: "Cmimet" },
   termine: { label: "Termine", sq: "Takimet" },
   material: { label: "Material", sq: "Materiali" },
   probleme: { label: "Probleme", sq: "Problemet" },
@@ -58,7 +58,7 @@ function FlashCard({ term }: { term: DictionaryTerm }) {
             {copied ? <><Check className="size-4" /> Kopiert!</> : <><Copy className="size-4" /> Kopieren</>}
           </Button>
           <Button size="touch" variant="outline" className="flex-1 gap-2" onClick={sendWhatsApp}>
-            {whatsapp ? <><Check className="size-4" /> Geoeffnet!</> : <><MessageCircle className="size-4" /> WhatsApp</>}
+            {whatsapp ? <><Check className="size-4" /> Geöffnet!</> : <><MessageCircle className="size-4" /> WhatsApp</>}
           </Button>
         </div>
       </CardContent>
@@ -114,7 +114,7 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
           <Button size="touch" variant="outline" onClick={prev} disabled={cardIndex === 0} className="flex-1 gap-2">
-            <ChevronLeft className="size-5" /> Zurueck
+            <ChevronLeft className="size-5" /> Zurück
           </Button>
           <Button size="touch" onClick={next} className="flex-1 gap-2">
             {cardIndex === sectionTerms.length - 1 ? "Fertig" : "Weiter"}
@@ -159,7 +159,7 @@ export function DeutschLernenClient({ terms }: { terms: DictionaryTerm[] }) {
         <CardContent className="p-4">
           <p className="mb-1 text-sm font-semibold text-primary">Wichtigster Satz / Fraza me e rendesishme:</p>
           <p className="text-base font-bold">
-            &quot;Der genaue Preis kann erst nach Besichtigung bestaetigt werden.&quot;
+            &quot;Der genaue Preis kann erst nach Besichtigung bestätigt werden.&quot;
           </p>
           <p className="mt-1 text-sm italic text-muted-foreground">
             &quot;Cmimi i sakte mund te konfirmohet vetem pas shikimit te objektit.&quot;

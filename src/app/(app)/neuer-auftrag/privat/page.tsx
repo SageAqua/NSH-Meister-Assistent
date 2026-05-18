@@ -66,7 +66,7 @@ export default function PrivatTerminPage() {
             href="/neuer-auftrag"
             className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="size-4" /> Zurueck
+            <ArrowLeft className="size-4" /> Zurück
           </Link>
 
           <div className="mb-6">

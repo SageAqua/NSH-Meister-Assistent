@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import type { Material } from "@/types"
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  benoetigt: { label: "Benoetigt", color: "bg-red-100 text-red-700 border-red-200" },
+  benoetigt: { label: "Benötigt", color: "bg-red-100 text-red-700 border-red-200" },
   bestellt: { label: "Bestellt", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
   vorhanden: { label: "Vorhanden", color: "bg-blue-100 text-blue-700 border-blue-200" },
   abgeholt: { label: "Abgeholt", color: "bg-purple-100 text-purple-700 border-purple-200" },
@@ -44,7 +44,7 @@ export default async function MaterialPage() {
       <div className="nsh-page-header">
         <p className="nsh-eyebrow">Listen</p>
         <h1 className="nsh-title">Material</h1>
-        <p className="nsh-subtitle">Materiali - {allMaterials.length} Eintraege nach Baustellen sortiert.</p>
+        <p className="nsh-subtitle">Materiali - {allMaterials.length} Einträge nach Baustellen sortiert.</p>
       </div>
 
       {allMaterials.length === 0 ? (
@@ -52,7 +52,7 @@ export default async function MaterialPage() {
           <CardContent className="py-12 text-center text-muted-foreground">
             <Package className="mx-auto mb-3 size-10 opacity-40" />
             <p className="text-lg font-semibold text-foreground">Noch kein Material erfasst.</p>
-            <p className="text-sm">Material wird beim Anlegen von Auftraegen hinzugefuegt.</p>
+            <p className="text-sm">Material wird beim Anlegen von Aufträgen hinzugefügt.</p>
           </CardContent>
         </Card>
       ) : (

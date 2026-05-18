@@ -253,38 +253,38 @@ ALTER TABLE dictionary_terms ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "terms_public_read" ON dictionary_terms
   FOR SELECT USING (true);
 
--- Seed-Daten (nur Admin kann einfuegen, daher kein INSERT-Policy fuer anon)
+-- Seed-Daten (nur Admin kann einfügen, daher kein INSERT-Policy für anon)
 -- Diese INSERTs laufen als postgres-User (SQL Editor umgeht RLS)
 INSERT INTO dictionary_terms (section, german, albanian, example_de, example_al) VALUES
--- Baustelle Woerter
+-- Baustelle Wörter
 ('baustelle', 'die Baustelle', 'kantieri', 'Die Baustelle ist bereit.', 'Kantieri eshte gati.'),
 ('baustelle', 'der Untergrund', 'baza', 'Der Untergrund ist schlecht.', 'Baza eshte e keqe.'),
 ('baustelle', 'das Vinyl', 'vinili', 'Das Vinyl wird verlegt.', 'Vinili vendoset.'),
 ('baustelle', 'der Boden', 'dyshemeja', 'Der Boden muss vorbereitet werden.', 'Dyshemeja duhet pergatitur.'),
 ('baustelle', 'die Sockelleiste', 'bordura', 'Die Sockelleisten werden am Ende angebracht.', 'Bordurat vendosen ne fund.'),
 ('baustelle', 'das Klickvinyl', 'vinili click', 'Klickvinyl ist einfach zu verlegen.', 'Vinili click eshte i lehte per tu vendosur.'),
-('baustelle', 'spachteln', 'shpetim me suva', 'Wir muessen zuerst spachteln.', 'Duhet te spaktelojme fillimisht.'),
+('baustelle', 'spachteln', 'shpetim me suva', 'Wir müssen zuerst spachteln.', 'Duhet te spaktelojme fillimisht.'),
 ('baustelle', 'der Trockenbau', 'ndertimi i thate', 'Der Trockenbau ist fertig.', 'Ndertimi i thate eshte gati.'),
 ('baustelle', 'die Endreinigung', 'pastrimi final', 'Die Endreinigung dauert 2 Stunden.', 'Pastrimi final zgjat 2 ore.'),
 ('baustelle', 'das Werkzeug', 'mjetet', 'Das Werkzeug ist im Auto.', 'Mjetet jane ne makine.'),
 -- Kunde sprechen
 ('kunden', 'Guten Tag, ich bin Naim Shala.', 'Miredit, une jam Naim Shala.', NULL, NULL),
-('kunden', 'Ich muss zuerst den Untergrund pruefen.', 'Duhet se pari ta kontrolloj bazen.', NULL, NULL),
-('kunden', 'Wann wuerde Ihnen eine Besichtigung passen?', 'Kur ju pershtatет nje vizite?', NULL, NULL),
+('kunden', 'Ich muss zuerst den Untergrund prüfen.', 'Duhet se pari ta kontrolloj bazen.', NULL, NULL),
+('kunden', 'Wann würde Ihnen eine Besichtigung passen?', 'Kur ju pershtatет nje vizite?', NULL, NULL),
 ('kunden', 'Ich rufe Sie morgen an.', 'Ju telefonoj neser.', NULL, NULL),
 ('kunden', 'Das Angebot schicke ich Ihnen per WhatsApp.', 'Ofertten jua dergoj nepermjet WhatsApp.', NULL, NULL),
 ('kunden', 'Wir beginnen am Montag.', 'Fillojme te henen.', NULL, NULL),
 ('kunden', 'Die Arbeit ist fertig.', 'Puna eshte e mbaruar.', NULL, NULL),
 ('kunden', 'Haben Sie noch Fragen?', 'Keni ende pyetje?', NULL, NULL),
--- Preise erklaeren
-('preise', 'Der genaue Preis kann erst nach Besichtigung bestaetigt werden.', 'Cmimi i sakte mund te konfirmohet vetem pas shikimit te objektit.', NULL, NULL),
+-- Preise erklären
+('preise', 'Der genaue Preis kann erst nach Besichtigung bestätigt werden.', 'Cmimi i sakte mund te konfirmohet vetem pas shikimit te objektit.', NULL, NULL),
 ('preise', 'Das kostet zwischen X und Y Euro.', 'Kjo kushton ndermjet X dhe Y Euro.', NULL, NULL),
-('preise', 'Der Preis pro Quadratmeter betraegt X Euro.', 'Cmimi per meter katror eshte X Euro.', NULL, NULL),
+('preise', 'Der Preis pro Quadratmeter beträgt X Euro.', 'Cmimi per meter katror eshte X Euro.', NULL, NULL),
 ('preise', 'Ich mache Ihnen ein schriftliches Angebot.', 'Ju bej nje oferte me shkrim.', NULL, NULL),
 ('preise', 'Die Materialkosten sind nicht enthalten.', 'Kostot e materialit nuk jane te perfshira.', NULL, NULL),
 ('preise', 'Zahlung nach Fertigstellung.', 'Pagesa pas perfundimit.', NULL, NULL),
 -- Termine
-('termine', 'Ich bin puenktlich da.', 'Jam atje me kohe.', NULL, NULL),
+('termine', 'Ich bin pünktlich da.', 'Jam atje me kohe.', NULL, NULL),
 ('termine', 'Ich komme um 8 Uhr.', 'Vij ne ora 8.', NULL, NULL),
 ('termine', 'Kann ich den Termin verschieben?', 'Mund ta shtyj takimin?', NULL, NULL),
 ('termine', 'Der Termin dauert einen Tag.', 'Takimi zgjat nje dite.', NULL, NULL),
@@ -293,11 +293,11 @@ INSERT INTO dictionary_terms (section, german, albanian, example_de, example_al)
 ('material', 'das Material', 'materiali', 'Das Material ist bestellt.', 'Materiali eshte porositur.'),
 ('material', 'der Kleber', 'ngjitesi', 'Der Kleber ist trocken.', 'Ngjitesi eshte thate.'),
 ('material', 'die Unterlage', 'shtresa baze', 'Die Unterlage wird zuerst verlegt.', 'Shtresa baze vendoset e para.'),
-('material', 'der Nagel', 'gozhde', 'Ich brauche mehr Naegel.', 'Kam nevoje per me shume gozhde.'),
+('material', 'der Nagel', 'gozhde', 'Ich brauche mehr Nägel.', 'Kam nevoje per me shume gozhde.'),
 ('material', 'die Schraube', 'vide', 'Die Schraube ist locker.', 'Vida eshte e lire.'),
--- Probleme erklaeren
+-- Probleme erklären
 ('probleme', 'Es gibt ein Problem mit dem Untergrund.', 'Ka nje problem me bazen.', NULL, NULL),
-('probleme', 'Das dauert laenger als geplant.', 'Kjo zgjat me shume se sa planifikuar.', NULL, NULL),
+('probleme', 'Das dauert länger als geplant.', 'Kjo zgjat me shume se sa planifikuar.', NULL, NULL),
 ('probleme', 'Es gibt einen Wasserschaden.', 'Ka demtim nga uji.', NULL, NULL),
 ('probleme', 'Ich muss erst reparieren.', 'Duhet fillimisht te riparoj.', NULL, NULL),
 ('probleme', 'Der Boden ist nicht gerade.', 'Dyshemeja nuk eshte e drejte.', NULL, NULL),

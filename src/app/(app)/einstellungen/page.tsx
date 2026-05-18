@@ -48,7 +48,7 @@ export default async function EinstellungenPage() {
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="size-4" /> Telefon in Auftraegen eingeben
+                <Phone className="size-4" /> Telefon in Aufträgen eingeben
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="size-4" /> Vechta, Niedersachsen

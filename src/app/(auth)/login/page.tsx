@@ -35,7 +35,7 @@ export default function LoginPage() {
         </div>
         <div>
           <p className="text-sm font-black uppercase tracking-[0.16em] text-sidebar-primary">Assistent</p>
-          <h1 className="mt-3 max-w-xl text-5xl font-black leading-tight">Alles fuer Baustellen, Kunden und Termine an einem Ort.</h1>
+          <h1 className="mt-3 max-w-xl text-5xl font-black leading-tight">Alles für Baustellen, Kunden und Termine an einem Ort.</h1>
         </div>
         <p className="text-sm text-sidebar-foreground/45">NSH Renovierung</p>
       </div>

@@ -72,7 +72,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
               <button
                 onClick={() => setShowForm(false)}
                 className="flex size-8 items-center justify-center rounded-lg hover:bg-accent"
-                aria-label="Formular schliessen"
+                aria-label="Formular schließen"
               >
                 <X className="size-4" />
               </button>

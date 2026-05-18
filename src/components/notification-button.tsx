@@ -104,7 +104,7 @@ export function NotificationButton() {
   if (status === "unsupported") {
     return (
       <div className="rounded-xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
-        Dein Browser unterstuetzt keine Push-Benachrichtigungen. Installiere die App oder nutze Chrome auf Android.
+        Dein Browser unterstützt keine Push-Benachrichtigungen. Installiere die App oder nutze Chrome auf Android.
       </div>
     )
   }
@@ -148,7 +148,7 @@ export function NotificationButton() {
           <p className="text-xs text-muted-foreground">
             {isSubscribed
               ? "Tippen zum Deaktivieren"
-              : "Erinnerungen vor Terminen auf diesem Geraet erhalten"}
+              : "Erinnerungen vor Terminen auf diesem Gerät erhalten"}
           </p>
         </div>
       </button>

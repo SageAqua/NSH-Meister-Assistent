@@ -324,7 +324,7 @@ export async function saveSimpleOrder(data: {
 
   const tasks = [
     data.offerNeeded ? { title: "Angebot schicken", due_date: new Date().toISOString().split("T")[0] } : null,
-    data.materialNeeded ? { title: "Material pruefen oder bestellen", due_date: data.startDate || null } : null,
+    data.materialNeeded ? { title: "Material prüfen oder bestellen", due_date: data.startDate || null } : null,
     { title: "Kunde nach Fertigstellung informieren", due_date: null },
     { title: "Rechnung stellen", due_date: null },
   ].filter(Boolean) as { title: string; due_date: string | null }[]

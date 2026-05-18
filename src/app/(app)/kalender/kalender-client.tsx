@@ -32,7 +32,7 @@ type View = "monat" | "liste" | "woche"
 
 const WEEKDAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 const MONTHS_DE = [
-  "Januar", "Februar", "Maerz", "April", "Mai", "Juni",
+  "Januar", "Februar", "März", "April", "Mai", "Juni",
   "Juli", "August", "September", "Oktober", "November", "Dezember",
 ]
 
@@ -147,10 +147,10 @@ function EventCard({
 
         <div className="flex flex-wrap gap-2 sm:justify-end">
           <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs" onClick={onEdit}>
-            <Pencil className="size-3.5" /> Aendern
+            <Pencil className="size-3.5" /> Ändern
           </Button>
           <Button size="sm" variant="outline" className="h-9 gap-1.5 text-xs text-destructive" onClick={onDelete}>
-            <Trash2 className="size-3.5" /> Loeschen
+            <Trash2 className="size-3.5" /> Löschen
           </Button>
           {event.status !== "erledigt" && (
             <form action={markEventDone.bind(null, event.id)}>
@@ -316,14 +316,14 @@ function DayDetailSheet({
                       onClick={() => { onClose(); onEdit(event) }}
                       className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold transition-colors hover:bg-accent"
                     >
-                      <Pencil className="size-3.5" /> Aendern
+                      <Pencil className="size-3.5" /> Ändern
                     </button>
                     <button
                       onClick={() => { onDelete(event.id); onClose() }}
                       disabled={isPending}
                       className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
                     >
-                      <Trash2 className="size-3.5" /> Loeschen
+                      <Trash2 className="size-3.5" /> Löschen
                     </button>
                     {event.status !== "erledigt" && (
                       <form action={markEventDone.bind(null, event.id)}>
@@ -641,7 +641,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
         <div>
           <p className="nsh-eyebrow">Termine</p>
           <h1 className="nsh-title">Kalender</h1>
-          <p className="nsh-subtitle">Alle Termine klar sehen, aendern und abhaken.</p>
+          <p className="nsh-subtitle">Alle Termine klar sehen, ändern und abhaken.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
@@ -678,7 +678,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
               {activeEvents.length} Termine · {openCount} offen · {doneCount} erledigt
             </p>
           </div>
-          <button onClick={nextMonth} className="flex size-11 items-center justify-center rounded-xl border transition-colors hover:bg-accent" aria-label="Naechster Monat">
+          <button onClick={nextMonth} className="flex size-11 items-center justify-center rounded-xl border transition-colors hover:bg-accent" aria-label="Nächster Monat">
             <ChevronRight className="size-5" />
           </button>
         </div>
@@ -721,11 +721,11 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
           <Card className="w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
             <CardContent className="space-y-4 p-5">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-black">Termin aendern</h3>
+                <h3 className="text-lg font-black">Termin ändern</h3>
                 <button
                   onClick={() => setEditing(null)}
                   className="flex size-9 items-center justify-center rounded-xl hover:bg-accent"
-                  aria-label="Schliessen"
+                  aria-label="Schließen"
                 >
                   <X className="size-5" />
                 </button>

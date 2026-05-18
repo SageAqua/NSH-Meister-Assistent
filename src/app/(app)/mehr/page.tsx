@@ -59,7 +59,7 @@ export default function MehrPage() {
       <div className="nsh-page-header">
         <p className="nsh-eyebrow">Werkzeuge</p>
         <h1 className="nsh-title">Mehr</h1>
-        <p className="nsh-subtitle">Weitere Funktionen fuer Preise, Notizen, Material und Lernen.</p>
+        <p className="nsh-subtitle">Weitere Funktionen für Preise, Notizen, Material und Lernen.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">

@@ -98,7 +98,7 @@ export function MonthlyCalendar({
         <button
           onClick={() => setViewedKey(nextMonthKey(viewedKey))}
           className="flex size-10 items-center justify-center rounded-lg border transition-colors hover:bg-accent"
-          aria-label="Naechster Monat"
+          aria-label="Nächster Monat"
         >
           <ChevronRight className="size-5" />
         </button>

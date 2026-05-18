@@ -67,7 +67,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
             href="/neuer-auftrag"
             className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="size-4" /> Zurueck
+            <ArrowLeft className="size-4" /> Zurück
           </Link>
 
           <div className="mb-6">
@@ -100,7 +100,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
                   className="h-16 w-full rounded-xl border-2 bg-card px-4 text-lg font-bold focus:border-blue-500 focus:outline-none"
                   defaultValue=""
                 >
-                  <option value="">Kein Kunde ausgewaehlt</option>
+                  <option value="">Kein Kunde ausgewählt</option>
                   {customers.map((c) => (
                     <option key={c.id} value={c.name}>
                       {c.name}

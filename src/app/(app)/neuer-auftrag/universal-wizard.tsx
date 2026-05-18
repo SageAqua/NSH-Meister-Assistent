@@ -21,7 +21,7 @@ import type { Customer } from "@/types"
 const QUICK_WORK = [
   "Vinyl verlegen",
   "Laminat verlegen",
-  "Waende streichen",
+  "Wände streichen",
   "Decke streichen",
   "Spachteln",
   "Trockenbau",
@@ -113,7 +113,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
         <textarea
           value={workTitle}
           onChange={(event) => setWorkTitle(event.target.value)}
-          placeholder="z.B. Kueche renovieren, Boden raus, Vinyl rein, Waende streichen"
+          placeholder="z.B. Küche renovieren, Boden raus, Vinyl rein, Wände streichen"
           rows={3}
           autoFocus
           className="w-full resize-none rounded-lg border-2 border-border bg-background p-4 text-lg font-semibold leading-snug outline-none transition-colors focus:border-primary"
@@ -145,15 +145,15 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
           </div>
           <div>
             <h2 className="text-xl font-black leading-tight">Wer ist der Kunde?</h2>
-            <p className="text-sm text-muted-foreground">Bestehend waehlen, neu eintragen oder spaeter machen.</p>
+            <p className="text-sm text-muted-foreground">Bestehend wählen, neu eintragen oder später machen.</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {[
-            { value: "existing" as const, label: "Kunde waehlen", disabled: customers.length === 0 },
+            { value: "existing" as const, label: "Kunde wählen", disabled: customers.length === 0 },
             { value: "new" as const, label: "Neuer Kunde" },
-            { value: "later" as const, label: "Spaeter" },
+            { value: "later" as const, label: "Später" },
           ].map((option) => (
             <button
               key={option.value}
@@ -240,8 +240,8 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <CalendarDays className="size-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black leading-tight">Wann und wie gross?</h2>
-            <p className="text-sm text-muted-foreground">Nur ausfuellen, was schon bekannt ist.</p>
+            <h2 className="text-xl font-black leading-tight">Wann und wie groß?</h2>
+            <p className="text-sm text-muted-foreground">Nur ausfüllen, was schon bekannt ist.</p>
           </div>
         </div>
 
@@ -274,7 +274,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             />
           </label>
           <label className="space-y-1 sm:col-span-2">
-            <span className="text-xs font-bold uppercase text-muted-foreground">Flaeche m2</span>
+            <span className="text-xs font-bold uppercase text-muted-foreground">Fläche m²</span>
             <input
               type="number"
               min="0"
@@ -329,7 +329,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             checked={materialNeeded}
             onClick={() => setMaterialNeeded((value) => !value)}
             icon={PackageCheck}
-            label="Material pruefen"
+            label="Material prüfen"
           />
         </div>
 

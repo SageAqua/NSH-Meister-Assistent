@@ -3,9 +3,8 @@ import { createClient } from "@/lib/supabase/server"
 import { logoutAction } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { NotificationButton } from "@/components/notification-button"
 import { CalendarCopyButton } from "@/components/calendar-copy-button"
-import { Bell, CalendarDays, LogOut, MapPin, Phone, Settings, User } from "lucide-react"
+import { CalendarDays, LogOut, MapPin, Phone, Settings, User } from "lucide-react"
 
 export default async function EinstellungenPage() {
   const supabase = await createClient()
@@ -77,18 +76,6 @@ export default async function EinstellungenPage() {
           </Card>
         </section>
       </div>
-
-      {/* Notifications */}
-      <section>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-          <Bell className="size-4" /> Benachrichtigungen
-        </h2>
-        <Card>
-          <CardContent className="p-4">
-            <NotificationButton />
-          </CardContent>
-        </Card>
-      </section>
 
       {/* Apple Kalender */}
       {calUrl && (

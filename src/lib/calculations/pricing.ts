@@ -1,4 +1,4 @@
-export type WorkCategory = "maler" | "boden" | "sonstiges"
+export type WorkCategory = "maler" | "boden" | "fugen" | "leisten" | "trockenbau" | "sonstiges"
 
 export interface ServiceItem {
   id: string
@@ -8,8 +8,8 @@ export interface ServiceItem {
   rateNormal: number
   rateLow: number
   rateHigh: number
-  unit: "m2" | "pauschal"
-  daysPerUnit: number // Arbeitstage pro 20 m²
+  unit: "m2" | "lfm" | "stk" | "pauschal"
+  daysPerUnit: number // Arbeitstage pro 20 Einheiten
 }
 
 export interface PriceResult {
@@ -25,22 +25,62 @@ export const SERVICES: ServiceItem[] = [
   { id: "tapezieren", category: "maler", labelDe: "Tapezieren", labelSq: "Tapetim", rateNormal: 24, rateLow: 18, rateHigh: 30, unit: "m2", daysPerUnit: 1.5 },
   { id: "fassade", category: "maler", labelDe: "Außenfassade", labelSq: "Fasada e jashtme", rateNormal: 16, rateLow: 12, rateHigh: 20, unit: "m2", daysPerUnit: 1.5 },
   { id: "grundierung", category: "maler", labelDe: "Grundierung (1x)", labelSq: "Grundim (1x)", rateNormal: 7, rateLow: 5, rateHigh: 9, unit: "m2", daysPerUnit: 0.5 },
+  { id: "tapete-entfernen", category: "maler", labelDe: "Tapete entfernen", labelSq: "Heqje tapeti", rateNormal: 8, rateLow: 6, rateHigh: 12, unit: "m2", daysPerUnit: 0.7 },
+  { id: "risse-ausbessern", category: "maler", labelDe: "Risse ausbessern", labelSq: "Riparim plasaritjesh", rateNormal: 9, rateLow: 6, rateHigh: 14, unit: "m2", daysPerUnit: 0.8 },
   // Bodenarbeiten
   { id: "klickvinyl", category: "boden", labelDe: "Klickvinyl", labelSq: "Vinyl klik", rateNormal: 28, rateLow: 24, rateHigh: 34, unit: "m2", daysPerUnit: 1 },
   { id: "klebevinyl", category: "boden", labelDe: "Klebevinyl", labelSq: "Vinyl ngjites", rateNormal: 35, rateLow: 30, rateHigh: 43, unit: "m2", daysPerUnit: 1.2 },
   { id: "rigid", category: "boden", labelDe: "Rigid Vinyl", labelSq: "Vinyl rigid", rateNormal: 32, rateLow: 27, rateHigh: 39, unit: "m2", daysPerUnit: 1 },
   { id: "laminat", category: "boden", labelDe: "Laminat", labelSq: "Laminat", rateNormal: 20, rateLow: 17, rateHigh: 25, unit: "m2", daysPerUnit: 0.8 },
+  { id: "boden-entfernen", category: "boden", labelDe: "Alten Boden entfernen", labelSq: "Heqje dyshemeje të vjetër", rateNormal: 9, rateLow: 6, rateHigh: 14, unit: "m2", daysPerUnit: 0.8 },
+  { id: "untergrund-schleifen", category: "boden", labelDe: "Untergrund schleifen", labelSq: "Lëmim i bazës", rateNormal: 8, rateLow: 6, rateHigh: 12, unit: "m2", daysPerUnit: 0.6 },
+  { id: "ausgleichsmasse", category: "boden", labelDe: "Ausgleichsmasse", labelSq: "Masë niveluese", rateNormal: 16, rateLow: 12, rateHigh: 22, unit: "m2", daysPerUnit: 1 },
+  // Fugen & Spachtel
+  { id: "fugenverspachteln-q1", category: "fugen", labelDe: "Fugenverspachteln Q1", labelSq: "Mbushje fugash Q1", rateNormal: 7, rateLow: 5, rateHigh: 10, unit: "m2", daysPerUnit: 0.7 },
+  { id: "fugenverspachteln-q2", category: "fugen", labelDe: "Fugenverspachteln Q2", labelSq: "Mbushje fugash Q2", rateNormal: 10, rateLow: 8, rateHigh: 14, unit: "m2", daysPerUnit: 0.9 },
+  { id: "spachtel-q3", category: "fugen", labelDe: "Spachteln Q3", labelSq: "Patinim Q3", rateNormal: 18, rateLow: 14, rateHigh: 24, unit: "m2", daysPerUnit: 1.2 },
+  { id: "silikonfugen", category: "fugen", labelDe: "Silikonfugen erneuern", labelSq: "Rinovim fugash silikoni", rateNormal: 14, rateLow: 10, rateHigh: 20, unit: "lfm", daysPerUnit: 0.7 },
+  { id: "acrylfugen", category: "fugen", labelDe: "Acrylfugen ziehen", labelSq: "Vendosje fugash akrili", rateNormal: 8, rateLow: 6, rateHigh: 12, unit: "lfm", daysPerUnit: 0.5 },
+  { id: "fliesenfugen-erneuern", category: "fugen", labelDe: "Fliesenfugen erneuern", labelSq: "Rinovim fugash pllakash", rateNormal: 24, rateLow: 18, rateHigh: 34, unit: "m2", daysPerUnit: 1.4 },
+  // Leisten & Montage
+  { id: "fussleisten-montieren", category: "leisten", labelDe: "Fußleisten montieren", labelSq: "Montim listelash dyshemeje", rateNormal: 9, rateLow: 6, rateHigh: 14, unit: "lfm", daysPerUnit: 0.5 },
+  { id: "fussleisten-demontieren", category: "leisten", labelDe: "Fußleisten demontieren", labelSq: "Çmontim listelash dyshemeje", rateNormal: 4, rateLow: 3, rateHigh: 7, unit: "lfm", daysPerUnit: 0.3 },
+  { id: "sockelleisten-versiegeln", category: "leisten", labelDe: "Sockelleisten versiegeln", labelSq: "Mbyllje listelash me silikon/akril", rateNormal: 5, rateLow: 3, rateHigh: 8, unit: "lfm", daysPerUnit: 0.3 },
+  { id: "uebergangsschienen", category: "leisten", labelDe: "Übergangsschienen setzen", labelSq: "Montim shina kalimi", rateNormal: 22, rateLow: 15, rateHigh: 35, unit: "stk", daysPerUnit: 0.4 },
+  { id: "tueren-kuerzen", category: "leisten", labelDe: "Türen kürzen", labelSq: "Shkurtim dyersh", rateNormal: 80, rateLow: 60, rateHigh: 110, unit: "stk", daysPerUnit: 0.4 },
+  // Trockenbau
+  { id: "trockenbau-wand", category: "trockenbau", labelDe: "Trockenbau Wand", labelSq: "Ndërtim i thatë mur", rateNormal: 25, rateLow: 21, rateHigh: 31, unit: "m2", daysPerUnit: 1.5 },
+  { id: "trockenbau-decke", category: "trockenbau", labelDe: "Trockenbau Decke", labelSq: "Ndërtim i thatë tavan", rateNormal: 30, rateLow: 25, rateHigh: 37, unit: "m2", daysPerUnit: 2 },
+  { id: "daemmung-einlegen", category: "trockenbau", labelDe: "Dämmung einlegen", labelSq: "Vendosje izolimi", rateNormal: 9, rateLow: 6, rateHigh: 14, unit: "m2", daysPerUnit: 0.6 },
+  { id: "revisionsklappe", category: "trockenbau", labelDe: "Revisionsklappe setzen", labelSq: "Montim kapaku kontrolli", rateNormal: 95, rateLow: 70, rateHigh: 140, unit: "stk", daysPerUnit: 0.5 },
   // Sonstiges
-  { id: "spachtel", category: "sonstiges", labelDe: "Spachtelarbeiten", labelSq: "Shpetim me suva", rateNormal: 12, rateLow: 10, rateHigh: 15, unit: "m2", daysPerUnit: 1 },
-  { id: "trockenbau-wand", category: "sonstiges", labelDe: "Trockenbau Wand", labelSq: "Ndertim i thate mur", rateNormal: 25, rateLow: 21, rateHigh: 31, unit: "m2", daysPerUnit: 1.5 },
-  { id: "trockenbau-decke", category: "sonstiges", labelDe: "Trockenbau Decke", labelSq: "Ndertim i thate tavan", rateNormal: 30, rateLow: 25, rateHigh: 37, unit: "m2", daysPerUnit: 2 },
   { id: "endreinigung", category: "sonstiges", labelDe: "Endreinigung", labelSq: "Pastrimi final", rateNormal: 8, rateLow: 7, rateHigh: 10, unit: "m2", daysPerUnit: 0.5 },
+  { id: "abkleben-abdecken", category: "sonstiges", labelDe: "Abkleben & Abdecken", labelSq: "Mbulim dhe ngjitje mbrojtëse", rateNormal: 4, rateLow: 3, rateHigh: 7, unit: "m2", daysPerUnit: 0.3 },
+  { id: "material-holen", category: "sonstiges", labelDe: "Material holen", labelSq: "Marrje materiali", rateNormal: 65, rateLow: 45, rateHigh: 95, unit: "pauschal", daysPerUnit: 0.4 },
+  { id: "entsorgung", category: "sonstiges", labelDe: "Entsorgung", labelSq: "Hedhje mbeturinash", rateNormal: 12, rateLow: 8, rateHigh: 20, unit: "m2", daysPerUnit: 0.5 },
 ]
 
 export const CATEGORY_META: Record<WorkCategory, { labelDe: string; labelSq: string; emoji: string }> = {
   maler: { labelDe: "Malerarbeiten", labelSq: "Punime lyerjeje", emoji: "🖌️" },
   boden: { labelDe: "Bodenarbeiten", labelSq: "Punime dyshemeje", emoji: "🪵" },
-  sonstiges: { labelDe: "Sonstiges", labelSq: "Te tjera", emoji: "🔧" },
+  fugen: { labelDe: "Fugen & Spachtel", labelSq: "Fuga & patinim", emoji: "▦" },
+  leisten: { labelDe: "Leisten & Montage", labelSq: "Listela & montim", emoji: "📏" },
+  trockenbau: { labelDe: "Trockenbau", labelSq: "Ndërtim i thatë", emoji: "🧱" },
+  sonstiges: { labelDe: "Sonstiges", labelSq: "Të tjera", emoji: "🔧" },
+}
+
+export const UNIT_LABELS: Record<ServiceItem["unit"], string> = {
+  m2: "m²",
+  lfm: "lfm",
+  stk: "Stk",
+  pauschal: "pauschal",
+}
+
+export const UNIT_LABELS_SQ: Record<ServiceItem["unit"], string> = {
+  m2: "m²",
+  lfm: "metër linear",
+  stk: "copë",
+  pauschal: "paushal",
 }
 
 export function calcPrice(service: ServiceItem, area: number, aufwaendig: boolean): PriceResult {
@@ -105,6 +145,7 @@ export function generateWorkPlan(
   startDate: string
 ): WorkDayPlan[] {
   const totalDays = calcDaysWithWorkers(service, area, totalWorkers)
+  const unit = UNIT_LABELS[service.unit]
   const plans: WorkDayPlan[] = []
 
   for (let i = 0; i < totalDays; i++) {
@@ -115,8 +156,8 @@ export function generateWorkPlan(
 
     if (totalDays === 1) {
       title = service.labelDe
-      tasksDe = ["Vorbereitung & Material", `${service.labelDe} (${area} m²)`, "Aufräumen & Abnahme mit Kunde"]
-      tasksSq = ["Pergatitja & materiali", `${service.labelSq} (${area} m²)`, "Pastrim & dorezim me klientin"]
+      tasksDe = ["Vorbereitung & Material", `${service.labelDe} (${area} ${unit})`, "Aufräumen & Abnahme mit Kunde"]
+      tasksSq = ["Përgatitja & materiali", `${service.labelSq} (${area} ${unit})`, "Pastrim & dorëzim me klientin"]
     } else if (i === 0) {
       title = `${service.labelDe} — Tag 1 (Vorbereitung)`
       tasksDe = ["Untergrund prüfen & vorbereiten", "Material ausladen & aufbauen", `Beginn: ${service.labelDe}`]
@@ -138,7 +179,8 @@ export function generateWorkPlan(
 
 export function buildWhatsAppText(service: ServiceItem, area: number, result: PriceResult): string {
   const days = calcDuration(service, area)
+  const unit = UNIT_LABELS[service.unit]
   return encodeURIComponent(
-    `Guten Tag,\n\nfür Ihre Anfrage (${service.labelDe}, ca. ${area} m²):\n• Preis: ca. ${result.low.toLocaleString("de-DE")} € – ${result.high.toLocaleString("de-DE")} €\n• Dauer: ca. ${days} Tag${days !== 1 ? "e" : ""}\n\nDer genaue Preis kann erst nach Besichtigung bestätigt werden.\n\nNSH Renovierung – Naim Shala`
+    `Guten Tag,\n\nfür Ihre Anfrage (${service.labelDe}, ca. ${area} ${unit}):\n• Preis: ca. ${result.low.toLocaleString("de-DE")} € – ${result.high.toLocaleString("de-DE")} €\n• Dauer: ca. ${days} Tag${days !== 1 ? "e" : ""}\n\nDer genaue Preis kann erst nach Besichtigung bestätigt werden.\n\nNSH Renovierung – Naim Shala`
   )
 }

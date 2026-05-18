@@ -5,11 +5,11 @@ import { Calculator, Copy, Check, MessageCircle, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { SERVICES, CATEGORY_META, calcPrice, calcDuration, buildWhatsAppText } from "@/lib/calculations/pricing"
+import { SERVICES, CATEGORY_META, UNIT_LABELS, UNIT_LABELS_SQ, calcPrice, calcDuration, buildWhatsAppText } from "@/lib/calculations/pricing"
 import type { WorkCategory } from "@/lib/calculations/pricing"
 import { savePriceCalculation } from "@/app/actions/orders"
 
-const CATEGORIES: WorkCategory[] = ["maler", "boden", "sonstiges"]
+const CATEGORIES: WorkCategory[] = ["maler", "boden", "fugen", "leisten", "trockenbau", "sonstiges"]
 
 export function PreisrechnerClient() {
   const [category, setCategory] = useState<WorkCategory>("maler")
@@ -27,6 +27,8 @@ export function PreisrechnerClient() {
 
   const result = area > 0 ? calcPrice(selectedService, area, aufwaendig) : null
   const days = area > 0 ? calcDuration(selectedService, area) : null
+  const unit = UNIT_LABELS[selectedService.unit]
+  const unitSq = UNIT_LABELS_SQ[selectedService.unit]
 
   function handleCategoryChange(cat: WorkCategory) {
     setCategory(cat)
@@ -36,7 +38,7 @@ export function PreisrechnerClient() {
 
   function copyPrice() {
     if (!result) return
-    const text = `Preisangebot NSH Renovierung:\n${selectedService.labelDe}, ca. ${area} m²\n• ca. ${result.normal.toLocaleString("de-DE")} € (${result.low.toLocaleString("de-DE")} – ${result.high.toLocaleString("de-DE")} €)\n• Dauer: ca. ${days} Tag${days !== 1 ? "e" : ""}\n\nDer genaue Preis kann erst nach Besichtigung bestätigt werden.`
+    const text = `Preisangebot NSH Renovierung:\n${selectedService.labelDe}, ca. ${area} ${unit}\n• ca. ${result.normal.toLocaleString("de-DE")} € (${result.low.toLocaleString("de-DE")} – ${result.high.toLocaleString("de-DE")} €)\n• Dauer: ca. ${days} Tag${days !== 1 ? "e" : ""}\n\nDer genaue Preis kann erst nach Besichtigung bestätigt werden.`
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -78,7 +80,7 @@ export function PreisrechnerClient() {
         <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
           <span className="nsh-i18n" data-sq="1. Kategoria">1. Kategorie</span>
         </p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {CATEGORIES.map((cat) => {
             const meta = CATEGORY_META[cat]
             return (
@@ -122,7 +124,7 @@ export function PreisrechnerClient() {
               <p className="text-sm font-bold leading-tight">
                 <span className="nsh-i18n" data-sq={service.labelSq}>{service.labelDe}</span>
               </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{service.rateNormal} €/m²</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{service.rateNormal} €/{UNIT_LABELS[service.unit]}</p>
             </button>
           ))}
         </div>
@@ -131,7 +133,7 @@ export function PreisrechnerClient() {
       {/* Step 3: Area + difficulty */}
       <div className="space-y-3">
         <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-          <span className="nsh-i18n" data-sq="3. Sipërfaqja">3. Fläche</span>
+          <span className="nsh-i18n" data-sq={`3. Sasia (${unitSq})`}>3. Menge ({unit})</span>
         </p>
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
@@ -145,10 +147,10 @@ export function PreisrechnerClient() {
             min="0"
             value={area || ""}
             onChange={(e) => setArea(parseFloat(e.target.value) || 0)}
-            placeholder="0"
+            placeholder={selectedService.unit === "pauschal" ? "1" : "0"}
             className="h-14 min-w-0 flex-1 rounded-2xl border-2 border-primary bg-background px-3 text-center text-2xl font-black focus:outline-none sm:px-4 sm:text-3xl"
           />
-          <span className="text-xl font-bold text-muted-foreground">m²</span>
+          <span className="text-xl font-bold text-muted-foreground">{unit}</span>
           <button
             onClick={() => setArea(area + 5)}
             className="flex size-14 shrink-0 items-center justify-center rounded-2xl border-2 text-2xl font-bold hover:border-primary hover:bg-accent"
@@ -238,7 +240,9 @@ export function PreisrechnerClient() {
         <div className="rounded-2xl border-2 border-dashed border-border p-8 text-center text-muted-foreground">
           <p className="text-4xl">💰</p>
           <p className="mt-2 font-medium">
-            <span className="nsh-i18n nsh-i18n-center" data-sq="Shkruaj m² → çmimi shfaqet menjëherë">m² eingeben → Preis erscheint sofort</span>
+            <span className="nsh-i18n nsh-i18n-center" data-sq={`Shkruaj ${unitSq} → çmimi shfaqet menjëherë`}>
+              {unit} eingeben → Preis erscheint sofort
+            </span>
           </p>
         </div>
       )}

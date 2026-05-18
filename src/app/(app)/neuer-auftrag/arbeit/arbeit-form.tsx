@@ -61,8 +61,8 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
   }
 
   return (
-    <div className="flex flex-col">
-      <div className="p-4 pb-36 sm:p-6">
+    <div className="flex min-w-0 flex-col">
+      <div className="p-4 pb-52 sm:p-6 sm:pb-44">
         <div className="mx-auto max-w-xl">
           <Link
             href="/neuer-auftrag"
@@ -91,7 +91,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="z.B. Besichtigung, Angebot, Besprechung..."
                 autoFocus
-                className="h-16 w-full rounded-xl border-2 border-blue-200 bg-blue-50 px-4 text-xl font-bold placeholder:font-normal placeholder:text-muted-foreground focus:border-blue-500 focus:bg-white focus:outline-none"
+                className="h-14 min-w-0 w-full rounded-xl border-2 border-blue-200 bg-blue-50 px-4 text-base font-bold placeholder:font-normal placeholder:text-muted-foreground focus:border-blue-500 focus:bg-white focus:outline-none sm:h-16 sm:text-xl"
               />
             </div>
 
@@ -103,7 +103,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
                     const name = e.target.value
                     if (name) setTitle((prev) => (prev ? prev : name))
                   }}
-                  className="h-16 w-full rounded-xl border-2 bg-card px-4 text-lg font-bold focus:border-blue-500 focus:outline-none"
+                  className="h-12 min-w-0 w-full rounded-xl border-2 bg-card px-3 text-base font-bold focus:border-blue-500 focus:outline-none sm:h-16 sm:px-4 sm:text-lg"
                   defaultValue=""
                 >
                   <option value="">Kein Kunde ausgewählt / Asnjë klient i zgjedhur</option>
@@ -122,7 +122,7 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="h-16 w-full rounded-xl border-2 bg-card px-4 text-xl font-bold focus:border-blue-500 focus:outline-none"
+                className="h-12 min-w-0 w-full max-w-full appearance-none rounded-xl border-2 bg-card px-3 text-base font-black focus:border-blue-500 focus:outline-none sm:h-14 sm:px-4 sm:text-lg"
               />
             </div>
 
@@ -130,20 +130,20 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
 
             <div>
               <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="NË ÇFARË ORE?">UM WIEVIEL UHR?</span></label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3">
                 {PRESETS.map((p) => (
                   <button
                     key={p.label}
                     type="button"
                     onClick={() => applyPreset(p)}
-                    className={`h-16 rounded-xl border-2 px-4 text-left transition-colors ${
+                    className={`h-14 min-w-0 rounded-xl border-2 px-3 text-left transition-colors sm:h-16 sm:px-4 ${
                       selectedPreset === p.label
                         ? "border-blue-500 bg-blue-100 text-blue-900"
                         : "border-border bg-card hover:bg-muted"
                     }`}
                   >
-                    <p className="text-base font-black"><span className="nsh-i18n" data-sq={p.sq}>{p.label}</span></p>
-                    <p className="text-xs text-muted-foreground">{p.sub}</p>
+                    <p className="text-sm font-black sm:text-base"><span className="nsh-i18n" data-sq={p.sq}>{p.label}</span></p>
+                    <p className="text-[11px] text-muted-foreground sm:text-xs">{p.sub}</p>
                   </button>
                 ))}
               </div>
@@ -151,23 +151,23 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
 
             <div>
               <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="ORA E SAKTË (opsionale)">GENAUE UHRZEIT (optional)</span></label>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 sm:gap-3">
+                <div className="min-w-0">
                   <p className="mb-1 text-xs text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></p>
                   <input
                     type="time"
                     value={startTime}
                     onChange={(e) => { setStartTime(e.target.value); setSelectedPreset(null) }}
-                    className="h-14 w-full rounded-xl border-2 bg-card px-3 text-lg font-bold focus:border-blue-500 focus:outline-none"
+                    className="h-12 min-w-0 w-full max-w-full appearance-none rounded-xl border-2 bg-card px-3 text-base font-black focus:border-blue-500 focus:outline-none sm:h-14 sm:text-lg"
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="mb-1 text-xs text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></p>
                   <input
                     type="time"
                     value={endTime}
                     onChange={(e) => { setEndTime(e.target.value); setSelectedPreset(null) }}
-                    className="h-14 w-full rounded-xl border-2 bg-card px-3 text-lg font-bold focus:border-blue-500 focus:outline-none"
+                    className="h-12 min-w-0 w-full max-w-full appearance-none rounded-xl border-2 bg-card px-3 text-base font-black focus:border-blue-500 focus:outline-none sm:h-14 sm:text-lg"
                   />
                 </div>
               </div>
@@ -182,17 +182,17 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t bg-background/95 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur md:sticky md:bottom-auto md:border-t-0 md:bg-transparent md:px-6 md:pb-6 md:backdrop-blur-none">
+      <div className="fixed inset-x-0 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-40 border-t bg-background/95 p-3 backdrop-blur md:sticky md:bottom-auto md:border-t-0 md:bg-transparent md:px-6 md:pb-6 md:backdrop-blur-none">
         <div className="mx-auto max-w-xl">
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="nsh-tap flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-blue-600 text-xl font-black text-white shadow-lg shadow-blue-500/25 transition-colors hover:bg-blue-700 disabled:opacity-60"
+            className="nsh-tap flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-base font-black text-white shadow-lg shadow-blue-500/25 transition-colors hover:bg-blue-700 disabled:opacity-60 sm:h-14 sm:text-lg"
           >
             {isPending ? (
-              <Loader2 className="size-6 animate-spin" />
+              <Loader2 className="size-5 animate-spin" />
             ) : (
-              <Check className="size-6" />
+              <Check className="size-5" />
             )}
             <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={isPending ? "Duke ruajtur..." : "Ruaj termin"}>
               {isPending ? "Wird gespeichert..." : "Termin speichern"}

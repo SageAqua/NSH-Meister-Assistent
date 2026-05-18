@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { BriefcaseBusiness, Building2, CalendarClock, CheckCircle2, FileText, Navigation, Phone, Plus, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -49,12 +50,14 @@ export function TagesplanSection({
   today,
   autoOpenForm = false,
   initialEventType = "arbeit",
+  compact = false,
 }: {
   events: CalendarEvent[]
   freeSlots: FreeSlot[]
   today: string
   autoOpenForm?: boolean
   initialEventType?: "privat" | "arbeit" | "baustelle"
+  compact?: boolean
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -205,61 +208,75 @@ export function TagesplanSection({
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-muted-foreground">
-          {events.length === 0
-            ? "Heute keine Termine"
-            : `${events.length} Termin${events.length !== 1 ? "e" : ""} heute`}
-        </p>
-        <button
-          onClick={() => {
-            setEventType("arbeit")
-            setTitle(getDefaultTitle("arbeit"))
-            setFormOpen(true)
-          }}
-          className="flex items-center gap-1 text-xs font-semibold text-primary"
-        >
-          <Plus className="size-3" /> Termin eintragen
-        </button>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        {([
-          { key: "privat" as const, label: "Privat", icon: User, type: "privat" as const },
-          { key: "arbeit" as const, label: "Work", icon: BriefcaseBusiness, type: "arbeit" as const },
-          { key: "baustelle" as const, label: "Baustelle", icon: Building2, type: "baustelle" as const },
-        ]).map((option) => {
-          const Icon = option.icon
-          return (
+      {!compact && (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold text-muted-foreground">
+              {events.length === 0
+                ? "Heute keine Termine"
+                : `${events.length} Termin${events.length !== 1 ? "e" : ""} heute`}
+            </p>
             <button
-              key={option.key}
-              type="button"
               onClick={() => {
-                setEventType(option.type)
-                setTitle(getDefaultTitle(option.type))
+                setEventType("arbeit")
+                setTitle(getDefaultTitle("arbeit"))
                 setFormOpen(true)
               }}
-              className="flex flex-col items-center justify-center gap-1 rounded-xl border bg-white px-2 py-2.5 text-xs font-semibold transition-colors hover:bg-accent"
+              className="flex items-center gap-1 text-xs font-semibold text-primary"
             >
-              <Icon className="size-4" />
-              <span>{option.label}</span>
+              <Plus className="size-3" /> Termin eintragen
             </button>
-          )
-        })}
-      </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { key: "privat" as const, label: "Privat", icon: User, type: "privat" as const },
+              { key: "arbeit" as const, label: "Work", icon: BriefcaseBusiness, type: "arbeit" as const },
+              { key: "baustelle" as const, label: "Baustelle", icon: Building2, type: "baustelle" as const },
+            ]).map((option) => {
+              const Icon = option.icon
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => {
+                    setEventType(option.type)
+                    setTitle(getDefaultTitle(option.type))
+                    setFormOpen(true)
+                  }}
+                  className="flex flex-col items-center justify-center gap-1 rounded-xl border bg-white px-2 py-2.5 text-xs font-semibold transition-colors hover:bg-accent"
+                >
+                  <Icon className="size-4" />
+                  <span>{option.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
 
       {timeline.length === 0 ? (
-        <button
-          onClick={() => {
-            setEventType("arbeit")
-            setTitle(getDefaultTitle("arbeit"))
-            setFormOpen(true)
-          }}
-          className="flex w-full flex-col items-center rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-5 hover:bg-primary/10 transition-colors"
-        >
-          <p className="text-base font-semibold text-primary">Ganzer Tag frei 🙌</p>
-          <p className="mt-0.5 text-sm text-muted-foreground">Tippen um Termin einzutragen</p>
-        </button>
+        compact ? (
+          <Link
+            href="/neuer-auftrag"
+            className="flex w-full flex-col items-center rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-5 hover:bg-primary/10 transition-colors"
+          >
+            <p className="text-base font-semibold text-primary">Ganzer Tag frei 🙌</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">Tippen um Termin einzutragen</p>
+          </Link>
+        ) : (
+          <button
+            onClick={() => {
+              setEventType("arbeit")
+              setTitle(getDefaultTitle("arbeit"))
+              setFormOpen(true)
+            }}
+            className="flex w-full flex-col items-center rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-5 hover:bg-primary/10 transition-colors"
+          >
+            <p className="text-base font-semibold text-primary">Ganzer Tag frei 🙌</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">Tippen um Termin einzutragen</p>
+          </button>
+        )
       ) : (
         <div className="space-y-2">
           {timeline.map((item) => {
@@ -424,17 +441,30 @@ export function TagesplanSection({
               )
             } else {
               const { slot } = item
-              return (
-                <button
-                  key={`free-${slot.startTime}`}
-                  onClick={() => openWithSlot(slot, "arbeit")}
-                  className="flex w-full items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-2 text-left transition-colors hover:bg-green-100"
-                >
+              const slotContent = (
+                <>
                   <div className="size-2 shrink-0 rounded-full bg-green-400" />
                   <p className="flex-1 text-xs font-semibold text-green-700">
                     {slot.startTime} – {slot.endTime} frei · {durLabel(slot.durationHours)}
                   </p>
                   <span className="shrink-0 text-xs font-semibold text-green-600">+ Termin</span>
+                </>
+              )
+              return compact ? (
+                <Link
+                  key={`free-${slot.startTime}`}
+                  href="/neuer-auftrag"
+                  className="flex w-full items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-2 text-left transition-colors hover:bg-green-100"
+                >
+                  {slotContent}
+                </Link>
+              ) : (
+                <button
+                  key={`free-${slot.startTime}`}
+                  onClick={() => openWithSlot(slot, "arbeit")}
+                  className="flex w-full items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-2 text-left transition-colors hover:bg-green-100"
+                >
+                  {slotContent}
                 </button>
               )
             }
@@ -443,7 +473,7 @@ export function TagesplanSection({
       )}
 
       {/* Add event form */}
-      {formOpen && (
+      {!compact && formOpen && (
         <Card className="border-primary/30">
           <CardContent className="space-y-3 p-4">
             <div className="flex items-center justify-between gap-3">

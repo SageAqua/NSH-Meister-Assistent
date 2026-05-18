@@ -9,7 +9,6 @@ import {
   Plus,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { Button } from "@/components/ui/button"
 import { markTaskDone } from "@/app/actions/orders"
 import { TagesplanSection } from "./tagesplan"
 import { MonthlyCalendar, type MonthlyCalendarEvent } from "./monthly-calendar"
@@ -96,7 +95,7 @@ function EventPill({ event }: { event: CalendarEvent }) {
         : "bg-blue-100 text-blue-800"
   const clean = event.title.replace(/^\[.*?\]\s*/, "")
   return (
-    <span className={`inline-block rounded-lg px-2 py-1 text-xs font-bold leading-tight ${cls}`}>
+    <span className={`inline-block rounded-md px-1.5 py-0.5 text-[11px] font-bold leading-tight ${cls}`}>
       {time(event.start_time)} {clean}
     </span>
   )
@@ -104,30 +103,30 @@ function EventPill({ event }: { event: CalendarEvent }) {
 
 function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }) {
   const days = buildWeekDays(events, today)
-  const activeDays = days.filter((d) => d.events.length > 0)
+  const hasAny = days.some((d) => d.events.length > 0)
 
-  if (activeDays.length === 0) {
+  if (!hasAny) {
     return (
-      <div className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
-        <p className="text-sm text-muted-foreground">Keine Termine diese Woche.</p>
-      </div>
+      <p className="rounded-xl border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        Keine Termine diese Woche.
+      </p>
     )
   }
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1">
+    <div className="flex gap-2 overflow-x-auto pb-0.5">
       {days.map((day) => {
-          const hasEvents = day.events.length > 0
+        const hasEvents = day.events.length > 0
         return (
           <div
             key={day.dateStr}
-            className={`flex min-w-[80px] flex-col gap-1 rounded-xl border px-2 py-2.5 ${hasEvents ? "border-primary/30 bg-primary/5" : "border-transparent bg-muted/30"}`}
+            className={`flex min-w-[72px] flex-col gap-1 rounded-xl border px-2 py-2 ${hasEvents ? "border-primary/30 bg-primary/5" : "border-transparent bg-muted/20"}`}
           >
             <span className="text-[11px] font-black text-muted-foreground">{day.label}</span>
             {hasEvents ? (
               day.events.map((e) => <EventPill key={e.id} event={e} />)
             ) : (
-              <span className="text-[10px] text-muted-foreground/50">Frei</span>
+              <span className="text-[10px] text-muted-foreground/40">—</span>
             )}
           </div>
         )
@@ -139,22 +138,22 @@ function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }
 function OpenTasks({ tasks }: { tasks: Task[] }) {
   if (tasks.length === 0)
     return (
-      <p className="rounded-lg border bg-card p-4 text-center font-semibold text-muted-foreground">
+      <p className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
         Keine offenen Aufgaben.
       </p>
     )
   return (
-    <div className="space-y-2">
-      {tasks.slice(0, 6).map((task) => (
+    <div className="space-y-1.5">
+      {tasks.slice(0, 4).map((task) => (
         <form key={task.id} action={markTaskDone.bind(null, task.id)}>
-          <button className="flex w-full items-center gap-3 rounded-lg border bg-card p-4 text-left shadow-sm active:bg-muted">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border-2 border-primary">
-              <CheckCircle2 className="size-4 text-primary" />
+          <button className="flex w-full items-center gap-3 rounded-xl border bg-card px-3 py-2.5 text-left shadow-sm active:bg-muted">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 border-primary">
+              <CheckCircle2 className="size-3.5 text-primary" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-base font-black">{task.title}</span>
+              <span className="block truncate text-sm font-bold">{task.title}</span>
               {task.projects && (
-                <span className="block truncate text-sm text-muted-foreground">
+                <span className="block truncate text-xs text-muted-foreground">
                   {task.projects.address ?? serviceName(task.projects.service_type)}
                 </span>
               )}
@@ -169,26 +168,25 @@ function OpenTasks({ tasks }: { tasks: Task[] }) {
 function ActiveProjects({ projects }: { projects: ProjectFull[] }) {
   if (projects.length === 0)
     return (
-      <p className="rounded-lg border bg-card p-4 text-center font-semibold text-muted-foreground">
+      <p className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
         Keine aktiven Baustellen.
       </p>
     )
   return (
-    <div className="space-y-2">
-      {projects.slice(0, 5).map((project) => (
+    <div className="space-y-1.5">
+      {projects.slice(0, 4).map((project) => (
         <Link key={project.id} href={`/baustellen/${project.id}`}>
-          <div className="flex items-center gap-3 rounded-lg border bg-card p-4 shadow-sm transition-colors hover:bg-muted active:bg-muted">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-              <Building2 className="size-6" />
+          <div className="flex items-center gap-3 rounded-xl border bg-card px-3 py-2.5 shadow-sm transition-colors hover:bg-muted active:bg-muted">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+              <Building2 className="size-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-lg font-black">{project.customers?.name ?? "Ohne Kunde"}</p>
-              <p className="truncate text-sm text-muted-foreground">
-                {serviceName(project.service_type)}
-                {project.address ? ` - ${project.address}` : ""}
+              <p className="truncate text-sm font-bold">{project.customers?.name ?? "Ohne Kunde"}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {serviceName(project.service_type)}{project.address ? ` · ${project.address}` : ""}
               </p>
             </div>
-            <ArrowRight className="size-5 shrink-0 text-muted-foreground" />
+            <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
           </div>
         </Link>
       ))}
@@ -236,13 +234,13 @@ export default async function HeutePage() {
       .select("*, projects(*)")
       .eq("is_done", false)
       .order("due_date", { ascending: true })
-      .limit(6),
+      .limit(4),
     supabase
       .from("projects")
       .select("*, customers(*)")
       .in("status", ["in_arbeit", "geplant"])
       .order("created_at", { ascending: false })
-      .limit(6),
+      .limit(4),
   ])
 
   const todayEvents = (todayEventsRaw ?? []) as CalendarEvent[]
@@ -266,66 +264,79 @@ export default async function HeutePage() {
     return acc
   }, {})
 
+  const dateStr = today.toLocaleDateString("de-DE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  })
+
   return (
-    <div className="nsh-page">
-      <header className="nsh-panel p-4 sm:p-5">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="nsh-eyebrow">Heute</p>
-            <h1 className="nsh-title">Hallo Naim</h1>
-            <p className="nsh-subtitle">
-              {today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}
-            </p>
-          </div>
-          <img
-            src="/logo.png"
-            alt="NSH Renovierung"
-            className="size-14 rounded-lg bg-white object-contain ring-1 ring-border"
-          />
+    <div className="flex flex-col gap-4 md:gap-5">
+
+      {/* ── Header ── */}
+      <header className="flex items-center justify-between gap-4 rounded-2xl border bg-card p-4 sm:p-5">
+        <div className="min-w-0">
+          <p className="text-[11px] font-black uppercase tracking-widest text-primary">Heute</p>
+          <h1 className="text-2xl font-black leading-tight sm:text-3xl">Hallo Naim</h1>
+          <p className="text-sm text-muted-foreground">{dateStr}</p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-3">
+          <img src="/logo.png" alt="NSH" className="size-10 rounded-lg bg-white object-contain ring-1 ring-border" />
+          <Link href="/neuer-auftrag">
+            <button className="flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-primary-foreground shadow-md shadow-primary/20 transition-colors hover:bg-primary/90">
+              <Plus className="size-4" /> Neuer Termin
+            </button>
+          </Link>
         </div>
       </header>
 
+      {/* ── Diese Woche ── */}
       <section className="space-y-2">
-        <h2 className="flex items-center gap-2 text-lg font-black">
-          <CalendarDays className="size-5 text-primary" /> Diese Woche
+        <h2 className="flex items-center gap-1.5 text-sm font-black text-muted-foreground">
+          <CalendarDays className="size-4" /> Diese Woche
         </h2>
         <WeekPreview events={weekEvents} today={today} />
       </section>
 
-      <section className="space-y-2">
-        <h2 className="flex items-center gap-2 text-lg font-black">
-          <ClipboardList className="size-5 text-primary" /> Aufgaben heute
-        </h2>
-        <OpenTasks tasks={tasks} />
-      </section>
+      {/* ── Two-column body on lg+ ── */}
+      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
 
-      <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <CalendarDays className="size-6 text-primary" /> Termine heute
+        {/* Left — Termine heute */}
+        <section className="space-y-2">
+          <h2 className="flex items-center gap-1.5 text-lg font-black">
+            <CalendarDays className="size-5 text-primary" /> Termine heute
           </h2>
-          <Link href="/neuer-auftrag" className="inline-flex">
-            <Button size="sm" className="gap-2">
-              <Plus className="size-4" /> Neu
-            </Button>
-          </Link>
+          <TagesplanSection events={todayEvents} freeSlots={[]} today={todayStr} compact />
+        </section>
+
+        {/* Right — only on lg+, stacks below on mobile */}
+        <div className="flex flex-col gap-4 md:gap-5">
+
+          {/* Month calendar — desktop right col */}
+          <section className="hidden lg:block space-y-2">
+            <h2 className="flex items-center gap-1.5 text-lg font-black">
+              <CalendarDays className="size-5 text-primary" /> Dieser Monat
+            </h2>
+            <MonthlyCalendar monthEventsMap={monthEventsMap} today={todayStr} />
+          </section>
+
+          {/* Aufgaben */}
+          <section className="space-y-2">
+            <h2 className="flex items-center gap-1.5 text-base font-black">
+              <ClipboardList className="size-4 text-primary" /> Aufgaben heute
+            </h2>
+            <OpenTasks tasks={tasks} />
+          </section>
+
+          {/* Baustellen */}
+          <section className="space-y-2">
+            <h2 className="flex items-center gap-1.5 text-base font-black">
+              <HardHat className="size-4 text-primary" /> Laufende Baustellen
+            </h2>
+            <ActiveProjects projects={projects} />
+          </section>
+
         </div>
-        <TagesplanSection events={todayEvents} freeSlots={[]} today={todayStr} />
-      </section>
-
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_300px] lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="space-y-3">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <CalendarDays className="size-6 text-primary" /> Dieser Monat
-          </h2>
-          <MonthlyCalendar monthEventsMap={monthEventsMap} today={todayStr} />
-        </section>
-        <section className="space-y-3">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <HardHat className="size-6 text-primary" /> Laufende Baustellen
-          </h2>
-          <ActiveProjects projects={projects} />
-        </section>
       </div>
     </div>
   )

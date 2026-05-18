@@ -207,7 +207,7 @@ function QuickAction({
 export default async function HeutePage({
   searchParams,
 }: {
-  searchParams: Promise<{ "new-event"?: string }>
+  searchParams: Promise<{ "new-event"?: string; type?: "privat" | "arbeit" | "baustelle" }>
 }) {
   const params = await searchParams
   const supabase = await createClient()
@@ -216,22 +216,39 @@ export default async function HeutePage({
   const startOfDay = `${todayStr}T00:00:00`
   const endOfDay = `${todayStr}T23:59:59`
 
+
   if (params["new-event"]) {
     return (
-      <div className="rounded-lg border bg-card p-5">
-        <h1 className="text-2xl font-black">Termin eintragen</h1>
-        <p className="mt-2 text-muted-foreground">
-          Termine werden jetzt am einfachsten ueber Neuer Auftrag mit Startdatum angelegt.
-        </p>
-        <Link href="/neuer-auftrag" className="mt-4 inline-flex">
-          <Button size="touch" className="gap-2">
-            <Plus className="size-5" /> Auftrag oder Termin anlegen
-          </Button>
-        </Link>
+      <div className="nsh-page max-w-3xl">
+        <div className="nsh-panel p-5 sm:p-6">
+          <p className="nsh-eyebrow">Neuer Termin</p>
+          <h1 className="nsh-title">Was moechtest du planen?</h1>
+          <p className="nsh-subtitle">Waehle den Typ: privat, Arbeit oder Baustelle. / Zgjidh tipin: privat, pune ose kantier.</p>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Link href="/notizen">
+              <div className="rounded-xl border border-violet-300 bg-violet-50 p-4 transition-colors hover:bg-violet-100">
+                <p className="text-sm font-black text-violet-800">Privat Termin</p>
+                <p className="mt-1 text-xs text-violet-700">Termin privat</p>
+              </div>
+            </Link>
+            <Link href="/neuer-auftrag">
+              <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 transition-colors hover:bg-blue-100">
+                <p className="text-sm font-black text-blue-800">Work Termin</p>
+                <p className="mt-1 text-xs text-blue-700">Termin pune</p>
+              </div>
+            </Link>
+            <Link href="/baustellen">
+              <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 transition-colors hover:bg-amber-100">
+                <p className="text-sm font-black text-amber-800">Baustelle planen</p>
+                <p className="mt-1 text-xs text-amber-700">Planifiko kantierin</p>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }
-
   const [
     { data: eventsRaw },
     { data: tasksRaw },

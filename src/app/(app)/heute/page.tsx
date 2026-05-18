@@ -5,27 +5,19 @@ import {
   CalendarDays,
   CheckCircle2,
   ClipboardList,
-  FileText,
   HardHat,
-  MapPin,
-  Navigation,
-  Phone,
   Plus,
-  Users,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { markTaskDone } from "@/app/actions/orders"
+import { TagesplanSection } from "./tagesplan"
 import type { CalendarEvent, Customer, Project, Task } from "@/types"
 
 type ProjectFull = Project & { customers: Customer | null }
 
 function formatDateKey(date: Date) {
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0"),
-  ].join("-")
+  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-")
 }
 
 function time(iso: string) {
@@ -34,113 +26,61 @@ function time(iso: string) {
 
 function serviceName(service: string) {
   const labels: Record<string, string> = {
-    vinyl: "Vinyl verlegen",
-    klickvinyl: "Klickvinyl",
-    klebevinyl: "Klebevinyl",
-    laminat: "Laminat",
-    waende: "Waende streichen",
-    decke: "Decke streichen",
-    spachtel: "Spachteln",
-    trockenbau: "Trockenbau",
+    vinyl: "Vinyl verlegen", klickvinyl: "Klickvinyl", klebevinyl: "Klebevinyl", laminat: "Laminat",
+    waende: "Waende streichen", decke: "Decke streichen", spachtel: "Spachteln", trockenbau: "Trockenbau",
   }
   return labels[service] ?? service
 }
 
-function TodayEvents({ events }: { events: CalendarEvent[] }) {
-  if (events.length === 0) {
-    return (
-      <div className="rounded-lg border-2 border-dashed bg-card p-5 text-center">
-        <CalendarDays className="mx-auto mb-2 size-9 text-muted-foreground" />
-        <p className="text-lg font-black">Heute keine Termine.</p>
-        <p className="mt-1 text-sm text-muted-foreground">Der Tag ist frei oder noch nicht geplant.</p>
-        <Link href="/heute?new-event=1" className="mt-4 inline-flex">
-          <Button size="touch" className="gap-2">
-            <Plus className="size-5" /> Termin eintragen
-          </Button>
-        </Link>
-      </div>
-    )
-  }
+function MonthlyOverview({ events }: { events: CalendarEvent[] }) {
+  if (events.length === 0) return <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">Kein Termin im aktuellen Monat.</p>
+  const grouped = events.reduce<Record<string, CalendarEvent[]>>((acc, event) => {
+    const day = event.start_time.split("T")[0]
+    if (!acc[day]) acc[day] = []
+    acc[day].push(event)
+    return acc
+  }, {})
 
   return (
-    <div className="space-y-2">
-      {events.map((event) => {
-        const customer = event.projects?.customers
-        const address = event.projects?.address ?? customer?.address
-        const place = [address, customer?.city].filter(Boolean).join(", ")
-
-        return (
-          <div key={event.id} className="rounded-lg border bg-card p-4 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <p className="text-lg font-black text-primary">
-                  {time(event.start_time)} - {time(event.end_time)}
-                </p>
-                <h3 className="mt-1 text-xl font-black leading-tight">{event.title}</h3>
-                {customer && <p className="mt-1 font-semibold text-muted-foreground">{customer.name}</p>}
-                {place && (
-                  <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="size-4 shrink-0" /> {place}
-                  </p>
-                )}
-              </div>
-              {event.status === "erledigt" && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-100 px-3 py-2 text-sm font-black text-emerald-700">
-                  <CheckCircle2 className="size-4" /> Erledigt
-                </span>
-              )}
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {place && (
-                <a href={`https://maps.google.com/?q=${encodeURIComponent(place)}`} target="_blank" rel="noreferrer">
-                  <Button size="touch" className="gap-2">
-                    <Navigation className="size-5" /> Navigation
-                  </Button>
-                </a>
-              )}
-              {customer?.phone && (
-                <a href={`tel:${customer.phone}`}>
-                  <Button size="touch" variant="outline" className="gap-2">
-                    <Phone className="size-5" /> Anrufen
-                  </Button>
-                </a>
-              )}
-              {event.project_id && (
-                <Link href={`/baustellen/${event.project_id}`}>
-                  <Button size="touch" variant="outline" className="gap-2">
-                    <HardHat className="size-5" /> Baustelle
-                  </Button>
-                </Link>
-              )}
-            </div>
+    <div className="space-y-3">
+      {Object.entries(grouped).slice(0, 10).map(([day, list]) => (
+        <div key={day} className="rounded-lg border bg-card p-3">
+          <p className="text-sm font-black">{new Date(`${day}T12:00:00`).toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" })}</p>
+          <div className="mt-2 space-y-1">
+            {list.map((event) => <p key={event.id} className="text-sm text-muted-foreground">{time(event.start_time)} · {event.title}</p>)}
           </div>
-        )
-      })}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function WeekPreview({ events }: { events: CalendarEvent[] }) {
+  return (
+    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+      <p className="text-sm font-black text-primary">Diese Woche / Këtë javë</p>
+      {events.length === 0 ? (
+        <p className="mt-1 text-sm text-muted-foreground">Keine Termine diese Woche.</p>
+      ) : (
+        <ul className="mt-2 space-y-1">
+          {events.slice(0, 5).map((event) => (
+            <li key={event.id} className="text-sm"><span className="font-bold">{new Date(event.start_time).toLocaleDateString("de-DE", { weekday: "short" })}</span> · {time(event.start_time)} · {event.title}</li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
 
 function OpenTasks({ tasks }: { tasks: Task[] }) {
-  if (tasks.length === 0) {
-    return <p className="rounded-lg border bg-card p-4 text-center font-semibold text-muted-foreground">Keine offenen Aufgaben.</p>
-  }
-
+  if (tasks.length === 0) return <p className="rounded-lg border bg-card p-4 text-center font-semibold text-muted-foreground">Keine offenen Aufgaben heute.</p>
   return (
     <div className="space-y-2">
       {tasks.slice(0, 4).map((task) => (
         <form key={task.id} action={markTaskDone.bind(null, task.id)}>
           <button className="flex w-full items-center gap-3 rounded-lg border bg-card p-4 text-left shadow-sm">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border-2 border-primary">
-              <CheckCircle2 className="size-4 text-primary" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-base font-black">{task.title}</span>
-              {task.projects && (
-                <span className="block truncate text-sm text-muted-foreground">
-                  {task.projects.address ?? serviceName(task.projects.service_type)}
-                </span>
-              )}
-            </span>
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border-2 border-primary"><CheckCircle2 className="size-4 text-primary" /></span>
+            <span className="min-w-0 flex-1"><span className="block truncate text-base font-black">{task.title}</span>{task.projects && <span className="block truncate text-sm text-muted-foreground">{task.projects.address ?? serviceName(task.projects.service_type)}</span>}</span>
           </button>
         </form>
       ))}
@@ -149,25 +89,14 @@ function OpenTasks({ tasks }: { tasks: Task[] }) {
 }
 
 function ActiveProjects({ projects }: { projects: ProjectFull[] }) {
-  if (projects.length === 0) {
-    return <p className="rounded-lg border bg-card p-4 text-center font-semibold text-muted-foreground">Keine aktiven Baustellen.</p>
-  }
-
+  if (projects.length === 0) return <p className="rounded-lg border bg-card p-4 text-center font-semibold text-muted-foreground">Keine aktiven Baustellen.</p>
   return (
     <div className="space-y-2">
       {projects.slice(0, 5).map((project) => (
         <Link key={project.id} href={`/baustellen/${project.id}`}>
           <div className="flex items-center gap-3 rounded-lg border bg-card p-4 shadow-sm transition-colors hover:bg-muted">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-              <Building2 className="size-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-lg font-black">{project.customers?.name ?? "Ohne Kunde"}</p>
-              <p className="truncate text-sm text-muted-foreground">
-                {serviceName(project.service_type)}
-                {project.address ? ` - ${project.address}` : ""}
-              </p>
-            </div>
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700"><Building2 className="size-6" /></div>
+            <div className="min-w-0 flex-1"><p className="truncate text-lg font-black">{project.customers?.name ?? "Ohne Kunde"}</p><p className="truncate text-sm text-muted-foreground">{serviceName(project.service_type)}{project.address ? ` - ${project.address}` : ""}</p></div>
             <ArrowRight className="size-5 shrink-0 text-muted-foreground" />
           </div>
         </Link>
@@ -218,6 +147,7 @@ export default async function HeutePage({
 
 
   if (params["new-event"]) {
+    const type = params.type === "privat" || params.type === "baustelle" || params.type === "arbeit" ? params.type : "arbeit"
     return (
       <div className="nsh-page max-w-3xl">
         <div className="nsh-panel p-5 sm:p-6">
@@ -291,46 +221,39 @@ export default async function HeutePage({
           <div>
             <p className="nsh-eyebrow">Heute</p>
             <h1 className="nsh-title">Hallo Naim</h1>
-            <p className="nsh-subtitle capitalize">{dateStr}</p>
+            <p className="nsh-subtitle">Alles Wichtige zuerst. / Gjithçka e rëndësishme e para.</p>
           </div>
           <img src="/logo.png" alt="NSH Renovierung" className="size-14 rounded-lg bg-white object-contain ring-1 ring-border" />
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <QuickAction href="/neuer-auftrag" icon={Plus} title="Neuer Auftrag" text="Freitext, Kunde, Termin" primary />
-        <QuickAction href="/baustellen" icon={Building2} title="Baustellen" text="Alle Arbeiten ansehen" />
-        <QuickAction href="/kunden" icon={Users} title="Kunden" text="Telefon und Adresse" />
-        <QuickAction href="/notizen" icon={FileText} title="Notiz" text="Schnell etwas merken" />
+      <div className="space-y-5 md:hidden">
+        <WeekPreview events={weekEvents} />
+        <section className="space-y-2"><h2 className="flex items-center gap-2 text-lg font-black"><ClipboardList className="size-5 text-primary" /> Aufgabe heute</h2><OpenTasks tasks={tasks} /></section>
       </div>
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <CalendarDays className="size-6 text-primary" /> Termine heute
-          </h2>
-          <Link href="/kalender" className="text-sm font-black text-primary">Kalender</Link>
+          <h2 className="flex items-center gap-2 text-xl font-black"><CalendarDays className="size-6 text-primary" /> Termine heute</h2>
+          <Link href="/neuer-auftrag" className="inline-flex"><Button size="sm" className="gap-2"><Plus className="size-4" /> Neu</Button></Link>
         </div>
-        <TodayEvents events={events} />
+        <TagesplanSection events={todayEvents} freeSlots={[]} today={todayStr} />
       </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 text-xl font-black">
-              <HardHat className="size-6 text-primary" /> Laufende Baustellen
-            </h2>
-            <Link href="/baustellen" className="text-sm font-black text-primary">Alle</Link>
-          </div>
-          <ActiveProjects projects={projects} />
-        </section>
+        <section className="space-y-3"><h2 className="flex items-center gap-2 text-xl font-black"><CalendarDays className="size-6 text-primary" /> Monatstermine</h2><MonthlyOverview events={monthEvents} /></section>
+        <section className="space-y-3"><h2 className="flex items-center gap-2 text-xl font-black"><HardHat className="size-6 text-primary" /> Laufende Baustellen</h2><ActiveProjects projects={projects} /></section>
+      </div>
 
-        <section className="space-y-3">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <ClipboardList className="size-6 text-primary" /> Aufgaben
-          </h2>
-          <OpenTasks tasks={tasks} />
-        </section>
+      <section className="space-y-3 hidden md:block">
+        <h2 className="flex items-center gap-2 text-xl font-black"><ClipboardList className="size-6 text-primary" /> Aufgaben heute</h2>
+        <OpenTasks tasks={tasks} />
+      </section>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Link href="/kunden" className="rounded-lg border bg-card p-4 font-bold hover:bg-muted">Kunden / Klientët</Link>
+        <Link href="/notizen" className="rounded-lg border bg-card p-4 font-bold hover:bg-muted">Notizen / Shënime</Link>
+        <Link href="/kalender" className="rounded-lg border bg-card p-4 font-bold hover:bg-muted">Kalender / Kalendar</Link>
       </div>
     </div>
   )

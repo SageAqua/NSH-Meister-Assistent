@@ -48,18 +48,20 @@ export function TagesplanSection({
   freeSlots,
   today,
   autoOpenForm = false,
+  initialEventType = "arbeit",
 }: {
   events: CalendarEvent[]
   freeSlots: FreeSlot[]
   today: string
   autoOpenForm?: boolean
+  initialEventType?: "privat" | "arbeit" | "baustelle"
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   // Add-event form
   const [formOpen, setFormOpen] = useState(autoOpenForm)
-  const [title, setTitle] = useState("")
+  const [title, setTitle] = useState(autoOpenForm ? getDefaultTitle(initialEventType) : "")
   const [date, setDate] = useState(today)
   const [startTime, setStartTime] = useState("08:00")
   const [endTime, setEndTime] = useState("16:00")
@@ -458,7 +460,7 @@ export function TagesplanSection({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Was? (z.B. Vinyl verlegen, Müller)"
               autoFocus
-              className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+              className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
             />
             <div>
               <label className="mb-1 block text-xs font-semibold text-muted-foreground">Datum</label>
@@ -466,7 +468,7 @@ export function TagesplanSection({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -476,7 +478,7 @@ export function TagesplanSection({
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
               <div>
@@ -485,7 +487,7 @@ export function TagesplanSection({
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
@@ -547,7 +549,7 @@ export function TagesplanSection({
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
               <div>
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground">Datum</label>
@@ -555,7 +557,7 @@ export function TagesplanSection({
                   type="date"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -565,7 +567,7 @@ export function TagesplanSection({
                     type="time"
                     value={editStart}
                     onChange={(e) => setEditStart(e.target.value)}
-                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                   />
                 </div>
                 <div>
@@ -574,7 +576,7 @@ export function TagesplanSection({
                     type="time"
                     value={editEnd}
                     onChange={(e) => setEditEnd(e.target.value)}
-                    className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                    className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>

@@ -3,8 +3,10 @@ import webpush from "web-push"
 import { createClient } from "@supabase/supabase-js"
 
 export async function GET(req: NextRequest) {
-  const auth = req.headers.get("authorization")
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  const secret = process.env.CRON_SECRET
+  const headerAuth = req.headers.get("authorization")
+  const querySecret = req.nextUrl.searchParams.get("secret")
+  if (headerAuth !== `Bearer ${secret}` && querySecret !== secret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

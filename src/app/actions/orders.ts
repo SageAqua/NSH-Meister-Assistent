@@ -577,6 +577,24 @@ export async function updateCustomer(data: {
   return {}
 }
 
+export async function deleteCustomer(customerId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { error } = await supabase
+    .from("customers")
+    .delete()
+    .eq("id", customerId)
+    .eq("user_id", user.id)
+
+  if (error) return { error: "Kunde konnte nicht geloescht werden." }
+  revalidatePath("/kunden")
+  revalidatePath("/heute")
+  revalidatePath("/baustellen")
+  return {}
+}
+
 export async function savePriceCalculation(data: {
   serviceType: string
   areaMm: number

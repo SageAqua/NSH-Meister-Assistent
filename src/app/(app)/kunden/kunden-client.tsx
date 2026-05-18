@@ -3,12 +3,12 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Check, ChevronRight, Loader2, Pencil, Phone, Plus, User, Users, X } from "lucide-react"
+import { AlertTriangle, Check, ChevronRight, Loader2, Pencil, Phone, Plus, Trash2, User, Users, X } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { saveCustomer, updateCustomer } from "@/app/actions/orders"
+import { deleteCustomer, saveCustomer, updateCustomer } from "@/app/actions/orders"
 import type { Customer } from "@/types"
 
 type CustomerWithProjects = Customer & { projects: { id: string; status: string }[] }
@@ -31,6 +31,8 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
   const [editNotes, setEditNotes] = useState("")
   const [editError, setEditError] = useState("")
   const [pendingCustomerId, setPendingCustomerId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<CustomerWithProjects | null>(null)
+  const [deleteError, setDeleteError] = useState("")
 
   function handleSave() {
     if (!name.trim()) return
@@ -84,6 +86,27 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
         setEditError(result.error)
       } else {
         setEditing(null)
+        router.refresh()
+      }
+      setPendingCustomerId(null)
+    })
+  }
+
+  function openDelete(customer: CustomerWithProjects) {
+    setDeleting(customer)
+    setDeleteError("")
+  }
+
+  function handleDelete() {
+    if (!deleting) return
+    setDeleteError("")
+    setPendingCustomerId(deleting.id)
+    startTransition(async () => {
+      const result = await deleteCustomer(deleting.id)
+      if (result?.error) {
+        setDeleteError(result.error)
+      } else {
+        setDeleting(null)
         router.refresh()
       }
       setPendingCustomerId(null)
@@ -265,6 +288,15 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                   >
                     {pendingCustomerId === customer.id ? <Loader2 className="size-4 animate-spin" /> : <Pencil className="size-4" />}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => openDelete(customer)}
+                    disabled={isPending}
+                    className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+                    aria-label={`${customer.name} loeschen`}
+                  >
+                    {pendingCustomerId === customer.id && deleting?.id === customer.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                  </button>
                 </CardContent>
               </Card>
             )
@@ -374,6 +406,54 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                 <Button size="touch" className="gap-2" onClick={handleUpdate} disabled={isPending || !editName.trim()}>
                   {pendingCustomerId === editing.id ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                   Speichern
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {deleting && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          onClick={() => setDeleting(null)}
+        >
+          <Card className="w-full max-w-md animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 shadow-2xl duration-200" onClick={(event) => event.stopPropagation()}>
+            <CardContent className="space-y-4 p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                  <AlertTriangle className="size-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-black leading-tight">
+                    <span className="nsh-i18n" data-sq="Fshi klientin">Kunde löschen?</span>
+                  </h3>
+                  <p className="mt-2 break-words text-sm font-semibold">{deleting.name}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Baustellen bleiben erhalten, nur die Kunden-Verknüpfung wird entfernt.
+                  </p>
+                </div>
+              </div>
+
+              {deleteError && (
+                <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm font-bold text-destructive">
+                  {deleteError}
+                </p>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="touch" variant="outline" onClick={() => setDeleting(null)} disabled={isPending}>
+                  Abbrechen
+                </Button>
+                <Button
+                  size="touch"
+                  variant="destructive"
+                  className="gap-2 bg-destructive text-white hover:bg-destructive/90"
+                  onClick={handleDelete}
+                  disabled={isPending}
+                >
+                  {pendingCustomerId === deleting.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                  Löschen
                 </Button>
               </div>
             </CardContent>

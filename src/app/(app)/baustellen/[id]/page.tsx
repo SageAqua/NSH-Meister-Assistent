@@ -9,6 +9,7 @@ import { markEventDone, markTaskDone, updateProjectStatus } from "@/app/actions/
 import type { Project, CalendarEvent, Task, Note, Material } from "@/types"
 import { cn } from "@/lib/utils"
 import { ProjectEditor } from "./project-editor"
+import { ProjectDelayButton } from "./project-day-actions"
 
 const STATUS_COLORS: Record<string, string> = {
   geplant: "bg-blue-100 text-blue-700",
@@ -169,14 +170,23 @@ export default async function BaustelleDetailPage({
               <span className="text-sm font-semibold capitalize sm:text-right">{row.value}</span>
             </div>
           ))}
-          {Object.entries(extras).filter(([, v]) => v).length > 0 && (
+          {Object.entries(extras).filter(([, v]) => v === true).length > 0 && (
             <div className="pt-1">
               <p className="text-sm text-muted-foreground mb-1">Zusatzarbeiten</p>
               <div className="flex flex-wrap gap-1">
-                {Object.entries(extras).filter(([, v]) => v).map(([k]) => (
+                {Object.entries(extras).filter(([, v]) => v === true).map(([k]) => (
                   <Badge key={k} variant="secondary" className="text-xs">{extraLabels[k] ?? k}</Badge>
                 ))}
               </div>
+            </div>
+          )}
+          {typeof extras.durationDays === "number" && (
+            <div className="flex flex-col gap-0.5 py-1 border-b last:border-0 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-sm text-muted-foreground">Geplante Dauer</span>
+              <span className="text-sm font-semibold sm:text-right">
+                {extras.durationDays} Arbeitstag{extras.durationDays === 1 ? "" : "e"}
+                {extras.workOnWeekends ? " inkl. Wochenende" : ""}
+              </span>
             </div>
           )}
         </CardContent>
@@ -216,19 +226,25 @@ export default async function BaustelleDetailPage({
           </h3>
           <div className="space-y-2">
             {(events as CalendarEvent[]).map((e) => (
-              <div key={e.id} className={cn("flex min-w-0 items-center gap-3 rounded-xl border p-3", e.status === "erledigt" && "opacity-60")}>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{e.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDate(e.start_time)} · {formatTime(e.start_time)}–{formatTime(e.end_time)}
-                  </p>
+              <div key={e.id} className={cn("min-w-0 rounded-xl border p-3", e.status === "erledigt" && "opacity-60")}>
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="break-words text-sm font-semibold">{e.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(e.start_time)} · {formatTime(e.start_time)}-{formatTime(e.end_time)}
+                    </p>
+                  </div>
+                  {e.status === "erledigt" && (
+                    <Badge variant="secondary" className="shrink-0 text-xs">Erledigt</Badge>
+                  )}
                 </div>
-                {e.status === "erledigt" ? (
-                  <Badge variant="secondary" className="text-xs shrink-0">Erledigt</Badge>
-                ) : (
-                  <form action={markEventDone.bind(null, e.id)}>
-                    <Button size="sm" type="submit" className="h-8 shrink-0">✓</Button>
-                  </form>
+                {e.status !== "erledigt" && (
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
+                    <ProjectDelayButton eventId={e.id} />
+                    <form action={markEventDone.bind(null, e.id)}>
+                      <Button size="sm" type="submit" className="h-9 w-full shrink-0 sm:w-auto">✓ Erledigt</Button>
+                    </form>
+                  </div>
                 )}
               </div>
             ))}

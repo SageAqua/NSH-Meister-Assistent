@@ -95,8 +95,9 @@ function EventPill({ event }: { event: CalendarEvent }) {
         : "bg-blue-100 text-blue-800"
   const clean = event.title.replace(/^\[.*?\]\s*/, "")
   return (
-    <span className={`inline-block rounded-md px-1.5 py-0.5 text-[11px] font-bold leading-tight ${cls}`}>
-      {time(event.start_time)} {clean}
+    <span className={`block min-w-0 rounded-md px-1.5 py-1 text-[10px] font-bold leading-tight ${cls}`}>
+      <span className="block truncate">{time(event.start_time)}</span>
+      <span className="line-clamp-2 break-words">{clean}</span>
     </span>
   )
 }
@@ -105,32 +106,43 @@ function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }
   const days = buildWeekDays(events, today)
   const hasAny = days.some((d) => d.events.length > 0)
 
-  if (!hasAny) {
-    return (
-      <p className="rounded-xl border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-        <span className="nsh-i18n" data-sq="Nuk ka termine këtë javë.">Keine Termine diese Woche.</span>
-      </p>
-    )
-  }
-
   return (
-    <div className="flex gap-2 overflow-x-auto pb-0.5">
-      {days.map((day) => {
-        const hasEvents = day.events.length > 0
-        return (
-          <div
-            key={day.dateStr}
-            className={`flex min-w-[72px] flex-col gap-1 rounded-xl border px-2 py-2 ${hasEvents ? "border-primary/30 bg-primary/5" : "border-transparent bg-muted/20"}`}
-          >
-            <span className="text-[11px] font-black text-muted-foreground">{day.label}</span>
-            {hasEvents ? (
-              day.events.map((e) => <EventPill key={e.id} event={e} />)
-            ) : (
-              <span className="text-[10px] text-muted-foreground/40">—</span>
-            )}
+    <div className="max-w-full overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="grid w-max grid-flow-col grid-rows-3 gap-2 pr-2">
+        {days.map((day) => {
+          const hasEvents = day.events.length > 0
+          const visibleEvents = day.events.slice(0, 2)
+          const moreCount = day.events.length - visibleEvents.length
+
+          return (
+            <div
+              key={day.dateStr}
+              className={`flex h-[76px] w-[116px] min-w-0 flex-col overflow-hidden rounded-xl border px-2 py-2 ${
+                hasEvents ? "border-primary/35 bg-primary/5" : "border-border/50 bg-muted/15"
+              }`}
+            >
+              <span className="block truncate text-[10px] font-black text-muted-foreground">{day.label}</span>
+              <div className="mt-1 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
+                {hasEvents ? (
+                  <>
+                    {visibleEvents.map((e) => <EventPill key={e.id} event={e} />)}
+                    {moreCount > 0 && (
+                      <span className="block truncate text-[10px] font-bold text-primary/80">+{moreCount} mehr</span>
+                    )}
+                  </>
+                ) : (
+                  <span className="truncate text-[10px] text-muted-foreground/40">—</span>
+                )}
+              </div>
+            </div>
+          )
+        })}
+        {!hasAny && (
+          <div className="col-span-2 flex h-[76px] w-[240px] items-center rounded-xl border bg-muted/30 px-4 text-sm text-muted-foreground">
+            <span className="nsh-i18n" data-sq="Nuk ka termine këtë javë.">Keine Termine diese Woche.</span>
           </div>
-        )
-      })}
+        )}
+      </div>
     </div>
   )
 }

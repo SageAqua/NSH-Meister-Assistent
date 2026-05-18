@@ -53,6 +53,8 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
   const [startDate, setStartDate] = useState(todayKey())
   const [startTime, setStartTime] = useState("08:00")
   const [endTime, setEndTime] = useState("16:00")
+  const [durationDays, setDurationDays] = useState(1)
+  const [workOnWeekends, setWorkOnWeekends] = useState(false)
   const [notes, setNotes] = useState("")
   const [materialNeeded, setMaterialNeeded] = useState(true)
   const [offerNeeded, setOfferNeeded] = useState(true)
@@ -85,6 +87,8 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
         startDate: startDate || undefined,
         startTime,
         endTime,
+        durationDays,
+        workOnWeekends,
         notes,
         materialNeeded,
         offerNeeded,
@@ -326,6 +330,67 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
         {startDate && (
           <DaySchedulePreview date={startDate} startTime={startTime} endTime={endTime} className="mt-3" />
         )}
+
+        <div className="mt-4 rounded-lg border bg-muted/20 p-3">
+          <div className="mb-3">
+            <p className="text-sm font-black">
+              <span className="nsh-i18n" data-sq="Sa ditë pune?">Wie lange dauert die Baustelle?</span>
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              <span className="nsh-i18n" data-sq="Aplikacioni krijon automatikisht ditët e punës.">Die App plant automatisch alle Arbeitstage ein.</span>
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {[
+              { value: 1, label: "1 Tag", sq: "1 ditë" },
+              { value: 2, label: "2 Tage", sq: "2 ditë" },
+              { value: 3, label: "3 Tage", sq: "3 ditë" },
+              { value: 5, label: "1 Woche", sq: "1 javë" },
+              { value: 10, label: "2 Wochen", sq: "2 javë" },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setDurationDays(option.value)}
+                className={cn(
+                  "min-h-12 rounded-lg border-2 px-2 text-sm font-black transition-colors",
+                  durationDays === option.value
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background"
+                )}
+              >
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={option.sq}>{option.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <label className="mt-3 block">
+            <span className="mb-1 block text-xs font-bold uppercase text-muted-foreground">
+              <span className="nsh-i18n" data-sq="Ditë pune saktë">Eigene Arbeitstage</span>
+            </span>
+            <input
+              type="number"
+              min={1}
+              max={60}
+              value={durationDays}
+              onChange={(event) => setDurationDays(Math.max(1, Math.min(60, Number(event.target.value) || 1)))}
+              className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base font-black outline-none focus:border-primary"
+            />
+          </label>
+
+          <label className="mt-3 flex items-center gap-3 rounded-lg border bg-background px-3 py-2">
+            <input
+              type="checkbox"
+              checked={workOnWeekends}
+              onChange={(event) => setWorkOnWeekends(event.target.checked)}
+              className="size-5 accent-primary"
+            />
+            <span className="text-sm font-bold">
+              <span className="nsh-i18n" data-sq="Planifiko edhe fundjavën">Auch Samstag/Sonntag einplanen</span>
+            </span>
+          </label>
+        </div>
       </section>
 
       <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">

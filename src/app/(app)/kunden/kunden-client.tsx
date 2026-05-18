@@ -3,12 +3,12 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Phone, Users, ChevronRight, Plus, X, User } from "lucide-react"
+import { Check, ChevronRight, Loader2, Pencil, Phone, Plus, User, Users, X } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { saveCustomer } from "@/app/actions/orders"
+import { saveCustomer, updateCustomer } from "@/app/actions/orders"
 import type { Customer } from "@/types"
 
 type CustomerWithProjects = Customer & { projects: { id: string; status: string }[] }
@@ -23,6 +23,14 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
   const [notes, setNotes] = useState("")
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState("")
+  const [editing, setEditing] = useState<CustomerWithProjects | null>(null)
+  const [editName, setEditName] = useState("")
+  const [editPhone, setEditPhone] = useState("")
+  const [editAddress, setEditAddress] = useState("")
+  const [editCity, setEditCity] = useState("")
+  const [editNotes, setEditNotes] = useState("")
+  const [editError, setEditError] = useState("")
+  const [pendingCustomerId, setPendingCustomerId] = useState<string | null>(null)
 
   function handleSave() {
     if (!name.trim()) return
@@ -46,6 +54,39 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
         setError("")
         router.refresh()
       }
+    })
+  }
+
+  function openEdit(customer: CustomerWithProjects) {
+    setEditing(customer)
+    setEditName(customer.name)
+    setEditPhone(customer.phone ?? "")
+    setEditAddress(customer.address ?? "")
+    setEditCity(customer.city ?? "")
+    setEditNotes(customer.notes ?? "")
+    setEditError("")
+  }
+
+  function handleUpdate() {
+    if (!editing || !editName.trim()) return
+    setEditError("")
+    setPendingCustomerId(editing.id)
+    startTransition(async () => {
+      const result = await updateCustomer({
+        id: editing.id,
+        name: editName,
+        phone: editPhone,
+        address: editAddress,
+        city: editCity,
+        notes: editNotes,
+      })
+      if (result?.error) {
+        setEditError(result.error)
+      } else {
+        setEditing(null)
+        router.refresh()
+      }
+      setPendingCustomerId(null)
     })
   }
 
@@ -215,10 +256,128 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                       <Phone className="size-4" />
                     </a>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => openEdit(customer)}
+                    disabled={isPending}
+                    className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                    aria-label={`${customer.name} bearbeiten`}
+                  >
+                    {pendingCustomerId === customer.id ? <Loader2 className="size-4 animate-spin" /> : <Pencil className="size-4" />}
+                  </button>
                 </CardContent>
               </Card>
             )
           })}
+        </div>
+      )}
+
+      {editing && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          onClick={() => setEditing(null)}
+        >
+          <Card className="w-full max-w-lg animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 shadow-2xl duration-200" onClick={(event) => event.stopPropagation()}>
+            <CardContent className="space-y-4 p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Pencil className="size-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-black leading-tight">
+                      <span className="nsh-i18n" data-sq="Ndrysho klientin">Kunde bearbeiten</span>
+                    </h3>
+                    <p className="mt-1 truncate text-xs text-muted-foreground">{editing.name}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditing(null)}
+                  className="flex size-8 shrink-0 items-center justify-center rounded-lg hover:bg-accent"
+                  aria-label="Bearbeiten schliessen"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                  <span className="nsh-i18n" data-sq="Emri">Name *</span>
+                </span>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(event) => setEditName(event.target.value)}
+                  className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                />
+              </label>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                    <span className="nsh-i18n" data-sq="Telefoni">Telefon</span>
+                  </span>
+                  <input
+                    type="tel"
+                    value={editPhone}
+                    onChange={(event) => setEditPhone(event.target.value)}
+                    className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                    <span className="nsh-i18n" data-sq="Qyteti">Stadt</span>
+                  </span>
+                  <input
+                    type="text"
+                    value={editCity}
+                    onChange={(event) => setEditCity(event.target.value)}
+                    className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  />
+                </label>
+              </div>
+
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                  <span className="nsh-i18n" data-sq="Adresa">Adresse</span>
+                </span>
+                <input
+                  type="text"
+                  value={editAddress}
+                  onChange={(event) => setEditAddress(event.target.value)}
+                  className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                  <span className="nsh-i18n" data-sq="Shënim">Notiz</span>
+                </span>
+                <textarea
+                  value={editNotes}
+                  onChange={(event) => setEditNotes(event.target.value)}
+                  rows={3}
+                  className="w-full resize-none rounded-lg border-2 border-border bg-background p-3 text-base focus:border-primary focus:outline-none"
+                />
+              </label>
+
+              {editError && (
+                <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm font-bold text-destructive">
+                  {editError}
+                </p>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="touch" variant="outline" onClick={() => setEditing(null)} disabled={isPending}>
+                  Abbrechen
+                </Button>
+                <Button size="touch" className="gap-2" onClick={handleUpdate} disabled={isPending || !editName.trim()}>
+                  {pendingCustomerId === editing.id ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                  Speichern
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

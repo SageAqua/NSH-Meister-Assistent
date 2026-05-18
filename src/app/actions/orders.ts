@@ -350,6 +350,8 @@ export async function saveSimpleOrder(data: {
   startDate?: string
   startTime?: string
   endTime?: string
+  durationDays?: number
+  workOnWeekends?: boolean
   notes?: string
   materialNeeded: boolean
   offerNeeded: boolean
@@ -404,6 +406,8 @@ export async function saveSimpleOrder(data: {
       extras: {
         materialNeeded: data.materialNeeded,
         offerNeeded: data.offerNeeded,
+        durationDays: data.durationDays ?? 1,
+        workOnWeekends: data.workOnWeekends ?? false,
       },
     })
     .select("id")
@@ -414,16 +418,31 @@ export async function saveSimpleOrder(data: {
   if (data.startDate) {
     const startTime = data.startTime || "08:00"
     const endTime = data.endTime || "16:00"
-    await supabase.from("calendar_events").insert({
-      user_id: user.id,
-      project_id: project.id,
-      title: workTitle,
-      start_time: `${data.startDate}T${startTime}:00`,
-      end_time: `${data.startDate}T${endTime}:00`,
-      status: "geplant",
-      helpers_count: data.helpersCount,
-      notes: data.notes?.trim() || null,
-    })
+    const durationDays = Math.max(1, Math.min(60, data.durationDays ?? 1))
+    const workOnWeekends = data.workOnWeekends ?? false
+    const plannedDates: string[] = []
+    const cursor = new Date(`${data.startDate}T12:00:00`)
+
+    while (plannedDates.length < durationDays) {
+      const day = cursor.getDay()
+      if (workOnWeekends || (day !== 0 && day !== 6)) {
+        plannedDates.push(cursor.toISOString().split("T")[0])
+      }
+      cursor.setDate(cursor.getDate() + 1)
+    }
+
+    await supabase.from("calendar_events").insert(
+      plannedDates.map((date, index) => ({
+        user_id: user.id,
+        project_id: project.id,
+        title: durationDays > 1 ? `${workTitle} (Tag ${index + 1}/${durationDays})` : workTitle,
+        start_time: `${date}T${startTime}:00`,
+        end_time: `${date}T${endTime}:00`,
+        status: "geplant",
+        helpers_count: data.helpersCount,
+        notes: data.notes?.trim() || null,
+      }))
+    )
   }
 
   const tasks = [
@@ -443,6 +462,60 @@ export async function saveSimpleOrder(data: {
   revalidatePath("/kalender")
   revalidatePath("/baustellen")
   return { projectId: project.id }
+}
+
+function addWorkDelayToIso(iso: string, workOnWeekends: boolean) {
+  const date = new Date(iso)
+  do {
+    date.setDate(date.getDate() + 1)
+  } while (!workOnWeekends && (date.getDay() === 0 || date.getDay() === 6))
+  return date.toISOString()
+}
+
+export async function delayProjectWorkFromEvent(eventId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const { data: event, error: eventError } = await supabase
+    .from("calendar_events")
+    .select("id, project_id, start_time, projects(extras)")
+    .eq("id", eventId)
+    .eq("user_id", user.id)
+    .single()
+
+  if (eventError || !event?.project_id) return { error: "Termin konnte nicht gefunden werden." }
+  const projectExtras = (event.projects as { extras?: Record<string, unknown> } | null)?.extras
+  const workOnWeekends = projectExtras?.workOnWeekends === true
+
+  const { data: events, error: eventsError } = await supabase
+    .from("calendar_events")
+    .select("id, start_time, end_time")
+    .eq("user_id", user.id)
+    .eq("project_id", event.project_id)
+    .eq("status", "geplant")
+    .gte("start_time", event.start_time)
+    .order("start_time", { ascending: false })
+
+  if (eventsError) return { error: "Plan konnte nicht geladen werden." }
+
+  for (const item of events ?? []) {
+    const { error } = await supabase
+      .from("calendar_events")
+      .update({
+        start_time: addWorkDelayToIso(item.start_time, workOnWeekends),
+        end_time: addWorkDelayToIso(item.end_time, workOnWeekends),
+      })
+      .eq("id", item.id)
+      .eq("user_id", user.id)
+
+    if (error) return { error: "Plan konnte nicht verschoben werden." }
+  }
+
+  revalidatePath("/heute")
+  revalidatePath("/kalender")
+  revalidatePath(`/baustellen/${event.project_id}`)
+  return {}
 }
 
 export async function saveCustomer(data: {
@@ -467,6 +540,40 @@ export async function saveCustomer(data: {
 
   if (error) return { error: "Kontakt konnte nicht gespeichert werden." }
   revalidatePath("/kunden")
+  return {}
+}
+
+export async function updateCustomer(data: {
+  id: string
+  name: string
+  phone?: string
+  address?: string
+  city?: string
+  notes?: string
+}): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const name = data.name.trim()
+  if (!name) return { error: "Bitte Namen eingeben." }
+
+  const { error } = await supabase
+    .from("customers")
+    .update({
+      name,
+      phone: data.phone?.trim() || null,
+      address: data.address?.trim() || null,
+      city: data.city?.trim() || null,
+      notes: data.notes?.trim() || null,
+    })
+    .eq("id", data.id)
+    .eq("user_id", user.id)
+
+  if (error) return { error: "Kunde konnte nicht geaendert werden." }
+  revalidatePath("/kunden")
+  revalidatePath(`/kunden/${data.id}`)
+  revalidatePath("/heute")
   return {}
 }
 

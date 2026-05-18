@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
-import type { ProjectStatus, VinylOrderForm, CalendarPlanDay } from "@/types"
+import type { ProjectStatus, VinylOrderForm, CalendarPlanDay, CalendarEvent } from "@/types"
 
 export async function saveVinylOrder(form: VinylOrderForm, plan: CalendarPlanDay[]) {
   const supabase = await createClient()
@@ -168,6 +168,29 @@ export async function updateCalendarEvent(data: {
   revalidatePath("/heute")
   revalidatePath("/kalender")
   return {}
+}
+
+export async function getCalendarEventsForDate(date: string): Promise<{ events?: CalendarEvent[]; error?: string }> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { events: [] }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  const startOfDay = `${date}T00:00:00`
+  const endOfDay = `${date}T23:59:59`
+
+  const { data, error } = await supabase
+    .from("calendar_events")
+    .select("*, projects(*, customers(*))")
+    .eq("user_id", user.id)
+    .gte("start_time", startOfDay)
+    .lte("start_time", endOfDay)
+    .neq("status", "abgesagt")
+    .order("start_time")
+
+  if (error) return { error: "Termine konnten nicht geladen werden." }
+  return { events: (data ?? []) as CalendarEvent[] }
 }
 
 export async function saveUniversalOrder(data: {

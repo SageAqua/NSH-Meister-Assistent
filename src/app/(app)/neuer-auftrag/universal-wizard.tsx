@@ -14,6 +14,7 @@ import {
   UserRound,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DaySchedulePreview } from "@/components/day-schedule-preview"
 import { cn } from "@/lib/utils"
 import { saveSimpleOrder } from "@/app/actions/orders"
 import type { Customer } from "@/types"
@@ -321,6 +322,10 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             </div>
           </div>
         </div>
+
+        {startDate && (
+          <DaySchedulePreview date={startDate} startTime={startTime} endTime={endTime} className="mt-3" />
+        )}
       </section>
 
       <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">

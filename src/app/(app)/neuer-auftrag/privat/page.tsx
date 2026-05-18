@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Check, Loader2 } from "lucide-react"
 import { saveCalendarEvent } from "@/app/actions/orders"
+import { DaySchedulePreview } from "@/components/day-schedule-preview"
 
 const PRESETS = [
   { label: "Morgens", sq: "Në mëngjes", sub: "08:00 – 10:00", start: "08:00", end: "10:00" },
@@ -102,6 +103,8 @@ export default function PrivatTerminPage() {
                 className="h-16 w-full rounded-xl border-2 bg-card px-4 text-xl font-bold focus:border-violet-500 focus:outline-none"
               />
             </div>
+
+            <DaySchedulePreview date={date} startTime={startTime} endTime={endTime} />
 
             <div>
               <label className="mb-2 block text-sm font-black text-muted-foreground"><span className="nsh-i18n" data-sq="NË ÇFARË ORE?">UM WIEVIEL UHR?</span></label>

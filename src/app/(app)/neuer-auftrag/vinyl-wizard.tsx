@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Check, AlertTriangle, Euro, Clock, Calendar 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { DaySchedulePreview } from "@/components/day-schedule-preview"
 import { calculatePrice, calculateDuration, getRiskHints, generateCalendarPlan } from "@/lib/calculations/vinyl"
 import { saveVinylOrder } from "@/app/actions/orders"
 import type { VinylOrderForm, Customer, PriceEstimate, DurationEstimate, CalendarPlanDay } from "@/types"
@@ -378,6 +379,9 @@ function StepStartdatum({ form, setForm }: { form: VinylOrderForm; setForm: (f: 
           onChange={(e) => setForm({ ...form, startDate: e.target.value })}
           className="h-14 w-full rounded-2xl border-2 border-primary bg-background px-4 text-lg font-semibold focus:outline-none"
         />
+        {form.startDate && (
+          <DaySchedulePreview date={form.startDate} startTime="08:00" endTime="16:00" className="w-full" />
+        )}
         <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
           {[1, 3, 7, 14].map((days) => {
             const d = new Date(); d.setDate(d.getDate() + days)

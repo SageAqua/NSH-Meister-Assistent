@@ -6,6 +6,7 @@ import Link from "next/link"
 import { BriefcaseBusiness, Building2, CalendarClock, CheckCircle2, FileText, Navigation, Phone, Plus, User, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { DaySchedulePreview } from "@/components/day-schedule-preview"
 import { cn } from "@/lib/utils"
 import { SwipeToReveal } from "@/components/swipe-to-reveal"
 import {
@@ -297,7 +298,6 @@ export function TagesplanSection({
               const phone = customer?.phone
               const eventTypeDetected = detectEventType(event)
               const eventVisual = getEventVisual(eventTypeDetected)
-              const isPrivate = eventTypeDetected === "privat"
 
               const endMin =
                 new Date(event.end_time).getHours() * 60 +
@@ -378,6 +378,7 @@ export function TagesplanSection({
                           </a>
                         )}
                         <Button
+                          type="button"
                           size="sm"
                           variant="outline"
                           className="h-9 gap-1.5 text-xs"
@@ -386,27 +387,29 @@ export function TagesplanSection({
                             setNotizText("")
                           }}
                         >
-                          <FileText className="size-3.5" /> Notiz
+                          <FileText className="size-3.5" />
+                          <span className="nsh-i18n nsh-i18n-button" data-sq="Shënim">Notiz</span>
                         </Button>
-                        {isPrivate ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-9 gap-1.5 text-xs"
-                            onClick={() => openEdit(event)}
-                          >
-                            <CalendarClock className="size-3.5" /> Verschieben
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            className="h-9 gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700"
-                            onClick={() => handleMarkDone(event.id)}
-                            disabled={isPending}
-                          >
-                            <CheckCircle2 className="size-3.5" /> Erledigt
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-9 gap-1.5 text-xs"
+                          onClick={() => openEdit(event)}
+                        >
+                          <CalendarClock className="size-3.5" />
+                          <span className="nsh-i18n nsh-i18n-button" data-sq="Shtyje">Verschieben</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-9 gap-1.5 bg-green-600 text-xs text-white hover:bg-green-700"
+                          onClick={() => handleMarkDone(event.id)}
+                          disabled={isPending}
+                        >
+                          <CheckCircle2 className="size-3.5" />
+                          <span className="nsh-i18n nsh-i18n-button" data-sq="Kryer">Erledigt</span>
+                        </Button>
                       </div>
                     )}
 
@@ -514,6 +517,7 @@ export function TagesplanSection({
                 className="h-14 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
               />
             </div>
+            <DaySchedulePreview date={date} startTime={startTime} endTime={endTime} />
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></label>

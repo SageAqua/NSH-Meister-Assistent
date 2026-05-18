@@ -1,18 +1,12 @@
 import type { Metadata, Viewport } from "next"
-import { Fraunces, Manrope } from "next/font/google"
+import { Inter } from "next/font/google"
 import "./globals.css"
 import { ServiceWorkerRegister } from "@/components/service-worker-register"
 
-const manrope = Manrope({
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-})
-
-const fraunces = Fraunces({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700"],
 })
 
 export const metadata: Metadata = {
@@ -50,7 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={`${manrope.variable} ${fraunces.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`}>
         {children}
         <ServiceWorkerRegister />
       </body>

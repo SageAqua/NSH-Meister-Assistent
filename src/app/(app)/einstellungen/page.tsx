@@ -1,13 +1,22 @@
+import { createHmac } from "crypto"
 import { createClient } from "@/lib/supabase/server"
 import { logoutAction } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { NotificationButton } from "@/components/notification-button"
-import { Bell, LogOut, MapPin, Phone, Settings, User } from "lucide-react"
+import { CalendarCopyButton } from "@/components/calendar-copy-button"
+import { Bell, CalendarDays, LogOut, MapPin, Phone, Settings, User } from "lucide-react"
 
 export default async function EinstellungenPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+
+  const calToken = user && process.env.CALENDAR_SECRET
+    ? createHmac("sha256", process.env.CALENDAR_SECRET).update(user.id).digest("hex")
+    : null
+  const calUrl = calToken
+    ? `https://nshrenovierung.vercel.app/api/calendar/feed.ics?token=${calToken}`
+    : null
 
   return (
     <div className="nsh-page max-w-5xl">
@@ -80,6 +89,34 @@ export default async function EinstellungenPage() {
           </CardContent>
         </Card>
       </section>
+
+      {/* Apple Kalender */}
+      {calUrl && (
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+            <CalendarDays className="size-4" /> Apple Kalender
+          </h2>
+          <Card>
+            <CardContent className="space-y-4 p-4">
+              <p className="text-sm text-muted-foreground">
+                Abonniere diesen Link in deiner Kalender-App. Neue Termine erscheinen automatisch — kein weiterer Aufwand.
+              </p>
+              <input
+                readOnly
+                value={calUrl}
+                className="w-full rounded-lg border bg-muted/40 px-3 py-2 text-xs font-mono text-muted-foreground"
+              />
+              <CalendarCopyButton url={calUrl} />
+              <div className="rounded-xl border bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
+                <p className="font-bold text-foreground">Einrichtung auf iPhone:</p>
+                <p>1. Einstellungen → Kalender → Konten → Konto hinzufügen</p>
+                <p>2. Andere → Kalenderabo hinzufügen</p>
+                <p>3. Link oben einfügen → Weiter → Sichern</p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       <form action={logoutAction} className="max-w-md">
         <Button type="submit" variant="destructive" size="touch" className="w-full gap-2">

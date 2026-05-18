@@ -46,9 +46,8 @@ export default function PrivatTerminPage() {
     startTransition(async () => {
       const result = await saveCalendarEvent({
         title: `[privat] ${title.trim()}`,
-        date,
-        startTime,
-        endTime,
+        startIso: new Date(`${date}T${startTime}:00`).toISOString(),
+        endIso: new Date(`${date}T${endTime}:00`).toISOString(),
       })
       if (result?.error) {
         setError(result.error)

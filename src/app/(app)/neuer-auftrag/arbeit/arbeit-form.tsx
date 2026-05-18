@@ -47,9 +47,8 @@ export function ArbeitTerminForm({ customers }: { customers: Customer[] }) {
     startTransition(async () => {
       const result = await saveCalendarEvent({
         title: `[arbeit] ${title.trim()}`,
-        date,
-        startTime,
-        endTime,
+        startIso: new Date(`${date}T${startTime}:00`).toISOString(),
+        endIso: new Date(`${date}T${endTime}:00`).toISOString(),
       })
       if (result?.error) {
         setError(result.error)

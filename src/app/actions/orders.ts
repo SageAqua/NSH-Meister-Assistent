@@ -395,9 +395,11 @@ export async function savePriceCalculation(data: {
 
 export async function saveCalendarEvent(data: {
   title: string
-  date: string
-  startTime: string
-  endTime: string
+  date?: string
+  startTime?: string
+  endTime?: string
+  startIso?: string
+  endIso?: string
   projectId?: string
 }): Promise<{ error?: string }> {
   const supabase = await createClient()
@@ -408,8 +410,8 @@ export async function saveCalendarEvent(data: {
     user_id: user.id,
     project_id: data.projectId ?? null,
     title: data.title,
-    start_time: `${data.date}T${data.startTime}:00`,
-    end_time: `${data.date}T${data.endTime}:00`,
+    start_time: data.startIso ?? `${data.date}T${data.startTime}:00`,
+    end_time: data.endIso ?? `${data.date}T${data.endTime}:00`,
     status: "geplant",
     helpers_count: 0,
   })

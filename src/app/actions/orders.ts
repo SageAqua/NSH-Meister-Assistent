@@ -416,6 +416,7 @@ export async function saveCalendarEvent(data: {
 
   if (error) return { error: "Termin konnte nicht gespeichert werden." }
   revalidatePath("/heute")
+  revalidatePath("/kalender")
   return {}
 }
 

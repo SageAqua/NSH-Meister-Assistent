@@ -1,37 +1,48 @@
 import Link from "next/link"
-import { BriefcaseBusiness, Building2, CalendarPlus2, User } from "lucide-react"
+import { BriefcaseBusiness, Building2, User } from "lucide-react"
 
 export default async function NeuerAuftragPage() {
   return (
-    <div className="min-h-[calc(100dvh-5.5rem)] w-full">
-      <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-center p-4 sm:p-6">
-        <p className="nsh-eyebrow">Schnell starten</p>
-        <h1 className="nsh-title">Was willst du jetzt eintragen?</h1>
-        <p className="nsh-subtitle">
-          Einfach tippen und los. / Prek dhe fillo.
-        </p>
+    <div className="flex min-h-[calc(100dvh-5.5rem)] w-full flex-col justify-center p-4 sm:p-6">
+      <div className="mx-auto w-full max-w-5xl">
+        <p className="nsh-eyebrow">Schnell starten / Fillo shpejt</p>
+        <h1 className="nsh-title mt-1">Was willst du eintragen?</h1>
+        <p className="nsh-subtitle">Waehle den Typ und fuell das Formular aus.</p>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <Link href="/heute?new-event=1&type=privat" className="rounded-2xl border border-violet-300 bg-violet-50 p-5 transition-colors hover:bg-violet-100">
-            <User className="size-7 text-violet-700" />
-            <p className="mt-3 text-lg font-black text-violet-900">Privat Termin</p>
-            <p className="text-sm text-violet-700">Termin privat</p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <Link
+            href="/neuer-auftrag/privat"
+            className="nsh-card-tap flex min-h-36 flex-col justify-between rounded-2xl border-2 border-violet-300 bg-violet-50 p-6 hover:bg-violet-100 sm:min-h-44"
+          >
+            <User className="size-12 text-violet-700" />
+            <div>
+              <p className="text-2xl font-black text-violet-900">Privat Termin</p>
+              <p className="mt-1 text-base text-violet-700">Arzt, Familie, Persoenliches</p>
+            </div>
           </Link>
-          <Link href="/heute?new-event=1&type=arbeit" className="rounded-2xl border border-blue-300 bg-blue-50 p-5 transition-colors hover:bg-blue-100">
-            <BriefcaseBusiness className="size-7 text-blue-700" />
-            <p className="mt-3 text-lg font-black text-blue-900">Work Termin</p>
-            <p className="text-sm text-blue-700">Termin pune</p>
+
+          <Link
+            href="/neuer-auftrag/arbeit"
+            className="nsh-card-tap flex min-h-36 flex-col justify-between rounded-2xl border-2 border-blue-300 bg-blue-50 p-6 hover:bg-blue-100 sm:min-h-44"
+          >
+            <BriefcaseBusiness className="size-12 text-blue-700" />
+            <div>
+              <p className="text-2xl font-black text-blue-900">Work Termin</p>
+              <p className="mt-1 text-base text-blue-700">Kundentermin, Besichtigung</p>
+            </div>
           </Link>
-          <Link href="/heute?new-event=1&type=baustelle" className="rounded-2xl border border-amber-300 bg-amber-50 p-5 transition-colors hover:bg-amber-100">
-            <Building2 className="size-7 text-amber-700" />
-            <p className="mt-3 text-lg font-black text-amber-900">Baustelle planen</p>
-            <p className="text-sm text-amber-700">Planifiko kantierin</p>
+
+          <Link
+            href="/neuer-auftrag/baustelle"
+            className="nsh-card-tap flex min-h-36 flex-col justify-between rounded-2xl border-2 border-amber-300 bg-amber-50 p-6 hover:bg-amber-100 sm:min-h-44"
+          >
+            <Building2 className="size-12 text-amber-700" />
+            <div>
+              <p className="text-2xl font-black text-amber-900">Baustelle planen</p>
+              <p className="mt-1 text-base text-amber-700">Auftrag, Projekt, Renovierung</p>
+            </div>
           </Link>
         </div>
-
-        <Link href="/kalender" className="mt-4 inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-bold hover:bg-accent w-fit">
-          <CalendarPlus2 className="size-4" /> Monat ansehen / Shiko muajin
-        </Link>
       </div>
     </div>
   )

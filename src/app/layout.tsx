@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next"
-import { Nunito } from "next/font/google"
+import { Poppins } from "next/font/google"
 import "./globals.css"
 import { ServiceWorkerRegister } from "@/components/service-worker-register"
 
-const nunito = Nunito({
+const poppins = Poppins({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
@@ -45,7 +45,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={`${nunito.variable} antialiased`}>
+      <body className={`${poppins.variable} antialiased`}>
         {children}
         <ServiceWorkerRegister />
       </body>

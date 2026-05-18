@@ -19,7 +19,12 @@
       "Bash(Format-Table -AutoSize)",
       "Bash(npx next *)",
       "Bash(npm install *)",
-      "Bash(node_modules/.bin/next build *)"
+      "Bash(node_modules/.bin/next build *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\({deps: Object.keys\\(p.dependencies\\), devDeps: Object.keys\\(p.devDependencies||{}\\)}, null, 2\\)\\)\")",
+      "Bash(cat src/types/index.ts)",
+      "Bash(cat src/types.ts)",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__execute_sql"
     ],
     "additionalDirectories": [
       "c:\\Users\\Growlio\\Documents\\02_Growlio\\02_NSH\\NSH-Meister-Assistent\\src\\app\\(app)\\kunden"

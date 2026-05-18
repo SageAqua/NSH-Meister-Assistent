@@ -34,7 +34,7 @@ export function MobileBottomNav() {
             onClick={hapticLight}
             className={cn(
               "flex flex-1 flex-col items-center justify-center gap-1 py-2.5",
-              "transition-colors duration-150",
+              "transition-colors duration-100",
               isNewAuftrag ? "text-primary" : isActive ? "text-primary" : "text-muted-foreground/70"
             )}
           >
@@ -45,7 +45,7 @@ export function MobileBottomNav() {
             ) : (
               <span
                 className={cn(
-                  "flex size-9 items-center justify-center rounded-xl transition-all duration-200",
+                  "flex size-9 items-center justify-center rounded-xl transition-all duration-100",
                   isActive ? "bg-primary/12 scale-110" : "scale-100"
                 )}
               >

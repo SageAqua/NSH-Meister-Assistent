@@ -143,14 +143,17 @@
     font-family: var(--font-heading), var(--font-sans), system-ui, sans-serif;
   }
 
-  /* Remove native tap flash, eliminate 300ms delay */
+  /* Eliminate 300ms tap delay and tap flash on all interactive elements */
   button,
   a,
   [role="button"],
+  [role="link"],
   input,
   select,
   textarea,
-  label {
+  label,
+  [tabindex],
+  summary {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
@@ -160,6 +163,12 @@
   [data-scroll] {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+  }
+
+  /* Promote nav to GPU layer for instant visual feedback */
+  nav {
+    will-change: transform;
+    transform: translateZ(0);
   }
 }
 

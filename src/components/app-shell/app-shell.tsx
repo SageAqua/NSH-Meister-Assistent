@@ -3,7 +3,15 @@ import { IpadSidebar } from "@/components/app-shell/ipad-sidebar"
 import { MobileBottomNav } from "@/components/app-shell/mobile-bottom-nav"
 import { TopNavbar } from "@/components/app-shell/top-navbar"
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  userName,
+  userEmail,
+}: {
+  children: ReactNode
+  userName: string
+  userEmail: string
+}) {
   return (
     <div className="min-h-dvh overflow-x-hidden md:h-dvh md:overflow-hidden">
       <div className="flex min-h-dvh min-w-0 overflow-x-hidden md:h-dvh md:min-h-0">
@@ -24,7 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           {/* Desktop top navbar */}
-          <TopNavbar />
+          <TopNavbar userName={userName} userEmail={userEmail} />
           {/* Page content */}
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 md:px-6 md:py-6 xl:px-8">

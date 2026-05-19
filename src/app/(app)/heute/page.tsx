@@ -6,7 +6,6 @@ import {
   ClipboardList,
   HardHat,
   Plus,
-  TrendingUp,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { markTaskDone } from "@/app/actions/orders"
@@ -105,8 +104,7 @@ function StatCard({
         </span>
       </div>
       <p className={`mt-3 text-4xl font-black tabular-nums ${primary ? "text-primary-foreground" : "text-foreground"}`}>{value}</p>
-      <p className={`mt-1.5 flex items-center gap-1 text-xs ${primary ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-        <TrendingUp className="size-3" />
+      <p className={`mt-1.5 text-xs ${primary ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
         {subtitle}
       </p>
     </div>
@@ -283,7 +281,7 @@ function ProgressGauge({ done, total }: { done: number; total: number }) {
           <p className="text-[10px] text-muted-foreground">Erledigt</p>
         </div>
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">{done} von {total} Aufgaben</p>
+      <p className="mt-3 text-xs text-muted-foreground">{done} von {total} Aufgaben erledigt</p>
     </div>
   )
 }
@@ -382,6 +380,9 @@ export default async function HeutePage() {
   const startOfDay = `${todayStr}T00:00:00`
   const endOfDay = `${todayStr}T23:59:59`
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const userName = user?.user_metadata?.full_name ?? user?.email ?? "Naim"
+
   const [
     { data: todayEventsRaw },
     { data: weekEventsRaw },
@@ -401,9 +402,9 @@ export default async function HeutePage() {
     supabase.from("projects").select("*", { count: "exact", head: true }),
     supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "in_arbeit"),
     supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "geplant"),
-    supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "abgeschlossen"),
-    supabase.from("tasks").select("*", { count: "exact", head: true }).gte("created_at", startOfMonth(today)).lte("created_at", endOfMonth(today)),
-    supabase.from("tasks").select("*", { count: "exact", head: true }).eq("is_done", true).gte("created_at", startOfMonth(today)).lte("created_at", endOfMonth(today)),
+    supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "fertig"),
+    supabase.from("tasks").select("*", { count: "exact", head: true }),
+    supabase.from("tasks").select("*", { count: "exact", head: true }).eq("is_done", true),
   ])
 
   const todayEvents = (todayEventsRaw ?? []) as CalendarEvent[]
@@ -421,7 +422,7 @@ export default async function HeutePage() {
       <header className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-2xl font-black leading-tight sm:text-3xl">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">{dateStr} · Hallo Naim!</p>
+          <p className="text-sm text-muted-foreground">{dateStr} · Hallo {userName.split(" ")[0]}!</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Link href="/neuer-auftrag">

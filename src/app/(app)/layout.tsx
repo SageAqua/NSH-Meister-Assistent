@@ -8,5 +8,8 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
   if (!data.user) redirect("/login")
 
-  return <AppShell>{children}</AppShell>
+  const name = data.user.user_metadata?.full_name ?? data.user.email ?? "Naim"
+  const email = data.user.email ?? ""
+
+  return <AppShell userName={name} userEmail={email}>{children}</AppShell>
 }

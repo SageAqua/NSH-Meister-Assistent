@@ -114,7 +114,7 @@ function StatCard({
 }
 
 // ── Analytics Bar Chart ────────────────────────────────────────────────────────
-function AnalyticsChart({ weekDays }: { weekDays: { label: string; events: CalendarEvent[] }[] }) {
+function AnalyticsChart({ weekDays }: { weekDays: { dateStr: string; label: string; events: CalendarEvent[] }[] }) {
   const max = Math.max(...weekDays.map((d) => d.events.length), 1)
   return (
     <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-5">

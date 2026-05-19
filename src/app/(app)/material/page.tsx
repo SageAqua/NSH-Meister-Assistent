@@ -82,9 +82,9 @@ export default async function MaterialPage() {
                       <p className="truncate text-xs text-muted-foreground">{project?.address ?? project?.service_type}</p>
                     </div>
                     {pending > 0 && (
-                      <Badge variant="secondary">
-                        <span className="nsh-i18n" data-sq="hapur">{pending} offen</span>
-                      </Badge>
+                      <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+                        {pending} offen
+                      </span>
                     )}
                   </div>
                 </Link>

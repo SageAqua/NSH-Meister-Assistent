@@ -135,7 +135,7 @@ function EventCard({
             <Clock className="size-4" />
             <span>{formatTime(event.start_time)} – {formatTime(event.end_time)}</span>
             <EventTypeBadge title={event.title} />
-            {event.status === "erledigt" && <Badge variant="secondary" className="text-xs"><span className="nsh-i18n" data-sq="Kryer">Erledigt</span></Badge>}
+            {event.status === "erledigt" && <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">Erledigt</span>}
           </div>
           <h3 className={cn("mt-1 font-black", dense ? "text-base" : "text-lg")}>
             {event.title.replace(/^\[.*?\]\s*/, "")}

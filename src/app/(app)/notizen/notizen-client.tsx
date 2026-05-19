@@ -328,9 +328,9 @@ export function NotizenClient({
               <Card key={note.id} className="transition-colors hover:border-primary/30">
                 <CardContent className="p-4">
                   <div className="mb-3 flex items-start justify-between gap-3">
-                    <Badge className={cn("border text-xs", TYPE_COLORS[note.type])}>
-                      <span className="nsh-i18n" data-sq={TYPE_LABELS_SQ[note.type]}>{TYPE_LABELS[note.type]}</span>
-                    </Badge>
+                    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", TYPE_COLORS[note.type])}>
+                      {TYPE_LABELS[note.type]}
+                    </span>
                     <div className="flex shrink-0 items-center gap-1">
                       <button
                         type="button"

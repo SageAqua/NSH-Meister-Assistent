@@ -437,24 +437,29 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
           <p className="rounded-lg bg-muted/60 p-3 text-sm text-muted-foreground">{project.notes}</p>
         )}
 
-        <div className="flex flex-wrap gap-2">
-          <Link href={`/baustellen/${project.id}`}>
-            <Button size="sm" className="gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          <Link href={`/baustellen/${project.id}`} className="col-span-2">
+            <Button size="touch" className="w-full gap-2">
               <CheckCircle2 className="size-4" />
-              <span className="nsh-i18n nsh-i18n-button" data-sq="Hap">Öffnen</span>
+              Öffnen
             </Button>
           </Link>
           {project.customers?.phone && (
             <a href={`tel:${project.customers.phone}`}>
-              <Button size="sm" variant="outline" className="gap-2">
+              <Button size="touch" variant="outline" className="w-full gap-2">
                 <Phone className="size-4" />
-                <span className="nsh-i18n nsh-i18n-button" data-sq="Telefono">Anrufen</span>
+                Anrufen
               </Button>
             </a>
           )}
-          <Button size="sm" variant="outline" className="gap-2" onClick={() => setIsEditing(true)}>
+          <Button
+            size="touch"
+            variant="outline"
+            className={cn("gap-2", !project.customers?.phone && "col-span-2")}
+            onClick={() => setIsEditing(true)}
+          >
             <Edit3 className="size-4" />
-            <span className="nsh-i18n nsh-i18n-button" data-sq="Ndrysho">Bearbeiten</span>
+            Bearbeiten
           </Button>
         </div>
 
@@ -467,19 +472,18 @@ function ProjectCard({ project, customers }: { project: ProjectWithCustomer; cus
 function InfoTile({
   icon: Icon,
   label,
-  labelSq,
   value,
 }: {
   icon: ComponentType<{ className?: string }>
   label: string
-  labelSq: string
+  labelSq?: string
   value: string
 }) {
   return (
     <div className="rounded-lg border bg-muted/30 p-2">
       <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase text-muted-foreground">
         <Icon className="size-3" />
-        <span className="nsh-i18n" data-sq={labelSq}>{label}</span>
+        <span>{label}</span>
       </div>
       <p className="truncate text-sm font-bold">{value}</p>
     </div>

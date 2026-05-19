@@ -373,8 +373,14 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
               type="number"
               min={1}
               max={60}
+              inputMode="numeric"
               value={durationDays}
-              onChange={(event) => setDurationDays(Math.max(1, Math.min(60, Number(event.target.value) || 1)))}
+              onFocus={(e) => e.target.select()}
+              onChange={(event) => {
+                const v = Number(event.target.value)
+                if (event.target.value === "" || isNaN(v)) return
+                setDurationDays(Math.max(1, Math.min(60, v)))
+              }}
               className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base font-black outline-none focus:border-primary"
             />
           </label>

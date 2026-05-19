@@ -1,13 +1,15 @@
 import { ReactNode } from "react"
 import { IpadSidebar } from "@/components/app-shell/ipad-sidebar"
 import { MobileBottomNav } from "@/components/app-shell/mobile-bottom-nav"
+import { TopNavbar } from "@/components/app-shell/top-navbar"
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh overflow-x-hidden md:h-dvh md:overflow-hidden">
       <div className="flex min-h-dvh min-w-0 overflow-x-hidden md:h-dvh md:min-h-0">
         <IpadSidebar />
-        <main className="min-w-0 flex-1 overflow-x-hidden pb-28 md:h-dvh md:overflow-y-auto md:overscroll-contain md:pb-0">
+        <main className="min-w-0 flex-1 overflow-x-hidden pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:flex md:h-dvh md:flex-col md:pb-0">
+          {/* Mobile sticky header */}
           <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur md:hidden">
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="NSH Renovierung" className="size-10 rounded-lg bg-white object-contain ring-1 ring-border" />
@@ -21,8 +23,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
           </div>
-          <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 md:px-6 md:py-6 xl:px-8">
-            {children}
+          {/* Desktop top navbar */}
+          <TopNavbar />
+          {/* Page content */}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 md:px-6 md:py-6 xl:px-8">
+              {children}
+            </div>
           </div>
         </main>
       </div>

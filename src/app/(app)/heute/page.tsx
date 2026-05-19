@@ -1,18 +1,17 @@
 import Link from "next/link"
 import {
-  ArrowRight,
-  Building2,
+  ArrowUpRight,
   CalendarDays,
   CheckCircle2,
   ClipboardList,
   HardHat,
   Plus,
+  TrendingUp,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { markTaskDone } from "@/app/actions/orders"
-import { TagesplanSection } from "./tagesplan"
-import { MonthlyCalendar, type MonthlyCalendarEvent } from "./monthly-calendar"
 import type { CalendarEvent, Customer, Project, Task } from "@/types"
+import { TimeTracker } from "./time-tracker"
 
 type ProjectFull = Project & { customers: Customer | null }
 
@@ -72,19 +71,224 @@ function buildWeekDays(events: CalendarEvent[], today: Date) {
   const mon = new Date(today)
   mon.setDate(today.getDate() + diff)
   mon.setHours(0, 0, 0, 0)
+  const dayLabels = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(mon)
     d.setDate(mon.getDate() + i)
     const dateStr = formatDateKey(d)
-    const label = d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric" })
     return {
       dateStr,
-      label,
+      label: dayLabels[d.getDay()],
       events: events.filter((e) => e.start_time.startsWith(dateStr)),
     }
   })
 }
 
+// ── Stat Card ─────────────────────────────────────────────────────────────────
+function StatCard({
+  title,
+  value,
+  subtitle,
+  primary,
+}: {
+  title: string
+  value: number
+  subtitle: string
+  primary?: boolean
+}) {
+  return (
+    <div className={`relative flex flex-col justify-between overflow-hidden rounded-2xl border p-5 ${primary ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>
+      <div className="flex items-start justify-between gap-2">
+        <p className={`text-sm font-semibold ${primary ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{title}</p>
+        <span className={`flex size-7 shrink-0 items-center justify-center rounded-full ${primary ? "bg-white/20" : "bg-muted"}`}>
+          <ArrowUpRight className={`size-3.5 ${primary ? "text-primary-foreground" : "text-muted-foreground"}`} />
+        </span>
+      </div>
+      <p className={`mt-3 text-4xl font-black tabular-nums ${primary ? "text-primary-foreground" : "text-foreground"}`}>{value}</p>
+      <p className={`mt-1.5 flex items-center gap-1 text-xs ${primary ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+        <TrendingUp className="size-3" />
+        {subtitle}
+      </p>
+    </div>
+  )
+}
+
+// ── Analytics Bar Chart ────────────────────────────────────────────────────────
+function AnalyticsChart({ weekDays }: { weekDays: { label: string; events: CalendarEvent[] }[] }) {
+  const max = Math.max(...weekDays.map((d) => d.events.length), 1)
+  return (
+    <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-5">
+      <p className="text-base font-black text-foreground">Projekt Analyse</p>
+      <p className="mb-4 text-xs text-muted-foreground">Termine diese Woche</p>
+      <div className="flex flex-1 items-end gap-2">
+        {weekDays.map((day) => {
+          const pct = day.events.length === 0 ? 0 : Math.max((day.events.length / max) * 100, 8)
+          const isToday = day.dateStr === formatDateKey(new Date())
+          return (
+            <div key={day.dateStr} className="group flex flex-1 flex-col items-center gap-1.5">
+              {day.events.length > 0 && (
+                <span className="text-[10px] font-bold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                  {day.events.length}
+                </span>
+              )}
+              <div className="w-full overflow-hidden rounded-lg bg-muted" style={{ height: "120px" }}>
+                <div
+                  className={`w-full rounded-lg transition-all ${isToday ? "bg-primary" : "bg-primary/40 group-hover:bg-primary/70"}`}
+                  style={{ height: `${pct}%`, marginTop: `${100 - pct}%` }}
+                />
+              </div>
+              <span className={`text-[10px] font-bold ${isToday ? "text-primary" : "text-muted-foreground"}`}>{day.label}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── Reminders (next event today) ───────────────────────────────────────────────
+function RemindersCard({ events }: { events: CalendarEvent[] }) {
+  const next = events[0]
+  return (
+    <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
+      <p className="text-base font-black text-foreground">Erinnerungen</p>
+      {next ? (
+        <div className="mt-3 flex flex-1 flex-col">
+          <p className="text-xl font-black leading-snug text-foreground">
+            {next.title.replace(/^\[.*?\]\s*/, "")}
+          </p>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            {time(next.start_time)} – {time(next.end_time)}
+          </p>
+          <div className="mt-4">
+            <Link href="/kalender">
+              <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-black text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
+                <CalendarDays className="size-4" />
+                Kalender öffnen
+              </button>
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground">Keine Termine heute.</p>
+      )}
+    </div>
+  )
+}
+
+// ── Project List (right column) ────────────────────────────────────────────────
+const projectColors = [
+  "bg-blue-500", "bg-violet-500", "bg-orange-500", "bg-emerald-500", "bg-rose-500",
+]
+
+function ProjectListCard({ projects }: { projects: ProjectFull[] }) {
+  return (
+    <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between">
+        <p className="text-base font-black text-foreground">Baustellen</p>
+        <Link href="/baustellen">
+          <button className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs font-bold text-muted-foreground transition-colors hover:bg-muted">
+            <Plus className="size-3" />
+            Neu
+          </button>
+        </Link>
+      </div>
+      <div className="mt-3 flex flex-col gap-2">
+        {projects.length === 0 && (
+          <p className="text-sm text-muted-foreground">Keine aktiven Baustellen.</p>
+        )}
+        {projects.slice(0, 5).map((p, i) => (
+          <Link key={p.id} href={`/baustellen/${p.id}`}>
+            <div className="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-muted">
+              <span className={`size-2 shrink-0 rounded-full ${projectColors[i % projectColors.length]}`} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {p.customers?.name ?? "Ohne Kunde"}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {serviceName(p.service_type)}
+                </p>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Tasks Card ─────────────────────────────────────────────────────────────────
+function TasksCard({ tasks }: { tasks: Task[] }) {
+  return (
+    <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between">
+        <p className="text-base font-black text-foreground">Aufgaben</p>
+        <Link href="/neuer-auftrag">
+          <button className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs font-bold text-muted-foreground transition-colors hover:bg-muted">
+            <Plus className="size-3" />
+            Aufgabe
+          </button>
+        </Link>
+      </div>
+      {tasks.length === 0 ? (
+        <p className="mt-3 text-sm text-muted-foreground">Keine offenen Aufgaben.</p>
+      ) : (
+        <div className="mt-3 flex flex-col gap-2">
+          {tasks.slice(0, 4).map((task) => (
+            <form key={task.id} action={markTaskDone.bind(null, task.id)}>
+              <button className="flex w-full items-center gap-3 rounded-xl border border-border bg-background px-3 py-2.5 text-left transition-colors hover:bg-muted active:bg-muted">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-primary">
+                  <CheckCircle2 className="size-3 text-primary" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-foreground">{task.title}</p>
+                  {task.projects && (
+                    <p className="truncate text-xs text-muted-foreground">
+                      {task.projects.address ?? serviceName(task.projects.service_type)}
+                    </p>
+                  )}
+                </div>
+                <span className="shrink-0 rounded-full border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary">
+                  Offen
+                </span>
+              </button>
+            </form>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Progress Gauge ─────────────────────────────────────────────────────────────
+function ProgressGauge({ done, total }: { done: number; total: number }) {
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100)
+  const deg = Math.round((pct / 100) * 360)
+  return (
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-5">
+      <p className="self-start text-base font-black text-foreground">Fortschritt</p>
+      <div className="relative mt-4 flex size-32 items-center justify-center">
+        <svg className="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" className="text-muted/50" />
+          <circle
+            cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10"
+            strokeDasharray={`${2 * Math.PI * 42}`}
+            strokeDashoffset={`${2 * Math.PI * 42 * (1 - pct / 100)}`}
+            strokeLinecap="round"
+            className="text-primary transition-all duration-700"
+          />
+        </svg>
+        <div className="relative text-center">
+          <p className="text-3xl font-black text-foreground">{pct}%</p>
+          <p className="text-[10px] text-muted-foreground">Erledigt</p>
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">{done} von {total} Aufgaben</p>
+    </div>
+  )
+}
+
+// ── Mobile week preview (unchanged) ───────────────────────────────────────────
 function EventPill({ event }: { event: CalendarEvent }) {
   const type = detectEventType(event.title)
   const cls =
@@ -92,7 +296,7 @@ function EventPill({ event }: { event: CalendarEvent }) {
       ? "bg-violet-100 text-violet-800"
       : type === "baustelle"
         ? "bg-amber-100 text-amber-800"
-        : "bg-blue-100 text-blue-800"
+        : "bg-emerald-100 text-emerald-800"
   const clean = event.title.replace(/^\[.*?\]\s*/, "")
   return (
     <span className={`block min-w-0 rounded-md px-1.5 py-1 text-[10px] font-bold leading-tight ${cls}`}>
@@ -105,7 +309,6 @@ function EventPill({ event }: { event: CalendarEvent }) {
 function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }) {
   const days = buildWeekDays(events, today)
   const hasAny = days.some((d) => d.events.length > 0)
-
   return (
     <div className="max-w-full overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="grid w-max grid-flow-col grid-rows-3 gap-2 pr-2">
@@ -113,7 +316,6 @@ function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }
           const hasEvents = day.events.length > 0
           const visibleEvents = day.events.slice(0, 2)
           const moreCount = day.events.length - visibleEvents.length
-
           return (
             <div
               key={day.dateStr}
@@ -139,7 +341,7 @@ function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }
         })}
         {!hasAny && (
           <div className="col-span-2 flex h-[76px] w-[240px] items-center rounded-xl border bg-muted/30 px-4 text-sm text-muted-foreground">
-            <span className="nsh-i18n" data-sq="Nuk ka termine këtë javë.">Keine Termine diese Woche.</span>
+            Keine Termine diese Woche.
           </div>
         )}
       </div>
@@ -147,65 +349,32 @@ function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }
   )
 }
 
-function OpenTasks({ tasks }: { tasks: Task[] }) {
-  if (tasks.length === 0)
-    return (
-      <p className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-        <span className="nsh-i18n" data-sq="Nuk ka detyra të hapura.">Keine offenen Aufgaben.</span>
-      </p>
-    )
+// ── Mobile-only today events ───────────────────────────────────────────────────
+function MobileTodayEvents({ events }: { events: CalendarEvent[] }) {
+  if (events.length === 0)
+    return <p className="rounded-xl border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">Keine Termine heute.</p>
   return (
-    <div className="space-y-1.5">
-      {tasks.slice(0, 4).map((task) => (
-        <form key={task.id} action={markTaskDone.bind(null, task.id)}>
-          <button className="flex w-full items-center gap-3 rounded-xl border bg-card px-3 py-2.5 text-left shadow-sm active:bg-muted">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 border-primary">
-              <CheckCircle2 className="size-3.5 text-primary" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-bold">{task.title}</span>
-              {task.projects && (
-                <span className="block truncate text-xs text-muted-foreground">
-                  {task.projects.address ?? serviceName(task.projects.service_type)}
-                </span>
-              )}
-            </span>
-          </button>
-        </form>
-      ))}
-    </div>
-  )
-}
-
-function ActiveProjects({ projects }: { projects: ProjectFull[] }) {
-  if (projects.length === 0)
-    return (
-      <p className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-        <span className="nsh-i18n" data-sq="Nuk ka kantiere aktive.">Keine aktiven Baustellen.</span>
-      </p>
-    )
-  return (
-    <div className="space-y-1.5">
-      {projects.slice(0, 4).map((project) => (
-        <Link key={project.id} href={`/baustellen/${project.id}`}>
-          <div className="flex items-center gap-3 rounded-xl border bg-card px-3 py-2.5 shadow-sm transition-colors hover:bg-muted active:bg-muted">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-              <Building2 className="size-4" />
-            </div>
+    <div className="flex flex-col gap-2">
+      {events.map((e) => {
+        const type = detectEventType(e.title)
+        const cls = type === "privat" ? "bg-violet-100 text-violet-800 border-violet-200"
+          : type === "baustelle" ? "bg-amber-100 text-amber-800 border-amber-200"
+          : "bg-emerald-100 text-emerald-800 border-emerald-200"
+        return (
+          <div key={e.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${cls}`}>
+            <CalendarDays className="size-4 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold">{project.customers?.name ?? "Ohne Kunde"}</p>
-              <p className="truncate text-xs text-muted-foreground">
-                {serviceName(project.service_type)}{project.address ? ` · ${project.address}` : ""}
-              </p>
+              <p className="truncate text-sm font-bold">{e.title.replace(/^\[.*?\]\s*/, "")}</p>
+              <p className="text-xs opacity-75">{time(e.start_time)} – {time(e.end_time)}</p>
             </div>
-            <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
           </div>
-        </Link>
-      ))}
+        )
+      })}
     </div>
   )
 }
 
+// ── Page ───────────────────────────────────────────────────────────────────────
 export default async function HeutePage() {
   const supabase = await createClient()
   const today = new Date()
@@ -216,150 +385,119 @@ export default async function HeutePage() {
   const [
     { data: todayEventsRaw },
     { data: weekEventsRaw },
-    { data: monthEventsRaw },
     { data: tasksRaw },
     { data: projectsRaw },
+    { count: totalCount },
+    { count: activeCount },
+    { count: plannedCount },
+    { count: doneCount },
+    { count: totalTasksCount },
+    { count: doneTasksCount },
   ] = await Promise.all([
-    supabase
-      .from("calendar_events")
-      .select("*, projects(*, customers(*))")
-      .gte("start_time", startOfDay)
-      .lte("start_time", endOfDay)
-      .neq("status", "abgesagt")
-      .order("start_time"),
-    supabase
-      .from("calendar_events")
-      .select("*, projects(*, customers(*))")
-      .gte("start_time", startOfWeek(today))
-      .lte("start_time", endOfWeek(today))
-      .neq("status", "abgesagt")
-      .order("start_time"),
-    supabase
-      .from("calendar_events")
-      .select("*, projects(*, customers(*))")
-      .gte("start_time", startOfMonth(today))
-      .lte("start_time", endOfMonth(today))
-      .neq("status", "abgesagt")
-      .order("start_time"),
-    supabase
-      .from("tasks")
-      .select("*, projects(*)")
-      .eq("is_done", false)
-      .order("due_date", { ascending: true })
-      .limit(4),
-    supabase
-      .from("projects")
-      .select("*, customers(*)")
-      .in("status", ["in_arbeit", "geplant"])
-      .order("created_at", { ascending: false })
-      .limit(4),
+    supabase.from("calendar_events").select("*, projects(*, customers(*))").gte("start_time", startOfDay).lte("start_time", endOfDay).neq("status", "abgesagt").order("start_time"),
+    supabase.from("calendar_events").select("*, projects(*, customers(*))").gte("start_time", startOfWeek(today)).lte("start_time", endOfWeek(today)).neq("status", "abgesagt").order("start_time"),
+    supabase.from("tasks").select("*, projects(*)").eq("is_done", false).order("due_date", { ascending: true }).limit(4),
+    supabase.from("projects").select("*, customers(*)").in("status", ["in_arbeit", "geplant"]).order("created_at", { ascending: false }).limit(5),
+    supabase.from("projects").select("*", { count: "exact", head: true }),
+    supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "in_arbeit"),
+    supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "geplant"),
+    supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "abgeschlossen"),
+    supabase.from("tasks").select("*", { count: "exact", head: true }).gte("created_at", startOfMonth(today)).lte("created_at", endOfMonth(today)),
+    supabase.from("tasks").select("*", { count: "exact", head: true }).eq("is_done", true).gte("created_at", startOfMonth(today)).lte("created_at", endOfMonth(today)),
   ])
 
   const todayEvents = (todayEventsRaw ?? []) as CalendarEvent[]
   const weekEvents = (weekEventsRaw ?? []) as CalendarEvent[]
-  const monthEvents = (monthEventsRaw ?? []) as CalendarEvent[]
   const tasks = (tasksRaw ?? []) as Task[]
   const projects = (projectsRaw ?? []) as ProjectFull[]
+  const weekDays = buildWeekDays(weekEvents, today)
 
-  const monthEventsMap = monthEvents.reduce<Record<string, MonthlyCalendarEvent[]>>((acc, ev) => {
-    const key = ev.start_time.slice(0, 7)
-    const date = ev.start_time.split("T")[0]
-    if (!acc[key]) acc[key] = []
-    acc[key].push({
-      id: ev.id,
-      date,
-      startTime: time(ev.start_time),
-      endTime: time(ev.end_time),
-      title: ev.title.replace(/^\[.*?\]\s*/, ""),
-      status: ev.status,
-    })
-    return acc
-  }, {})
-
-  const dateStr = today.toLocaleDateString("de-DE", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  })
+  const dateStr = today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })
 
   return (
-    <div className="flex flex-col gap-4 md:gap-5 lg:h-[calc(100dvh-3rem)] lg:overflow-hidden">
+    <div className="flex flex-col gap-4 md:gap-5">
 
       {/* ── Header ── */}
-      <header className="shrink-0 flex items-center justify-between gap-4 rounded-2xl border bg-card p-4">
+      <header className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[11px] font-black uppercase tracking-widest text-primary">
-            <span className="nsh-i18n" data-sq="Sot">Heute</span>
-          </p>
-          <h1 className="text-2xl font-black leading-tight sm:text-3xl">
-            <span className="nsh-i18n" data-sq="Përshëndetje Naim">Hallo Naim</span>
-          </h1>
-          <p className="text-sm text-muted-foreground">{dateStr}</p>
+          <h1 className="text-2xl font-black leading-tight sm:text-3xl">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">{dateStr} · Hallo Naim!</p>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2">
           <Link href="/neuer-auftrag">
-            <button className="flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-primary-foreground shadow-md shadow-primary/20 transition-colors hover:bg-primary/90">
+            <button className="flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-primary-foreground shadow-sm shadow-primary/20 transition-colors hover:bg-primary/90">
               <Plus className="size-4" />
-              <span className="nsh-i18n nsh-i18n-button" data-sq="Termin i ri">Neuer Termin</span>
+              <span>Auftrag</span>
             </button>
           </Link>
-          <img src="/logo.png" alt="NSH" className="hidden size-10 rounded-lg bg-white object-contain ring-1 ring-border lg:block" />
+          <Link href="/kunden">
+            <button className="flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
+              Kunden
+            </button>
+          </Link>
         </div>
       </header>
 
-      {/* ── Diese Woche — mobile/tablet only ── */}
-      <section className="shrink-0 space-y-2 lg:hidden">
-        <h2 className="flex items-center gap-1.5 text-sm font-black text-muted-foreground">
+      {/* ── Mobile week preview ── */}
+      <section className="lg:hidden">
+        <h2 className="mb-2 flex items-center gap-1.5 text-sm font-black text-muted-foreground">
           <CalendarDays className="size-4" />
-          <span className="nsh-i18n" data-sq="Kjo javë">Diese Woche</span>
+          Diese Woche
         </h2>
         <WeekPreview events={weekEvents} today={today} />
       </section>
 
-      {/* ── Two-column body ── */}
-      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        <StatCard title="Gesamt Baustellen" value={totalCount ?? 0} subtitle="Alle Projekte" primary />
+        <StatCard title="Abgeschlossen" value={doneCount ?? 0} subtitle="Fertig gestellt" />
+        <StatCard title="In Arbeit" value={activeCount ?? 0} subtitle="Laufende Projekte" />
+        <StatCard title="Geplant" value={plannedCount ?? 0} subtitle="In Planung" />
+      </div>
 
-        {/* Left — Termine heute */}
-        <section className="flex min-h-0 min-w-0 flex-col gap-2 lg:overflow-y-auto lg:pr-1">
-          <h2 className="shrink-0 flex items-center gap-1.5 text-lg font-black">
-            <CalendarDays className="size-5 text-primary" />
-            <span className="nsh-i18n" data-sq="Terminet sot">Termine heute</span>
+      {/* ── Desktop: Row 2 — Analytics | Reminders | Projects ── */}
+      <div className="hidden gap-4 lg:grid lg:grid-cols-[1fr_280px_260px]">
+        <AnalyticsChart weekDays={weekDays} />
+        <RemindersCard events={todayEvents} />
+        <ProjectListCard projects={projects} />
+      </div>
+
+      {/* ── Desktop: Row 3 — Tasks | Progress | Time Tracker ── */}
+      <div className="hidden gap-4 lg:grid lg:grid-cols-[1fr_240px_240px]">
+        <TasksCard tasks={tasks} />
+        <ProgressGauge done={doneTasksCount ?? 0} total={totalTasksCount ?? 0} />
+        <TimeTracker />
+      </div>
+
+      {/* ── Mobile fallback — stacked sections ── */}
+      <div className="flex flex-col gap-4 lg:hidden">
+        <section className="space-y-2">
+          <h2 className="flex items-center gap-1.5 text-base font-black">
+            <CalendarDays className="size-4 text-primary" />
+            Termine heute
           </h2>
-          <TagesplanSection events={todayEvents} freeSlots={[]} today={todayStr} compact />
+          <MobileTodayEvents events={todayEvents} />
         </section>
 
-        {/* Right — stacks on mobile, fixed height column on desktop */}
-        <div className="flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pb-1">
+        <section className="space-y-2">
+          <h2 className="flex items-center gap-1.5 text-base font-black">
+            <ClipboardList className="size-4 text-primary" />
+            Aufgaben
+          </h2>
+          <TasksCard tasks={tasks} />
+        </section>
 
-          {/* Month calendar — desktop right col */}
-          <section className="hidden shrink-0 space-y-2 lg:block">
-            <h2 className="flex items-center gap-1.5 text-base font-black">
-              <CalendarDays className="size-4 text-primary" />
-              <span className="nsh-i18n" data-sq="Ky muaj">Dieser Monat</span>
-            </h2>
-            <MonthlyCalendar monthEventsMap={monthEventsMap} today={todayStr} compact />
-          </section>
+        <section className="space-y-2">
+          <h2 className="flex items-center gap-1.5 text-base font-black">
+            <HardHat className="size-4 text-primary" />
+            Baustellen
+          </h2>
+          <ProjectListCard projects={projects} />
+        </section>
 
-          {/* Aufgaben */}
-          <section className="space-y-2">
-            <h2 className="flex items-center gap-1.5 text-base font-black">
-              <ClipboardList className="size-4 text-primary" />
-              <span className="nsh-i18n" data-sq="Detyra">Aufgaben</span>
-            </h2>
-            <OpenTasks tasks={tasks} />
-          </section>
-
-          {/* Baustellen */}
-          <section className="space-y-2">
-            <h2 className="flex items-center gap-1.5 text-base font-black">
-              <HardHat className="size-4 text-primary" />
-              <span className="nsh-i18n" data-sq="Kantiere">Baustellen</span>
-            </h2>
-            <ActiveProjects projects={projects} />
-          </section>
-
-        </div>
+        <TimeTracker />
       </div>
+
     </div>
   )
 }

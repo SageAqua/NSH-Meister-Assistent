@@ -223,11 +223,11 @@ function DayDetailSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 pb-[env(safe-area-inset-bottom)] sm:items-center sm:pb-0"
       onClick={onClose}
     >
       <div
-        className="w-full max-h-[88dvh] max-w-lg overflow-y-auto rounded-t-2xl bg-background shadow-2xl sm:rounded-2xl"
+        className="w-full max-h-[88dvh] max-w-lg overflow-y-auto rounded-t-2xl bg-background pb-[env(safe-area-inset-bottom)] shadow-2xl sm:rounded-2xl sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle (mobile) */}
@@ -744,7 +744,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
       {/* Edit modal */}
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 pb-[max(env(safe-area-inset-bottom),1rem)] sm:items-center sm:p-4"
           onClick={() => setEditing(null)}
         >
           <Card className="w-full max-w-lg" onClick={(e) => e.stopPropagation()}>

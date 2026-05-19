@@ -5,7 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   Home, Calendar, PlusCircle, Building2, Grid3x3,
-  Calculator, FileText, Users, BookOpen, Package, Settings
+  Calculator, FileText, Users, BookOpen, Package, Settings,
+  HelpCircle, LogOut,
 } from "lucide-react"
 import { mainNav, moreNav } from "@/data/navigation"
 import { cn } from "@/lib/utils"
@@ -24,104 +25,100 @@ const iconMap: Record<string, ElementType> = {
   settings: Settings,
 }
 
+function NavItem({
+  href,
+  icon: Icon,
+  label,
+  isActive,
+}: {
+  href: string
+  icon: ElementType
+  label: string
+  isActive: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+        isActive
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      )}
+    >
+      <span className={cn(
+        "flex size-8 shrink-0 items-center justify-center rounded-lg",
+        isActive ? "bg-white/20" : "bg-sidebar-foreground/8"
+      )}>
+        <Icon className="size-4" />
+      </span>
+      <span className="truncate">{label}</span>
+    </Link>
+  )
+}
+
 export function IpadSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden h-dvh w-56 shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-sidebar-border bg-sidebar md:flex lg:w-[19rem]">
-      <div className="px-4 pb-4 pt-5">
-        <div className="flex items-center gap-3 rounded-lg bg-white/7 p-3 ring-1 ring-white/10">
-          <div className="flex size-12 items-center justify-center overflow-hidden rounded-lg bg-white">
-            <img src="/logo.png" alt="NSH Renovierung" className="size-12 object-contain" />
+    <aside className="hidden h-dvh w-56 shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-sidebar-border bg-sidebar md:flex lg:w-[17rem]">
+
+      {/* Logo */}
+      <div className="px-4 pb-3 pt-5">
+        <div className="flex items-center gap-3 px-1">
+          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary">
+            <img src="/logo.png" alt="NSH" className="size-9 object-contain" />
           </div>
           <div className="min-w-0">
-            <p className="text-lg font-black leading-tight text-sidebar-foreground">
-              <span className="nsh-i18n" data-sq="Paneli NSH">NSH Dashboard</span>
-            </p>
-            <p className="truncate text-sm text-sidebar-foreground/60">
-              <span className="nsh-i18n" data-sq="Rinovim Vechta">Renovierung Vechta</span>
-            </p>
+            <p className="truncate text-base font-black text-sidebar-foreground">NSH</p>
+            <p className="truncate text-xs text-sidebar-foreground/50">Renovierung Vechta</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 pb-4">
-        <p className="px-3 pb-2 text-[11px] font-black uppercase tracking-[0.16em] text-sidebar-foreground/38">
-          <span className="nsh-i18n" data-sq="Punë">Arbeit</span>
+      <nav className="flex flex-1 flex-col gap-0.5 px-3 pb-4">
+
+        {/* MENU section */}
+        <p className="mb-1 mt-3 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/35">
+          Menu
         </p>
-        {mainNav.map((item) => {
+        {mainNav.filter(item => item.href !== "/mehr").map((item) => {
           const Icon = iconMap[item.icon ?? ""] ?? Home
-          const isActive = pathname === item.href || (item.href !== "/mehr" && pathname.startsWith(item.href + "/"))
-          const isNewAuftrag = item.href === "/neuer-auftrag"
+          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"))
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "group flex min-h-[58px] items-center gap-3 rounded-lg px-3 transition-colors",
-                isNewAuftrag
-                  ? "mb-2 mt-1 bg-sidebar-primary text-sidebar-primary-foreground shadow-sm hover:bg-sidebar-primary/90"
-                  : isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              )}
-            >
-              <span className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/7 text-sidebar-foreground/75 group-hover:text-sidebar-accent-foreground",
-                isActive && "bg-white/10 text-sidebar-accent-foreground",
-                isNewAuftrag && "bg-white/18 text-sidebar-primary-foreground"
-              )}>
-                <Icon className="size-5" />
-              </span>
-              <div className="min-w-0">
-                <p className={cn("truncate text-sm font-black", isNewAuftrag && "text-sidebar-primary-foreground")}>{item.labelDe}</p>
-                {item.labelSq && (
-                  <p className={cn("truncate text-xs", isNewAuftrag ? "text-sidebar-primary-foreground/75" : "text-sidebar-foreground/45")}>
-                    {item.labelSq}
-                  </p>
-                )}
-              </div>
-            </Link>
+            <NavItem key={item.href} href={item.href} icon={Icon} label={item.labelDe} isActive={isActive} />
           )
         })}
 
-        <div className="my-4 border-t border-sidebar-border" />
-        <p className="px-3 pb-2 text-[11px] font-black uppercase tracking-[0.16em] text-sidebar-foreground/38">
-          <span className="nsh-i18n" data-sq="Mjete">Werkzeuge</span>
+        <div className="my-3 border-t border-sidebar-border" />
+
+        {/* GENERAL section */}
+        <p className="mb-1 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/35">
+          Allgemein
         </p>
         {moreNav.map((item) => {
           const Icon = iconMap[item.icon ?? ""] ?? Settings
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex min-h-[48px] items-center gap-3 rounded-lg px-3 transition-colors",
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              )}
-            >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/7">
-                <Icon className="size-4" />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold leading-tight">{item.labelDe}</p>
-                {item.labelSq && <p className="truncate text-xs text-sidebar-foreground/40">{item.labelSq}</p>}
-              </div>
-            </Link>
+            <NavItem key={item.href} href={item.href} icon={Icon} label={item.labelDe} isActive={isActive} />
           )
         })}
+        <NavItem href="/mehr" icon={Grid3x3} label="Mehr" isActive={pathname === "/mehr"} />
       </nav>
 
-      <div className="border-t border-sidebar-border px-5 py-4">
-        <p className="text-xs font-semibold text-sidebar-foreground/55">
-          <span className="nsh-i18n" data-sq="Rinovim">NSH Renovierung</span>
-        </p>
-        <p className="text-xs text-sidebar-foreground/35">
-          <span className="nsh-i18n" data-sq="Paneli">Dashboard</span>
-        </p>
+      {/* Bottom promo card */}
+      <div className="px-3 pb-4">
+        <div className="relative overflow-hidden rounded-2xl bg-primary px-4 py-4">
+          <div className="relative z-10">
+            <p className="text-sm font-black leading-tight text-primary-foreground">NSH Meister</p>
+            <p className="mt-0.5 text-xs text-primary-foreground/70">Assistent</p>
+            <div className="mt-3 flex size-8 items-center justify-center overflow-hidden rounded-lg bg-white/20">
+              <img src="/logo.png" alt="NSH" className="size-7 object-contain" />
+            </div>
+          </div>
+          <div className="pointer-events-none absolute -right-4 -top-4 size-20 rounded-full bg-white/5" />
+          <div className="pointer-events-none absolute -bottom-6 -right-2 size-24 rounded-full bg-white/5" />
+        </div>
       </div>
     </aside>
   )

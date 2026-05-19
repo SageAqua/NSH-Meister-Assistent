@@ -406,7 +406,7 @@ function ListView({
           <span className="nsh-i18n nsh-i18n-center" data-sq="Nuk ka termine të ardhshme">Keine bevorstehenden Termine</span>
         </p>
         <p className="text-sm">
-          <span className="nsh-i18n nsh-i18n-center" data-sq="Me "Termin i ri" mund të shtosh direkt një termin.">Mit &quot;Neuer Termin&quot; kannst du direkt einen Termin eintragen.</span>
+          <span className="nsh-i18n nsh-i18n-center" data-sq={'Me "Termin i ri" mund të shtosh direkt një termin.'}>Mit &quot;Neuer Termin&quot; kannst du direkt einen Termin eintragen.</span>
         </p>
       </CardContent>
     </Card>

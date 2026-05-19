@@ -186,7 +186,7 @@ export interface DocumentRecord {
   suggested_filename: string | null
   file_size: number | null
   doc_type: DocType
-  doc_direction: DocDirection
+  doc_direction: DocDirection | null
   category: DocCategory | null
   vendor: string | null
   recipient: string | null
@@ -203,8 +203,8 @@ export interface DocumentRecord {
 
 export interface DocumentAnalysis {
   doc_type: DocType
-  doc_direction: DocDirection
-  category: DocCategory
+  doc_direction: DocDirection | null
+  category: DocCategory | null
   vendor: string | null
   recipient: string | null
   amount_gross: number | null

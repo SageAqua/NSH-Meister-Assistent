@@ -9,7 +9,7 @@ const STEPS = [
   "Fertig ✓",
 ]
 
-export function UploadProgress({ step }: { step: number }) {
+export function UploadProgress({ step, detail }: { step: number; detail?: string }) {
   const isDone = step >= STEPS.length - 1
 
   return (
@@ -19,6 +19,7 @@ export function UploadProgress({ step }: { step: number }) {
       ) : (
         <Loader2 className="size-16 animate-spin text-primary" />
       )}
+      {detail && <p className="max-w-full truncate text-sm font-bold text-muted-foreground">{detail}</p>}
       <div className="w-full space-y-2">
         {STEPS.map((label, i) => (
           <div

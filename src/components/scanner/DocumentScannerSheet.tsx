@@ -11,6 +11,12 @@ import { createClient } from "@/lib/supabase/client"
 import type { DocumentAnalysis } from "@/types"
 
 type SheetState = "options" | "preview" | "uploading" | "done" | "error"
+type SelectedDocument = {
+  id: string
+  file: File
+  previewUrl: string | null
+  analysis: DocumentAnalysis
+}
 
 function todayStr() {
   return new Date().toISOString().split("T")[0]
@@ -33,6 +39,25 @@ function defaultAnalysis(): DocumentAnalysis {
   }
 }
 
+function baseNameFromFile(file: File) {
+  return file.name.replace(/\.[^.]+$/, "").toLowerCase().replace(/\s+/g, "_")
+}
+
+function createSelectedDocument(file: File, index: number): SelectedDocument {
+  return {
+    id: `${Date.now()}_${index}_${file.name}`,
+    file,
+    previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+    analysis: { ...defaultAnalysis(), suggested_filename: baseNameFromFile(file) },
+  }
+}
+
+function revokePreviewUrls(documents: SelectedDocument[]) {
+  documents.forEach((doc) => {
+    if (doc.previewUrl) URL.revokeObjectURL(doc.previewUrl)
+  })
+}
+
 interface Props {
   open: boolean
   onClose: () => void
@@ -44,10 +69,9 @@ export function DocumentScannerSheet({ open, onClose }: Props) {
   const cloudRef = useRef<HTMLInputElement>(null)
 
   const [state, setState] = useState<SheetState>("options")
-  const [file, setFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [analysis, setAnalysis] = useState<DocumentAnalysis>(defaultAnalysis())
+  const [documents, setDocuments] = useState<SelectedDocument[]>([])
   const [uploadStep, setUploadStep] = useState(0)
+  const [uploadLabel, setUploadLabel] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
   const [dragOver, setDragOver] = useState(false)
 
@@ -68,27 +92,34 @@ export function DocumentScannerSheet({ open, onClose }: Props) {
   }
 
   function reset() {
+    revokePreviewUrls(documents)
     setState("options")
-    setFile(null)
-    setPreviewUrl(null)
-    setAnalysis(defaultAnalysis())
+    setDocuments([])
     setUploadStep(0)
+    setUploadLabel("")
     setErrorMsg("")
   }
 
   function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return
-    const picked = files[0]
-    setFile(picked)
-    setPreviewUrl(picked.type.startsWith("image/") ? URL.createObjectURL(picked) : null)
-    // Pre-fill suggested filename with original name (without extension)
-    const baseName = picked.name.replace(/\.[^.]+$/, "").toLowerCase().replace(/\s+/g, "_")
-    setAnalysis({ ...defaultAnalysis(), suggested_filename: baseName })
+    const picked = Array.from(files).filter((file) =>
+      file.type.startsWith("image/") || file.type === "application/pdf"
+    )
+
+    if (picked.length === 0) {
+      setErrorMsg("Bitte Bilder oder PDF-Dateien auswählen.")
+      setState("error")
+      return
+    }
+
+    const nextDocuments = picked.map((file, index) => createSelectedDocument(file, index))
+    revokePreviewUrls(documents)
+    setDocuments(nextDocuments)
     setState("preview")
   }
 
   async function handleUpload() {
-    if (!file) return
+    if (documents.length === 0) return
     setState("uploading")
     setUploadStep(0)
 
@@ -97,39 +128,45 @@ export function DocumentScannerSheet({ open, onClose }: Props) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Nicht angemeldet")
 
-      setUploadStep(1)
-      let pdfBytes: Uint8Array
-      if (file.type === "application/pdf") {
-        pdfBytes = new Uint8Array(await file.arrayBuffer())
-      } else {
-        pdfBytes = await convertImageToPdf(file)
+      for (const [index, doc] of documents.entries()) {
+        const current = `${index + 1}/${documents.length}: ${doc.file.name}`
+
+        setUploadLabel(current)
+        setUploadStep(1)
+        let pdfBytes: Uint8Array
+        if (doc.file.type === "application/pdf") {
+          pdfBytes = new Uint8Array(await doc.file.arrayBuffer())
+        } else {
+          pdfBytes = await convertImageToPdf(doc.file)
+        }
+
+        setUploadStep(2)
+        const safeName = (doc.analysis.suggested_filename || doc.analysis.doc_type)
+          .toLowerCase().replace(/[^a-z0-9_\-]/g, "_")
+        const filename = `${safeName}_${Date.now()}_${index}.pdf`
+        const category = doc.analysis.category ?? "sonstiges"
+        const storagePath = `${user.id}/${category}/${filename}`
+
+        const { error: uploadError } = await supabase.storage
+          .from("documents")
+          .upload(storagePath, pdfBytes, { contentType: "application/pdf", upsert: false })
+
+        if (uploadError) throw new Error(uploadError.message)
+
+        const result = await saveDocument({
+          filePath: storagePath,
+          originalFilename: doc.file.name,
+          suggestedFilename: safeName,
+          fileSize: pdfBytes.byteLength,
+          analysis: doc.analysis,
+          analysisRaw: "",
+        })
+
+        if (result.error) throw new Error(result.error)
       }
 
-      setUploadStep(2)
-      const safeName = (analysis.suggested_filename || analysis.doc_type)
-        .toLowerCase().replace(/[^a-z0-9_\-]/g, "_")
-      const filename = `${safeName}_${Date.now()}.pdf`
-      const category = analysis.category ?? "sonstiges"
-      const storagePath = `${user.id}/${category}/${filename}`
-
-      const { error: uploadError } = await supabase.storage
-        .from("documents")
-        .upload(storagePath, pdfBytes, { contentType: "application/pdf", upsert: false })
-
-      if (uploadError) throw new Error(uploadError.message)
-
-      const result = await saveDocument({
-        filePath: storagePath,
-        originalFilename: file.name,
-        suggestedFilename: safeName,
-        fileSize: pdfBytes.byteLength,
-        analysis,
-        analysisRaw: "",
-      })
-
-      if (result.error) throw new Error(result.error)
-
       setUploadStep(3)
+      setUploadLabel(`${documents.length} Dokument${documents.length === 1 ? "" : "e"} gespeichert`)
       setState("done")
       setTimeout(handleClose, 1800)
     } catch (err) {
@@ -192,7 +229,7 @@ export function DocumentScannerSheet({ open, onClose }: Props) {
             className="sr-only" onChange={(e) => handleFiles(e.target.files)} />
           <input ref={galleryRef} type="file" accept="image/*,application/pdf" multiple
             className="sr-only" onChange={(e) => handleFiles(e.target.files)} />
-          <input ref={cloudRef} type="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" multiple
+          <input ref={cloudRef} type="file" accept="image/*,application/pdf" multiple
             className="sr-only" onChange={(e) => handleFiles(e.target.files)} />
 
           {state === "options" && (
@@ -201,7 +238,7 @@ export function DocumentScannerSheet({ open, onClose }: Props) {
                 { icon: Camera, label: "Kamera", sub: "Direkt fotografieren",
                   onClick: () => { if ("vibrate" in navigator) navigator.vibrate(10); cameraRef.current?.click() },
                   color: "text-blue-500 bg-blue-50" },
-                { icon: Images, label: "Galerie & Dateien", sub: "Fotos, PDFs, Dokumente",
+                { icon: Images, label: "PC / Galerie", sub: "Mehrere Fotos oder PDFs",
                   onClick: () => galleryRef.current?.click(),
                   color: "text-violet-500 bg-violet-50" },
                 { icon: Cloud, label: "Cloud-Dokumente", sub: "iCloud, Google Drive, Dropbox",
@@ -228,28 +265,43 @@ export function DocumentScannerSheet({ open, onClose }: Props) {
                 onDrop={handleDrop}
                 className={`hidden md:flex mt-3 h-20 items-center justify-center rounded-xl border border-dashed transition-colors ${dragOver ? "border-primary bg-primary/5" : "border-border"}`}
               >
-                <p className="text-xs font-semibold text-muted-foreground">Oder hierher ziehen</p>
+                <p className="text-xs font-semibold text-muted-foreground">Mehrere Bilder oder PDFs hierher ziehen</p>
               </div>
             </div>
           )}
 
-          {state === "preview" && file && (
+          {state === "preview" && documents.length > 0 && (
             <div className="space-y-4">
-              <FilePreviewCard
-                file={file}
-                previewUrl={previewUrl}
-                analysis={analysis}
-                onChange={(updates) => setAnalysis((prev) => ({ ...prev, ...updates }))}
-              />
+              <div className="space-y-3">
+                {documents.map((doc, index) => (
+                  <div key={doc.id} className="space-y-2">
+                    {documents.length > 1 && (
+                      <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">
+                        Dokument {index + 1} von {documents.length}
+                      </p>
+                    )}
+                    <FilePreviewCard
+                      file={doc.file}
+                      previewUrl={doc.previewUrl}
+                      analysis={doc.analysis}
+                      onChange={(updates) => setDocuments((prev) => prev.map((item) =>
+                        item.id === doc.id
+                          ? { ...item, analysis: { ...item.analysis, ...updates } }
+                          : item
+                      ))}
+                    />
+                  </div>
+                ))}
+              </div>
               <Button size="touch" className="w-full gap-2" onClick={handleUpload}>
                 <Upload className="size-4" />
-                Hochladen
+                {documents.length === 1 ? "Hochladen" : `${documents.length} Dokumente hochladen`}
               </Button>
             </div>
           )}
 
-          {state === "uploading" && <UploadProgress step={uploadStep} />}
-          {state === "done" && <UploadProgress step={3} />}
+          {state === "uploading" && <UploadProgress step={uploadStep} detail={uploadLabel} />}
+          {state === "done" && <UploadProgress step={3} detail={uploadLabel} />}
 
           {state === "error" && (
             <div className="space-y-4 py-6 text-center">

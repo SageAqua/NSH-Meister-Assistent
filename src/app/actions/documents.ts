@@ -85,7 +85,7 @@ export async function deleteDocument(id: string): Promise<{ error?: string }> {
 
 export async function updateDocumentMeta(
   id: string,
-  updates: { doc_type?: DocType; doc_direction?: DocDirection; category?: DocCategory; vendor?: string }
+  updates: { doc_type?: DocType; doc_direction?: DocDirection | null; category?: DocCategory | null; vendor?: string }
 ): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

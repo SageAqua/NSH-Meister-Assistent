@@ -62,6 +62,7 @@ function DocumentCard({ doc, onDelete }: { doc: DocumentRecord; onDelete: () => 
 
   const displayName = doc.suggested_filename ?? doc.original_filename
   const isEinnahme = doc.doc_direction === "einnahme"
+  const isAusgabe = doc.doc_direction === "ausgabe"
 
   return (
     <div className="flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
@@ -72,9 +73,13 @@ function DocumentCard({ doc, onDelete }: { doc: DocumentRecord; onDelete: () => 
         </span>
         <span className={cn(
           "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-bold",
-          isEinnahme ? "border-green-200 bg-green-50 text-green-700" : "border-orange-200 bg-orange-50 text-orange-700"
+          isEinnahme
+            ? "border-green-200 bg-green-50 text-green-700"
+            : isAusgabe
+              ? "border-orange-200 bg-orange-50 text-orange-700"
+              : "border-violet-200 bg-violet-50 text-violet-700"
         )}>
-          {isEinnahme ? "↑ Einnahme" : "↓ Ausgabe"}
+          {isEinnahme ? "↑ Einnahme" : isAusgabe ? "↓ Ausgabe" : "Angebot"}
         </span>
       </div>
 

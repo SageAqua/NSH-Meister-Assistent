@@ -11,11 +11,6 @@ const DOC_TYPE_LABELS: Record<DocType, string> = {
 
 const DOC_TYPES: DocType[] = ["rechnung", "kassenbon", "angebot", "lieferschein", "vertrag", "sonstiges"]
 
-const DIRECTION_LABELS: Record<DocDirection, string> = {
-  einnahme: "Einnahme (Geld kommt rein)",
-  ausgabe: "Ausgabe (Geld geht raus)",
-}
-
 const CATEGORY_LABELS: Record<DocCategory, string> = {
   material: "Material", tanken: "Tanken", werkzeug: "Werkzeug",
   buero: "Büro", essen: "Essen", versicherung: "Versicherung",
@@ -33,6 +28,22 @@ interface Props {
 export function FilePreviewCard({ file, previewUrl, analysis, onChange }: Props) {
   const isImage = file.type.startsWith("image/")
   const fileSizeKb = Math.round(file.size / 1024)
+  const isOffer = analysis.doc_type === "angebot"
+
+  function handleDocTypeChange(docType: DocType) {
+    if (docType === "angebot") {
+      onChange({ doc_type: docType, doc_direction: null, category: null })
+      return
+    }
+
+    const nextDirection = analysis.doc_direction ?? "ausgabe"
+
+    onChange({
+      doc_type: docType,
+      doc_direction: nextDirection,
+      category: nextDirection === "ausgabe" ? analysis.category ?? "sonstiges" : null,
+    })
+  }
 
   return (
     <div className="space-y-4">
@@ -64,7 +75,7 @@ export function FilePreviewCard({ file, previewUrl, analysis, onChange }: Props)
               <button
                 key={t}
                 type="button"
-                onClick={() => onChange({ doc_type: t })}
+                onClick={() => handleDocTypeChange(t)}
                 className={cn(
                   "rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors",
                   analysis.doc_type === t
@@ -79,27 +90,36 @@ export function FilePreviewCard({ file, previewUrl, analysis, onChange }: Props)
         </div>
 
         {/* Direction */}
-        <div className="space-y-1.5">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Richtung</p>
-          <div className="grid grid-cols-2 gap-2">
-            {(["einnahme", "ausgabe"] as DocDirection[]).map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => onChange({ doc_direction: d })}
-                className={cn(
-                  "rounded-lg border px-3 py-2 text-xs font-bold transition-colors",
-                  analysis.doc_direction === d
-                    ? d === "einnahme" ? "border-green-500 bg-green-50 text-green-700"
-                      : "border-orange-500 bg-orange-50 text-orange-700"
-                    : "border-border bg-background text-foreground hover:bg-muted"
-                )}
-              >
-                {d === "einnahme" ? "↑ Einnahme" : "↓ Ausgabe"}
-              </button>
-            ))}
+        {isOffer ? (
+          <div className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700">
+            Angebot: keine Einnahme / Ausgabe
           </div>
-        </div>
+        ) : (
+          <div className="space-y-1.5">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Richtung</p>
+            <div className="grid grid-cols-2 gap-2">
+              {(["einnahme", "ausgabe"] as DocDirection[]).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => onChange({
+                    doc_direction: d,
+                    category: d === "ausgabe" ? analysis.category ?? "sonstiges" : null,
+                  })}
+                  className={cn(
+                    "rounded-lg border px-3 py-2 text-xs font-bold transition-colors",
+                    analysis.doc_direction === d
+                      ? d === "einnahme" ? "border-green-500 bg-green-50 text-green-700"
+                        : "border-orange-500 bg-orange-50 text-orange-700"
+                      : "border-border bg-background text-foreground hover:bg-muted"
+                  )}
+                >
+                  {d === "einnahme" ? "↑ Einnahme" : "↓ Ausgabe"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Category (only for Ausgabe) */}
         {analysis.doc_direction === "ausgabe" && (
@@ -156,7 +176,7 @@ export function FilePreviewCard({ file, previewUrl, analysis, onChange }: Props)
         {/* Vendor */}
         <div className="space-y-1">
           <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-            {analysis.doc_direction === "einnahme" ? "Kunde" : "Lieferant / Händler"}
+            {analysis.doc_direction === "einnahme" || isOffer ? "Kunde" : "Lieferant / Händler"}
           </label>
           <input
             type="text"

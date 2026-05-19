@@ -24,7 +24,8 @@
       "Bash(cat src/types/index.ts)",
       "Bash(cat src/types.ts)",
       "mcp__claude_ai_Supabase__list_projects",
-      "mcp__claude_ai_Supabase__execute_sql"
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(npx tsc *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Growlio\\Documents\\02_Growlio\\02_NSH\\NSH-Meister-Assistent\\src\\app\\(app)\\kunden"

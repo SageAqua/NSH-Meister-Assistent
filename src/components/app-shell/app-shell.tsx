@@ -18,18 +18,9 @@ export function AppShell({
         <IpadSidebar />
         <main className="min-w-0 flex-1 overflow-x-hidden pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:flex md:h-dvh md:flex-col md:pb-0">
           {/* Mobile sticky header */}
-          <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur md:hidden">
-            <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="NSH Renovierung" className="size-10 rounded-lg bg-white object-contain ring-1 ring-border" />
-              <div>
-                <p className="text-sm font-black leading-tight">
-                  <span className="nsh-i18n" data-sq="Paneli NSH">NSH Dashboard</span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  <span className="nsh-i18n" data-sq="Kantiere, klientë, termine">Baustellen, Kunden, Termine</span>
-                </p>
-              </div>
-            </div>
+          <div className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur md:hidden">
+            <img src="/logo.png" alt="NSH" className="size-8 rounded-lg bg-white object-contain ring-1 ring-border" />
+            <p className="text-sm font-black">NSH Renovierung</p>
           </div>
           {/* Desktop top navbar */}
           <TopNavbar userName={userName} userEmail={userEmail} />

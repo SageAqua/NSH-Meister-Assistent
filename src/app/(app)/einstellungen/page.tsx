@@ -78,6 +78,7 @@ export default async function EinstellungenPage() {
                 { label: "Version", labelSq: "Versioni", value: "1.0.0", valueSq: "1.0.0" },
                 { label: "Sprache", labelSq: "Gjuha", value: "Deutsch", valueSq: "Gjermanisht" },
                 { label: "Datenbank", labelSq: "Baza e të dhënave", value: user ? "✓ Verbunden" : "Getrennt", valueSq: user ? "✓ Lidhur" : "E shkëputur" },
+                { label: "Entwickelt von", labelSq: "Zhvilluar nga", value: "Growlio", valueSq: "Growlio" },
               ].map(({ label, labelSq, value, valueSq }) => (
                 <div key={label} className="flex items-center justify-between border-b py-2 last:border-0">
                   <span className="text-sm text-muted-foreground">

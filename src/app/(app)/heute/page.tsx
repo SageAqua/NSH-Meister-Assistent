@@ -3,8 +3,6 @@ import {
   ArrowUpRight,
   CalendarDays,
   CheckCircle2,
-  ClipboardList,
-  HardHat,
   Plus,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
@@ -48,22 +46,6 @@ function endOfWeek(d: Date): string {
   return formatDateKey(sun) + "T23:59:59"
 }
 
-function startOfMonth(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01T00:00:00`
-}
-
-function endOfMonth(d: Date): string {
-  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0)
-  return formatDateKey(last) + "T23:59:59"
-}
-
-function detectEventType(title: string): "privat" | "arbeit" | "baustelle" {
-  const t = title.toLowerCase()
-  if (t.includes("[privat]")) return "privat"
-  if (t.includes("[baustelle]")) return "baustelle"
-  return "arbeit"
-}
-
 function buildWeekDays(events: CalendarEvent[], today: Date) {
   const day = today.getDay()
   const diff = day === 0 ? -6 : 1 - day
@@ -83,7 +65,7 @@ function buildWeekDays(events: CalendarEvent[], today: Date) {
   })
 }
 
-// ── Stat Card ─────────────────────────────────────────────────────────────────
+// ── Stat Card (desktop) ────────────────────────────────────────────────────────
 function StatCard({
   title,
   value,
@@ -107,6 +89,16 @@ function StatCard({
       <p className={`mt-1.5 text-xs ${primary ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
         {subtitle}
       </p>
+    </div>
+  )
+}
+
+// ── Stat Chip (mobile strip) ───────────────────────────────────────────────────
+function StatChip({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
+  return (
+    <div className={`flex flex-col items-center justify-center rounded-2xl p-3 text-center ${accent ? "bg-primary/10" : "bg-muted/50"}`}>
+      <p className={`text-2xl font-black tabular-nums ${accent ? "text-primary" : "text-foreground"}`}>{value}</p>
+      <p className="mt-0.5 text-[10px] font-semibold text-muted-foreground">{label}</p>
     </div>
   )
 }
@@ -144,7 +136,7 @@ function AnalyticsChart({ weekDays }: { weekDays: { dateStr: string; label: stri
   )
 }
 
-// ── Reminders (next event today) ───────────────────────────────────────────────
+// ── Reminders ─────────────────────────────────────────────────────────────────
 function RemindersCard({ events }: { events: CalendarEvent[] }) {
   const next = events[0]
   return (
@@ -174,7 +166,7 @@ function RemindersCard({ events }: { events: CalendarEvent[] }) {
   )
 }
 
-// ── Project List (right column) ────────────────────────────────────────────────
+// ── Project List ───────────────────────────────────────────────────────────────
 const projectColors = [
   "bg-blue-500", "bg-violet-500", "bg-orange-500", "bg-emerald-500", "bg-rose-500",
 ]
@@ -261,7 +253,6 @@ function TasksCard({ tasks }: { tasks: Task[] }) {
 // ── Progress Gauge ─────────────────────────────────────────────────────────────
 function ProgressGauge({ done, total }: { done: number; total: number }) {
   const pct = total === 0 ? 0 : Math.round((done / total) * 100)
-  const deg = Math.round((pct / 100) * 360)
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-5">
       <p className="self-start text-base font-black text-foreground">Fortschritt</p>
@@ -286,92 +277,6 @@ function ProgressGauge({ done, total }: { done: number; total: number }) {
   )
 }
 
-// ── Mobile week preview (unchanged) ───────────────────────────────────────────
-function EventPill({ event }: { event: CalendarEvent }) {
-  const type = detectEventType(event.title)
-  const cls =
-    type === "privat"
-      ? "bg-violet-100 text-violet-800"
-      : type === "baustelle"
-        ? "bg-amber-100 text-amber-800"
-        : "bg-emerald-100 text-emerald-800"
-  const clean = event.title.replace(/^\[.*?\]\s*/, "")
-  return (
-    <span className={`block min-w-0 rounded-md px-1.5 py-1 text-[10px] font-bold leading-tight ${cls}`}>
-      <span className="block truncate">{time(event.start_time)}</span>
-      <span className="line-clamp-2 break-words">{clean}</span>
-    </span>
-  )
-}
-
-function WeekPreview({ events, today }: { events: CalendarEvent[]; today: Date }) {
-  const days = buildWeekDays(events, today)
-  const hasAny = days.some((d) => d.events.length > 0)
-  return (
-    <div className="max-w-full overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div className="grid w-max grid-flow-col grid-rows-3 gap-2 pr-2">
-        {days.map((day) => {
-          const hasEvents = day.events.length > 0
-          const visibleEvents = day.events.slice(0, 2)
-          const moreCount = day.events.length - visibleEvents.length
-          return (
-            <div
-              key={day.dateStr}
-              className={`flex h-[76px] w-[116px] min-w-0 flex-col overflow-hidden rounded-xl border px-2 py-2 ${
-                hasEvents ? "border-primary/35 bg-primary/5" : "border-border/50 bg-muted/15"
-              }`}
-            >
-              <span className="block truncate text-[10px] font-black text-muted-foreground">{day.label}</span>
-              <div className="mt-1 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
-                {hasEvents ? (
-                  <>
-                    {visibleEvents.map((e) => <EventPill key={e.id} event={e} />)}
-                    {moreCount > 0 && (
-                      <span className="block truncate text-[10px] font-bold text-primary/80">+{moreCount} mehr</span>
-                    )}
-                  </>
-                ) : (
-                  <span className="truncate text-[10px] text-muted-foreground/40">—</span>
-                )}
-              </div>
-            </div>
-          )
-        })}
-        {!hasAny && (
-          <div className="col-span-2 flex h-[76px] w-[240px] items-center rounded-xl border bg-muted/30 px-4 text-sm text-muted-foreground">
-            Keine Termine diese Woche.
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ── Mobile-only today events ───────────────────────────────────────────────────
-function MobileTodayEvents({ events }: { events: CalendarEvent[] }) {
-  if (events.length === 0)
-    return <p className="rounded-xl border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">Keine Termine heute.</p>
-  return (
-    <div className="flex flex-col gap-2">
-      {events.map((e) => {
-        const type = detectEventType(e.title)
-        const cls = type === "privat" ? "bg-violet-100 text-violet-800 border-violet-200"
-          : type === "baustelle" ? "bg-amber-100 text-amber-800 border-amber-200"
-          : "bg-emerald-100 text-emerald-800 border-emerald-200"
-        return (
-          <div key={e.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${cls}`}>
-            <CalendarDays className="size-4 shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold">{e.title.replace(/^\[.*?\]\s*/, "")}</p>
-              <p className="text-xs opacity-75">{time(e.start_time)} – {time(e.end_time)}</p>
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default async function HeutePage() {
   const supabase = await createClient()
@@ -382,6 +287,7 @@ export default async function HeutePage() {
 
   const { data: { user } } = await supabase.auth.getUser()
   const userName = user?.user_metadata?.full_name ?? user?.email ?? "Naim"
+  const firstName = userName.split(" ")[0]
 
   const [
     { data: todayEventsRaw },
@@ -418,38 +324,95 @@ export default async function HeutePage() {
   return (
     <div className="flex flex-col gap-4 md:gap-5">
 
-      {/* ── Header ── */}
-      <header className="flex items-center justify-between gap-4">
+      {/* ── Header — desktop only ── */}
+      <header className="hidden items-center justify-between gap-4 lg:flex">
         <div className="min-w-0">
           <h1 className="text-2xl font-black leading-tight sm:text-3xl">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">{dateStr} · Hallo {userName.split(" ")[0]}!</p>
+          <p className="text-sm text-muted-foreground">{dateStr} · Hallo {firstName}!</p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Link href="/neuer-auftrag">
-            <button className="flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-primary-foreground shadow-sm shadow-primary/20 transition-colors hover:bg-primary/90">
-              <Plus className="size-4" />
-              <span>Auftrag</span>
-            </button>
-          </Link>
-          <Link href="/kunden">
-            <button className="flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
-              Kunden
-            </button>
-          </Link>
-        </div>
+        <Link href="/neuer-auftrag">
+          <button className="flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-primary-foreground shadow-sm shadow-primary/20 transition-colors hover:bg-primary/90">
+            <Plus className="size-4" />
+            <span>Auftrag</span>
+          </button>
+        </Link>
       </header>
 
-      {/* ── Mobile week preview ── */}
-      <section className="lg:hidden">
-        <h2 className="mb-2 flex items-center gap-1.5 text-sm font-black text-muted-foreground">
-          <CalendarDays className="size-4" />
-          Diese Woche
-        </h2>
-        <WeekPreview events={weekEvents} today={today} />
-      </section>
+      {/* ── MOBILE ONLY ── */}
+      <div className="flex flex-col gap-6 lg:hidden">
 
-      {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        {/* 1. Greeting */}
+        <div className="pt-1">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{dateStr}</p>
+          <h1 className="mt-1.5 text-3xl font-black leading-tight">Guten Tag,<br />{firstName}!</h1>
+        </div>
+
+        {/* 2. CTA */}
+        <Link href="/neuer-auftrag">
+          <button className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-md shadow-primary/20">
+            <Plus className="size-5" />
+            Neuer Auftrag
+          </button>
+        </Link>
+
+        {/* 3. Stats strip */}
+        <div className="grid grid-cols-3 gap-2.5">
+          <StatChip label="In Arbeit" value={activeCount ?? 0} />
+          <StatChip label="Geplant" value={plannedCount ?? 0} />
+          <StatChip label="Fertig" value={doneCount ?? 0} accent />
+        </div>
+
+        {/* 4. Today events */}
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Heute</p>
+            <Link href="/kalender">
+              <span className="text-xs font-semibold text-primary">Kalender →</span>
+            </Link>
+          </div>
+          {todayEvents.length === 0 ? (
+            <p className="rounded-2xl border border-border/50 bg-muted/30 px-4 py-4 text-sm text-muted-foreground">Keine Termine heute.</p>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {todayEvents.slice(0, 3).map((e) => (
+                <div key={e.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5">
+                  <div className="w-1 shrink-0 self-stretch rounded-full bg-primary" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-foreground">{e.title.replace(/^\[.*?\]\s*/, "")}</p>
+                    <p className="text-xs text-muted-foreground">{time(e.start_time)} – {time(e.end_time)}</p>
+                  </div>
+                </div>
+              ))}
+              {todayEvents.length > 3 && (
+                <Link href="/kalender">
+                  <p className="text-center text-xs font-semibold text-primary">+{todayEvents.length - 3} weitere anzeigen</p>
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 5. Tasks */}
+        {tasks.length > 0 && (
+          <div>
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Aufgaben</p>
+            <div>
+              {tasks.slice(0, 3).map((task) => (
+                <form key={task.id} action={markTaskDone.bind(null, task.id)}>
+                  <button className="flex w-full items-center gap-3 border-b border-border px-1 py-3 text-left last:border-0">
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-border" />
+                    <p className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{task.title}</p>
+                  </button>
+                </form>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* ── Stat Cards — desktop only ── */}
+      <div className="hidden lg:grid lg:grid-cols-4 lg:gap-4">
         <StatCard title="Gesamt Baustellen" value={totalCount ?? 0} subtitle="Alle Projekte" primary />
         <StatCard title="Abgeschlossen" value={doneCount ?? 0} subtitle="Fertig gestellt" />
         <StatCard title="In Arbeit" value={activeCount ?? 0} subtitle="Laufende Projekte" />
@@ -467,35 +430,6 @@ export default async function HeutePage() {
       <div className="hidden gap-4 lg:grid lg:grid-cols-[1fr_240px_240px]">
         <TasksCard tasks={tasks} />
         <ProgressGauge done={doneTasksCount ?? 0} total={totalTasksCount ?? 0} />
-        <TimeTracker />
-      </div>
-
-      {/* ── Mobile fallback — stacked sections ── */}
-      <div className="flex flex-col gap-4 lg:hidden">
-        <section className="space-y-2">
-          <h2 className="flex items-center gap-1.5 text-base font-black">
-            <CalendarDays className="size-4 text-primary" />
-            Termine heute
-          </h2>
-          <MobileTodayEvents events={todayEvents} />
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="flex items-center gap-1.5 text-base font-black">
-            <ClipboardList className="size-4 text-primary" />
-            Aufgaben
-          </h2>
-          <TasksCard tasks={tasks} />
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="flex items-center gap-1.5 text-base font-black">
-            <HardHat className="size-4 text-primary" />
-            Baustellen
-          </h2>
-          <ProjectListCard projects={projects} />
-        </section>
-
         <TimeTracker />
       </div>
 

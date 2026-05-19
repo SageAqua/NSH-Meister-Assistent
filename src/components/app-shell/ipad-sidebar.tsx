@@ -115,6 +115,7 @@ export function IpadSidebar() {
             <div className="mt-3 flex size-8 items-center justify-center overflow-hidden rounded-lg bg-white/20">
               <img src="/logo.png" alt="NSH" className="size-7 object-contain" />
             </div>
+            <p className="mt-3 text-[10px] font-semibold text-primary-foreground/50">by Growlio</p>
           </div>
           <div className="pointer-events-none absolute -right-4 -top-4 size-20 rounded-full bg-white/5" />
           <div className="pointer-events-none absolute -bottom-6 -right-2 size-24 rounded-full bg-white/5" />

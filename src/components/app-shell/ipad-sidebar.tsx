@@ -110,7 +110,7 @@ export function IpadSidebar() {
       <div className="px-3 pb-4">
         <div className="relative overflow-hidden rounded-2xl bg-primary px-4 py-4">
           <div className="relative z-10">
-            <p className="text-sm font-black leading-tight text-primary-foreground">NSH Meister</p>
+            <p className="text-sm font-black leading-tight text-primary-foreground">NSH Dashboard</p>
             <p className="mt-0.5 text-xs text-primary-foreground/70">Assistent</p>
             <div className="mt-3 flex size-8 items-center justify-center overflow-hidden rounded-lg bg-white/20">
               <img src="/logo.png" alt="NSH" className="size-7 object-contain" />

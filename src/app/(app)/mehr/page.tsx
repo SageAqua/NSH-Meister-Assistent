@@ -1,8 +1,26 @@
 import Link from "next/link"
-import { Calculator, FileText, Users, BookOpen, Package, Settings, ChevronRight } from "lucide-react"
+import { Calculator, FileText, Users, BookOpen, Package, Settings, ChevronRight, FileCheck, BarChart3 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 const MORE_ITEMS = [
+  {
+    href: "/dokumente",
+    icon: FileCheck,
+    labelDe: "Dokumente",
+    labelSq: "Dokumente",
+    desc: "Rechnungen scannen & archivieren",
+    descSq: "Skano dhe arkivo faturat",
+    color: "bg-primary/10 text-primary",
+  },
+  {
+    href: "/finanzen",
+    icon: BarChart3,
+    labelDe: "Finanzen",
+    labelSq: "Financat",
+    desc: "Umsatz, Ausgaben & Umsatzsteuer",
+    descSq: "Xhiroja, shpenzimet dhe TVSH",
+    color: "bg-green-100 text-green-700",
+  },
   {
     href: "/preisrechner",
     icon: Calculator,
@@ -28,7 +46,7 @@ const MORE_ITEMS = [
     labelSq: "Klientë",
     desc: "Alle Kontakte verwalten",
     descSq: "Menaxho të gjitha kontaktet",
-    color: "bg-green-100 text-green-700",
+    color: "bg-cyan-100 text-cyan-700",
   },
   {
     href: "/deutsch-lernen",

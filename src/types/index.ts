@@ -171,3 +171,47 @@ export interface CalendarPlanDay {
   endTime: string
   helpers: number
 }
+
+export type DocType = "rechnung" | "kassenbon" | "angebot" | "lieferschein" | "vertrag" | "foto" | "sonstiges"
+export type DocDirection = "einnahme" | "ausgabe"
+export type DocCategory = "material" | "tanken" | "werkzeug" | "buero" | "essen" | "versicherung" | "lohn" | "sonstiges"
+
+export interface DocumentRecord {
+  id: string
+  user_id: string
+  project_id: string | null
+  customer_id: string | null
+  file_path: string
+  original_filename: string
+  suggested_filename: string | null
+  file_size: number | null
+  doc_type: DocType
+  doc_direction: DocDirection
+  category: DocCategory | null
+  vendor: string | null
+  recipient: string | null
+  amount_gross: number | null
+  amount_net: number | null
+  amount_vat: number | null
+  vat_rate: number | null
+  document_date: string | null
+  document_number: string | null
+  status: string
+  analysis_raw: string | null
+  created_at: string
+}
+
+export interface DocumentAnalysis {
+  doc_type: DocType
+  doc_direction: DocDirection
+  category: DocCategory
+  vendor: string | null
+  recipient: string | null
+  amount_gross: number | null
+  amount_net: number | null
+  amount_vat: number | null
+  vat_rate: number | null
+  document_date: string | null
+  document_number: string | null
+  suggested_filename: string
+}

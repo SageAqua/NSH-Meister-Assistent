@@ -3,11 +3,12 @@ import {
   ArrowUpRight,
   CalendarDays,
   CheckCircle2,
+  FileCheck,
   Plus,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { markTaskDone } from "@/app/actions/orders"
-import type { CalendarEvent, Customer, Project, Task } from "@/types"
+import type { CalendarEvent, Customer, Project, Task, DocumentRecord } from "@/types"
 import { TimeTracker } from "./time-tracker"
 
 type ProjectFull = Project & { customers: Customer | null }
@@ -67,6 +68,22 @@ function buildWeekDays(events: CalendarEvent[], today: Date) {
     return {
       dateStr,
       label: dayLabels[d.getDay()],
+      events: events.filter((e) => e.start_time.startsWith(dateStr)),
+    }
+  })
+}
+
+function buildNextDays(events: CalendarEvent[], today: Date, count = 5) {
+  const dayLabels = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(today)
+    d.setDate(today.getDate() + i + 1)
+    const dateStr = formatDateKey(d)
+    return {
+      dateStr,
+      label: dayLabels[d.getDay()],
+      dayNum: d.getDate(),
+      monthStr: d.toLocaleDateString("de-DE", { month: "short" }),
       events: events.filter((e) => e.start_time.startsWith(dateStr)),
     }
   })
@@ -291,6 +308,8 @@ export default async function HeutePage() {
   const todayStr = formatDateKey(today)
   const startOfDay = `${todayStr}T00:00:00`
   const endOfDay = `${todayStr}T23:59:59`
+  const tomorrowStart = formatDateKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)) + "T00:00:00"
+  const in5DaysEnd = formatDateKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5)) + "T23:59:59"
 
   const { data: { user } } = await supabase.auth.getUser()
   const userName = user?.user_metadata?.full_name ?? "Naim Shala"
@@ -299,8 +318,10 @@ export default async function HeutePage() {
   const [
     { data: todayEventsRaw },
     { data: weekEventsRaw },
+    { data: nextWeekEventsRaw },
     { data: tasksRaw },
     { data: projectsRaw },
+    { data: recentDocsRaw },
     { count: totalCount },
     { count: activeCount },
     { count: plannedCount },
@@ -310,8 +331,10 @@ export default async function HeutePage() {
   ] = await Promise.all([
     supabase.from("calendar_events").select("*, projects(*, customers(*))").gte("start_time", startOfDay).lte("start_time", endOfDay).neq("status", "abgesagt").order("start_time"),
     supabase.from("calendar_events").select("*, projects(*, customers(*))").gte("start_time", startOfWeek(today)).lte("start_time", endOfWeek(today)).neq("status", "abgesagt").order("start_time"),
-    supabase.from("tasks").select("*, projects(*)").eq("is_done", false).order("due_date", { ascending: true }).limit(4),
+    supabase.from("calendar_events").select("*").gte("start_time", tomorrowStart).lte("start_time", in5DaysEnd).neq("status", "abgesagt").order("start_time"),
+    supabase.from("tasks").select("*, projects(*)").eq("is_done", false).order("due_date", { ascending: true }).limit(5),
     supabase.from("projects").select("*, customers(*)").in("status", ["in_arbeit", "geplant"]).order("created_at", { ascending: false }).limit(5),
+    supabase.from("documents").select("id, suggested_filename, amount_gross, doc_direction, created_at").order("created_at", { ascending: false }).limit(3),
     supabase.from("projects").select("*", { count: "exact", head: true }),
     supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "in_arbeit"),
     supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "geplant"),
@@ -322,9 +345,12 @@ export default async function HeutePage() {
 
   const todayEvents = (todayEventsRaw ?? []) as CalendarEvent[]
   const weekEvents = (weekEventsRaw ?? []) as CalendarEvent[]
+  const nextWeekEvents = (nextWeekEventsRaw ?? []) as CalendarEvent[]
   const tasks = (tasksRaw ?? []) as Task[]
   const projects = (projectsRaw ?? []) as ProjectFull[]
+  const recentDocs = (recentDocsRaw ?? []) as Pick<DocumentRecord, "id" | "suggested_filename" | "amount_gross" | "doc_direction" | "created_at">[]
   const weekDays = buildWeekDays(weekEvents, today)
+  const nextDays = buildNextDays(nextWeekEvents, today)
 
   const dateStr = today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })
 
@@ -354,7 +380,26 @@ export default async function HeutePage() {
           <h1 className="mt-1.5 text-3xl font-black leading-tight">Guten Tag,<br />{firstName}!</h1>
         </div>
 
-        {/* 2. CTA */}
+        {/* 2. So geht's guide */}
+        <div className="rounded-2xl border border-border/60 bg-muted/40 px-4 py-3.5">
+          <p className="mb-2.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">So geht's</p>
+          <div className="space-y-2">
+            {[
+              { n: "1", text: "Neuen Auftrag anlegen wenn ein Kunde anruft", active: true },
+              { n: "2", text: "Jeden Morgen hier checken was heute ansteht", active: true },
+              { n: "3", text: "Auftrag als \"Fertig\" markieren wenn die Arbeit fertig ist", active: false },
+            ].map((step) => (
+              <div key={step.n} className="flex items-start gap-2.5">
+                <span className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${step.active ? "bg-primary text-primary-foreground" : "bg-muted-foreground/30 text-muted-foreground"}`}>
+                  {step.n}
+                </span>
+                <p className={`text-sm font-semibold leading-snug ${step.active ? "text-foreground" : "text-muted-foreground"}`}>{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. CTA */}
         <Link href="/neuer-auftrag">
           <button className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-black text-primary-foreground shadow-md shadow-primary/20">
             <Plus className="size-5" />
@@ -362,14 +407,14 @@ export default async function HeutePage() {
           </button>
         </Link>
 
-        {/* 3. Stats strip */}
+        {/* 4. Stats strip */}
         <div className="grid grid-cols-3 gap-2.5">
           <StatChip label="In Arbeit" value={activeCount ?? 0} />
           <StatChip label="Geplant" value={plannedCount ?? 0} />
           <StatChip label="Fertig" value={doneCount ?? 0} accent />
         </div>
 
-        {/* 4. Today events */}
+        {/* 5. Today events */}
         <div>
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Heute</p>
@@ -378,7 +423,7 @@ export default async function HeutePage() {
             </Link>
           </div>
           {todayEvents.length === 0 ? (
-            <p className="rounded-2xl border border-border/50 bg-muted/30 px-4 py-4 text-sm text-muted-foreground">Keine Termine heute.</p>
+            <p className="rounded-2xl border border-dashed border-border/50 bg-muted/20 px-4 py-4 text-sm text-muted-foreground">Keine Termine heute.</p>
           ) : (
             <div className="flex flex-col gap-2.5">
               {todayEvents.slice(0, 3).map((e) => (
@@ -403,18 +448,102 @@ export default async function HeutePage() {
           )}
         </div>
 
-        {/* 5. Tasks */}
-        {tasks.length > 0 && (
-          <div>
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Aufgaben</p>
-            <div>
-              {tasks.slice(0, 3).map((task) => (
+        {/* 6. Diese Woche */}
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Diese Woche</p>
+            <Link href="/kalender">
+              <span className="text-xs font-semibold text-primary">Alle →</span>
+            </Link>
+          </div>
+          <div className="flex flex-col gap-2">
+            {nextDays.map((day) => (
+              <div key={day.dateStr} className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
+                <div className="w-10 shrink-0 text-center">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground">{day.label}</p>
+                  <p className="text-xl font-black leading-tight text-foreground">{day.dayNum}</p>
+                  <p className="text-[10px] text-muted-foreground">{day.monthStr}</p>
+                </div>
+                <div className="h-10 w-px shrink-0 bg-border" />
+                <div className="min-w-0 flex-1">
+                  {day.events.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Frei</p>
+                  ) : (
+                    <div className="space-y-0.5">
+                      {day.events.slice(0, 2).map((e) => (
+                        <p key={e.id} className="truncate text-sm font-semibold text-foreground leading-snug">{e.title.replace(/^\[.*?\]\s*/, "")}</p>
+                      ))}
+                      {day.events.length > 2 && (
+                        <p className="text-xs text-muted-foreground">+{day.events.length - 2} weitere</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {day.events.length > 0 && (
+                  <div className={`h-8 w-1.5 shrink-0 rounded-full ${
+                    detectEventType(day.events[0].title) === "privat" ? "bg-violet-400" :
+                    detectEventType(day.events[0].title) === "baustelle" ? "bg-amber-400" :
+                    "bg-blue-400"
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 7. Offene Aufgaben */}
+        <div>
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Offene Aufgaben</p>
+          {tasks.length === 0 ? (
+            <div className="flex items-center gap-2.5 rounded-xl border border-dashed border-border/50 bg-muted/20 px-4 py-4">
+              <CheckCircle2 className="size-5 shrink-0 text-green-500" />
+              <p className="text-sm font-semibold text-muted-foreground">Alles erledigt — keine offenen Aufgaben.</p>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-border bg-card">
+              {tasks.slice(0, 5).map((task, i) => (
                 <form key={task.id} action={markTaskDone.bind(null, task.id)}>
-                  <button className="flex w-full items-center gap-3 border-b border-border px-1 py-3 text-left last:border-0">
+                  <button className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 ${i < Math.min(tasks.length, 5) - 1 ? "border-b border-border" : ""}`}>
                     <span className="flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-border" />
-                    <p className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{task.title}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-foreground">{task.title}</p>
+                      {task.projects && (
+                        <p className="truncate text-xs text-muted-foreground">
+                          {task.projects.address ?? serviceName(task.projects.service_type)}
+                        </p>
+                      )}
+                    </div>
                   </button>
                 </form>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 8. Letzte Dokumente */}
+        {recentDocs.length > 0 && (
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Letzte Dokumente</p>
+              <Link href="/dokumente">
+                <span className="text-xs font-semibold text-primary">Alle →</span>
+              </Link>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {recentDocs.map((doc) => (
+                <Link key={doc.id} href="/dokumente">
+                  <div className="flex w-36 shrink-0 flex-col rounded-xl border border-border bg-card p-3">
+                    <div className="mb-2 flex size-8 items-center justify-center rounded-lg bg-muted">
+                      <FileCheck className="size-4 text-muted-foreground" />
+                    </div>
+                    <p className="truncate text-xs font-bold text-foreground leading-tight">{doc.suggested_filename ?? "Dokument"}</p>
+                    <p className={`mt-1 text-sm font-black ${doc.doc_direction === "einnahme" ? "text-green-600" : "text-foreground"}`}>
+                      {doc.amount_gross != null
+                        ? new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(doc.amount_gross)
+                        : "—"}
+                    </p>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>

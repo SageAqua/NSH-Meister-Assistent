@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import {
   Home, Calendar, PlusCircle, Building2, Grid3x3,
   Calculator, FileText, Users, BookOpen, Package, Settings,
-  HelpCircle, LogOut,
+  HelpCircle, LogOut, FileCheck, BarChart3,
 } from "lucide-react"
 import { mainNav, moreNav } from "@/data/navigation"
 import { cn } from "@/lib/utils"
@@ -19,6 +19,8 @@ const iconMap: Record<string, ElementType> = {
   grid: Grid3x3,
   calculator: Calculator,
   "file-text": FileText,
+  "file-check": FileCheck,
+  "bar-chart-3": BarChart3,
   users: Users,
   "book-open": BookOpen,
   package: Package,

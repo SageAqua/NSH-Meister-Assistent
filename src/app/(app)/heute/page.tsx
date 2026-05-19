@@ -46,6 +46,13 @@ function endOfWeek(d: Date): string {
   return formatDateKey(sun) + "T23:59:59"
 }
 
+function detectEventType(title: string): "privat" | "arbeit" | "baustelle" {
+  const t = title.toLowerCase()
+  if (t.includes("[privat]")) return "privat"
+  if (t.includes("[baustelle]")) return "baustelle"
+  return "arbeit"
+}
+
 function buildWeekDays(events: CalendarEvent[], today: Date) {
   const day = today.getDay()
   const diff = day === 0 ? -6 : 1 - day
@@ -286,7 +293,7 @@ export default async function HeutePage() {
   const endOfDay = `${todayStr}T23:59:59`
 
   const { data: { user } } = await supabase.auth.getUser()
-  const userName = user?.user_metadata?.full_name ?? user?.email ?? "Naim"
+  const userName = user?.user_metadata?.full_name ?? "Naim Shala"
   const firstName = userName.split(" ")[0]
 
   const [
@@ -376,7 +383,11 @@ export default async function HeutePage() {
             <div className="flex flex-col gap-2.5">
               {todayEvents.slice(0, 3).map((e) => (
                 <div key={e.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5">
-                  <div className="w-1 shrink-0 self-stretch rounded-full bg-primary" />
+                  <div className={`w-1 shrink-0 self-stretch rounded-full ${
+                    detectEventType(e.title) === "privat" ? "bg-violet-500" :
+                    detectEventType(e.title) === "baustelle" ? "bg-amber-500" :
+                    "bg-blue-500"
+                  }`} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-foreground">{e.title.replace(/^\[.*?\]\s*/, "")}</p>
                     <p className="text-xs text-muted-foreground">{time(e.start_time)} – {time(e.end_time)}</p>

@@ -27,6 +27,7 @@ import {
 } from "@/app/actions/orders"
 import type { CalendarEvent } from "@/types"
 import { cn } from "@/lib/utils"
+import { addDaysToDateKey, formatDateKeyInTimeZone, formatTimeInTimeZone, localDateTimeToUtcIso } from "@/lib/date-time"
 
 type View = "monat" | "liste"
 
@@ -37,15 +38,15 @@ const MONTHS_DE = [
 ]
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
+  return formatTimeInTimeZone(iso)
 }
 
 function isoToDate(iso: string) {
-  return iso.split("T")[0]
+  return formatDateKeyInTimeZone(iso)
 }
 
 function isoToTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", hour12: false })
+  return formatTimeInTimeZone(iso)
 }
 
 function isSameDay(a: Date, b: Date) {
@@ -53,8 +54,8 @@ function isSameDay(a: Date, b: Date) {
 }
 
 function isSameMonth(iso: string, month: number, year: number) {
-  const date = new Date(iso)
-  return date.getMonth() === month && date.getFullYear() === year
+  const [eventYear, eventMonth] = formatDateKeyInTimeZone(iso).split("-").map(Number)
+  return eventMonth - 1 === month && eventYear === year
 }
 
 function getInitialMonth(events: CalendarEvent[]) {
@@ -63,8 +64,8 @@ function getInitialMonth(events: CalendarEvent[]) {
   if (hasCurrentMonthEvents || events.length === 0) return { month: now.getMonth(), year: now.getFullYear() }
   const nowMs = now.getTime()
   const next = events.find((e) => new Date(e.start_time).getTime() >= nowMs) ?? events[0]
-  const d = new Date(next.start_time)
-  return { month: d.getMonth(), year: d.getFullYear() }
+  const [year, month] = formatDateKeyInTimeZone(next.start_time).split("-").map(Number)
+  return { month: month - 1, year }
 }
 
 function getEventLocation(event: CalendarEvent) {
@@ -393,11 +394,13 @@ function DayDetailSheet({
 // ── Views ────────────────────────────────────────────────────────────────────
 
 function ListView({
-  events, onDelete, onEdit,
+  events, onDelete, onEdit, todayKey, tomorrowKey,
 }: {
   events: CalendarEvent[]
   onDelete: (id: string) => void
   onEdit: (event: CalendarEvent) => void
+  todayKey: string
+  tomorrowKey: string
 }) {
   if (events.length === 0) return (
     <Card className="border-dashed">
@@ -423,8 +426,8 @@ function ListView({
     <div className="space-y-6">
       {Object.entries(grouped).map(([day, dayEvents]) => {
         const date = new Date(day + "T12:00:00")
-        const isToday = isSameDay(date, new Date())
-        const isTomorrow = isSameDay(date, new Date(Date.now() + 86400000))
+        const isToday = day === todayKey
+        const isTomorrow = day === tomorrowKey
         const fullDate = date.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })
         const dayLabel = isToday ? `Heute — ${fullDate}`
           : isTomorrow ? `Morgen — ${fullDate}`
@@ -468,7 +471,7 @@ function MonthView({
 
   const eventsByDay: Record<number, CalendarEvent[]> = {}
   events.forEach((e) => {
-    const day = new Date(e.start_time).getDate()
+    const day = Number(isoToDate(e.start_time).split("-")[2])
     if (!eventsByDay[day]) eventsByDay[day] = []
     eventsByDay[day].push(e)
   })
@@ -574,6 +577,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
   const [view, setView] = useState<View>("liste")
   const [month, setMonth] = useState(initial.month)
   const [year, setYear] = useState(initial.year)
+  const [todayKey] = useState(() => formatDateKeyInTimeZone(new Date()))
   const [selectedDay, setSelectedDay] = useState<SelectedDay | null>(null)
 
   const [editing, setEditing] = useState<CalendarEvent | null>(null)
@@ -588,8 +592,8 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
   const doneCount = activeEvents.filter((e) => e.status === "erledigt").length
   const openCount = activeEvents.length - doneCount
 
-  const startOfToday = new Date()
-  startOfToday.setHours(0, 0, 0, 0)
+  const tomorrowKey = addDaysToDateKey(todayKey, 1)
+  const startOfToday = new Date(localDateTimeToUtcIso(todayKey, "00:00:00"))
   const upcomingEvents = events
     .filter((e) => e.status !== "abgesagt" && new Date(e.start_time) >= startOfToday)
     .sort((a, b) => a.start_time.localeCompare(b.start_time))
@@ -716,7 +720,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
         />
       )}
       {view === "liste" && (
-        <ListView events={upcomingEvents} onDelete={handleDelete} onEdit={openEdit} />
+            <ListView events={upcomingEvents} onDelete={handleDelete} onEdit={openEdit} todayKey={todayKey} tomorrowKey={tomorrowKey} />
       )}
 
       {/* Day detail sheet */}

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import type { ProjectStatus, VinylOrderForm, CalendarPlanDay, CalendarEvent } from "@/types"
+import { localDateTimeToUtcIso } from "@/lib/date-time"
 
 export async function saveVinylOrder(form: VinylOrderForm, plan: CalendarPlanDay[]) {
   const supabase = await createClient()
@@ -57,8 +58,8 @@ export async function saveVinylOrder(form: VinylOrderForm, plan: CalendarPlanDay
       user_id: user.id,
       project_id: project.id,
       title: day.title,
-      start_time: `${day.date}T${day.startTime}:00`,
-      end_time: `${day.date}T${day.endTime}:00`,
+      start_time: localDateTimeToUtcIso(day.date, day.startTime),
+      end_time: localDateTimeToUtcIso(day.date, day.endTime),
       status: "geplant" as const,
       helpers_count: day.helpers,
     }))
@@ -239,8 +240,8 @@ export async function updateCalendarEvent(data: {
     .from("calendar_events")
     .update({
       title: data.title,
-      start_time: `${data.date}T${data.startTime}:00`,
-      end_time: `${data.date}T${data.endTime}:00`,
+      start_time: localDateTimeToUtcIso(data.date, data.startTime),
+      end_time: localDateTimeToUtcIso(data.date, data.endTime),
     })
     .eq("id", data.id)
     .eq("user_id", user.id)
@@ -258,8 +259,8 @@ export async function getCalendarEventsForDate(date: string): Promise<{ events?:
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Nicht angemeldet." }
 
-  const startOfDay = `${date}T00:00:00`
-  const endOfDay = `${date}T23:59:59`
+  const startOfDay = localDateTimeToUtcIso(date, "00:00:00")
+  const endOfDay = localDateTimeToUtcIso(date, "23:59:59")
 
   const { data, error } = await supabase
     .from("calendar_events")
@@ -317,8 +318,8 @@ export async function saveUniversalOrder(data: {
         user_id: user.id,
         project_id: project.id,
         title: day.title,
-        start_time: `${day.date}T${day.startTime}:00`,
-        end_time: `${day.date}T${day.endTime}:00`,
+        start_time: localDateTimeToUtcIso(day.date, day.startTime),
+        end_time: localDateTimeToUtcIso(day.date, day.endTime),
         status: "geplant" as const,
         helpers_count: data.helpersCount,
       }))
@@ -436,8 +437,8 @@ export async function saveSimpleOrder(data: {
         user_id: user.id,
         project_id: project.id,
         title: durationDays > 1 ? `${workTitle} (Tag ${index + 1}/${durationDays})` : workTitle,
-        start_time: `${date}T${startTime}:00`,
-        end_time: `${date}T${endTime}:00`,
+        start_time: localDateTimeToUtcIso(date, startTime),
+        end_time: localDateTimeToUtcIso(date, endTime),
         status: "geplant",
         helpers_count: data.helpersCount,
         notes: data.notes?.trim() || null,
@@ -635,12 +636,16 @@ export async function saveCalendarEvent(data: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Nicht angemeldet." }
 
+  const startAt = data.startIso ?? (data.date && data.startTime ? localDateTimeToUtcIso(data.date, data.startTime) : null)
+  const endAt = data.endIso ?? (data.date && data.endTime ? localDateTimeToUtcIso(data.date, data.endTime) : null)
+  if (!startAt || !endAt) return { error: "Datum oder Uhrzeit fehlt." }
+
   const { error } = await supabase.from("calendar_events").insert({
     user_id: user.id,
     project_id: data.projectId ?? null,
     title: data.title,
-    start_time: data.startIso ?? `${data.date}T${data.startTime}:00`,
-    end_time: data.endIso ?? `${data.date}T${data.endTime}:00`,
+    start_time: startAt,
+    end_time: endAt,
     status: "geplant",
     helpers_count: 0,
   })
@@ -648,6 +653,88 @@ export async function saveCalendarEvent(data: {
   if (error) return { error: "Termin konnte nicht gespeichert werden." }
   revalidatePath("/heute")
   revalidatePath("/kalender")
+  return {}
+}
+
+export async function saveTodayWorkSession(data: {
+  projectId: string
+  date: string
+  startTime: string
+  endTime: string
+  helpersCount?: number
+}): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Nicht angemeldet." }
+
+  if (!data.projectId || !data.date || !data.startTime || !data.endTime) {
+    return { error: "Baustelle oder Uhrzeit fehlt." }
+  }
+
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("id, service_type, helpers_count")
+    .eq("id", data.projectId)
+    .eq("user_id", user.id)
+    .single()
+
+  if (projectError || !project) return { error: "Baustelle wurde nicht gefunden." }
+
+  const startAt = localDateTimeToUtcIso(data.date, data.startTime)
+  const endAt = localDateTimeToUtcIso(data.date, data.endTime)
+  if (new Date(endAt).getTime() <= new Date(startAt).getTime()) {
+    return { error: "Ende muss nach dem Start liegen." }
+  }
+
+  const dayStart = localDateTimeToUtcIso(data.date, "00:00:00")
+  const dayEnd = localDateTimeToUtcIso(data.date, "23:59:59")
+  const helpers = data.helpersCount ?? project.helpers_count ?? 0
+
+  const { data: existingEvent } = await supabase
+    .from("calendar_events")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("project_id", project.id)
+    .gte("start_time", dayStart)
+    .lte("start_time", dayEnd)
+    .neq("status", "abgesagt")
+    .order("start_time")
+    .limit(1)
+    .maybeSingle()
+
+  const { error } = existingEvent
+    ? await supabase
+        .from("calendar_events")
+        .update({
+          title: `[baustelle] ${project.service_type}`,
+          start_time: startAt,
+          end_time: endAt,
+          helpers_count: helpers,
+        })
+        .eq("id", existingEvent.id)
+        .eq("user_id", user.id)
+    : await supabase.from("calendar_events").insert({
+        user_id: user.id,
+        project_id: project.id,
+        title: `[baustelle] ${project.service_type}`,
+        start_time: startAt,
+        end_time: endAt,
+        status: "geplant",
+        helpers_count: helpers,
+      })
+
+  if (error) return { error: "Arbeit konnte nicht eingetragen werden." }
+
+  await supabase
+    .from("projects")
+    .update({ status: "in_arbeit" })
+    .eq("id", project.id)
+    .eq("user_id", user.id)
+
+  revalidatePath("/heute")
+  revalidatePath("/kalender")
+  revalidatePath("/baustellen")
+  revalidatePath(`/baustellen/${project.id}`)
   return {}
 }
 

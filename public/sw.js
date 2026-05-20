@@ -1,5 +1,16 @@
-const CACHE_NAME = "nsh-meister-v2"
-const OFFLINE_URLS = ["/heute", "/kalender", "/preisrechner", "/neuer-auftrag"]
+const CACHE_NAME = "nsh-meister-v3"
+const OFFLINE_URLS = [
+  "/",
+  "/heute",
+  "/kalender",
+  "/preisrechner",
+  "/neuer-auftrag",
+  "/neuer-auftrag/baustelle",
+  "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/apple-touch-icon.png",
+]
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -22,13 +33,49 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return
   const url = new URL(event.request.url)
-  if (!url.origin.startsWith("http")) return
+  if (url.origin !== self.location.origin) return
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+          return response
+        })
+        .catch(async () => {
+          return (
+            (await caches.match(event.request)) ||
+            (await caches.match("/heute")) ||
+            (await caches.match("/"))
+          )
+        })
+    )
+    return
+  }
+
+  if (url.pathname.startsWith("/_next/static/") || url.pathname.match(/\.(png|jpg|jpeg|webp|svg|ico|css|js)$/)) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        return cached || fetch(event.request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+          }
+          return response
+        })
+      })
+    )
+    return
+  }
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        const clone = response.clone()
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+        if (response.ok) {
+          const clone = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+        }
         return response
       })
       .catch(() => caches.match(event.request))

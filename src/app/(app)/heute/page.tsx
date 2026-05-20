@@ -10,15 +10,24 @@ import { createClient } from "@/lib/supabase/server"
 import { markTaskDone } from "@/app/actions/orders"
 import type { CalendarEvent, Customer, Project, Task, DocumentRecord } from "@/types"
 import { TimeTracker } from "./time-tracker"
+import { TodayWorkPlanner } from "./today-work-planner"
+import {
+  APP_TIME_ZONE,
+  addDaysToDateKey,
+  formatDateKeyInTimeZone,
+  formatTimeInTimeZone,
+  localDateTimeToUtcIso,
+  weekdayFromDateKey,
+} from "@/lib/date-time"
 
 type ProjectFull = Project & { customers: Customer | null }
 
 function formatDateKey(date: Date) {
-  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-")
+  return formatDateKeyInTimeZone(date)
 }
 
 function time(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
+  return formatTimeInTimeZone(iso)
 }
 
 function serviceName(service: string) {
@@ -30,21 +39,17 @@ function serviceName(service: string) {
 }
 
 function startOfWeek(d: Date): string {
-  const day = d.getDay()
+  const dateKey = formatDateKey(d)
+  const day = weekdayFromDateKey(dateKey)
   const diff = day === 0 ? -6 : 1 - day
-  const mon = new Date(d)
-  mon.setDate(d.getDate() + diff)
-  mon.setHours(0, 0, 0, 0)
-  return formatDateKey(mon) + "T00:00:00"
+  return localDateTimeToUtcIso(addDaysToDateKey(dateKey, diff), "00:00:00")
 }
 
 function endOfWeek(d: Date): string {
-  const day = d.getDay()
+  const dateKey = formatDateKey(d)
+  const day = weekdayFromDateKey(dateKey)
   const diff = day === 0 ? 0 : 7 - day
-  const sun = new Date(d)
-  sun.setDate(d.getDate() + diff)
-  sun.setHours(23, 59, 59, 0)
-  return formatDateKey(sun) + "T23:59:59"
+  return localDateTimeToUtcIso(addDaysToDateKey(dateKey, diff), "23:59:59")
 }
 
 function detectEventType(title: string): "privat" | "arbeit" | "baustelle" {
@@ -55,36 +60,33 @@ function detectEventType(title: string): "privat" | "arbeit" | "baustelle" {
 }
 
 function buildWeekDays(events: CalendarEvent[], today: Date) {
-  const day = today.getDay()
+  const todayKey = formatDateKey(today)
+  const day = weekdayFromDateKey(todayKey)
   const diff = day === 0 ? -6 : 1 - day
-  const mon = new Date(today)
-  mon.setDate(today.getDate() + diff)
-  mon.setHours(0, 0, 0, 0)
+  const mondayKey = addDaysToDateKey(todayKey, diff)
   const dayLabels = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(mon)
-    d.setDate(mon.getDate() + i)
-    const dateStr = formatDateKey(d)
+    const dateStr = addDaysToDateKey(mondayKey, i)
     return {
       dateStr,
-      label: dayLabels[d.getDay()],
-      events: events.filter((e) => e.start_time.startsWith(dateStr)),
+      label: dayLabels[weekdayFromDateKey(dateStr)],
+      events: events.filter((e) => formatDateKeyInTimeZone(e.start_time) === dateStr),
     }
   })
 }
 
 function buildNextDays(events: CalendarEvent[], today: Date, count = 5) {
   const dayLabels = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
+  const todayKey = formatDateKey(today)
   return Array.from({ length: count }, (_, i) => {
-    const d = new Date(today)
-    d.setDate(today.getDate() + i + 1)
-    const dateStr = formatDateKey(d)
+    const dateStr = addDaysToDateKey(todayKey, i + 1)
+    const [, month, day] = dateStr.split("-").map(Number)
     return {
       dateStr,
-      label: dayLabels[d.getDay()],
-      dayNum: d.getDate(),
-      monthStr: d.toLocaleDateString("de-DE", { month: "short" }),
-      events: events.filter((e) => e.start_time.startsWith(dateStr)),
+      label: dayLabels[weekdayFromDateKey(dateStr)],
+      dayNum: day,
+      monthStr: new Date(Date.UTC(2000, month - 1, 1)).toLocaleDateString("de-DE", { month: "short", timeZone: "UTC" }),
+      events: events.filter((e) => formatDateKeyInTimeZone(e.start_time) === dateStr),
     }
   })
 }
@@ -191,46 +193,6 @@ function RemindersCard({ events }: { events: CalendarEvent[] }) {
 }
 
 // ── Project List ───────────────────────────────────────────────────────────────
-const projectColors = [
-  "bg-blue-500", "bg-violet-500", "bg-orange-500", "bg-emerald-500", "bg-rose-500",
-]
-
-function ProjectListCard({ projects }: { projects: ProjectFull[] }) {
-  return (
-    <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <p className="text-base font-black text-foreground">Baustellen</p>
-        <Link href="/baustellen">
-          <button className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs font-bold text-muted-foreground transition-colors hover:bg-muted">
-            <Plus className="size-3" />
-            Neu
-          </button>
-        </Link>
-      </div>
-      <div className="mt-3 flex flex-col gap-2">
-        {projects.length === 0 && (
-          <p className="text-sm text-muted-foreground">Keine aktiven Baustellen.</p>
-        )}
-        {projects.slice(0, 5).map((p, i) => (
-          <Link key={p.id} href={`/baustellen/${p.id}`}>
-            <div className="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-muted">
-              <span className={`size-2 shrink-0 rounded-full ${projectColors[i % projectColors.length]}`} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-foreground">
-                  {p.customers?.name ?? "Ohne Kunde"}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {serviceName(p.service_type)}
-                </p>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 // ── Tasks Card ─────────────────────────────────────────────────────────────────
 function TasksCard({ tasks }: { tasks: Task[] }) {
   return (
@@ -306,10 +268,10 @@ export default async function HeutePage() {
   const supabase = await createClient()
   const today = new Date()
   const todayStr = formatDateKey(today)
-  const startOfDay = `${todayStr}T00:00:00`
-  const endOfDay = `${todayStr}T23:59:59`
-  const tomorrowStart = formatDateKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)) + "T00:00:00"
-  const in5DaysEnd = formatDateKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5)) + "T23:59:59"
+  const startOfDay = localDateTimeToUtcIso(todayStr, "00:00:00")
+  const endOfDay = localDateTimeToUtcIso(todayStr, "23:59:59")
+  const tomorrowStart = localDateTimeToUtcIso(addDaysToDateKey(todayStr, 1), "00:00:00")
+  const in5DaysEnd = localDateTimeToUtcIso(addDaysToDateKey(todayStr, 5), "23:59:59")
 
   const { data: { user } } = await supabase.auth.getUser()
   const userName = user?.user_metadata?.full_name ?? "Naim Shala"
@@ -333,7 +295,7 @@ export default async function HeutePage() {
     supabase.from("calendar_events").select("*, projects(*, customers(*))").gte("start_time", startOfWeek(today)).lte("start_time", endOfWeek(today)).neq("status", "abgesagt").order("start_time"),
     supabase.from("calendar_events").select("*").gte("start_time", tomorrowStart).lte("start_time", in5DaysEnd).neq("status", "abgesagt").order("start_time"),
     supabase.from("tasks").select("*, projects(*)").eq("is_done", false).order("due_date", { ascending: true }).limit(5),
-    supabase.from("projects").select("*, customers(*)").in("status", ["in_arbeit", "geplant"]).order("created_at", { ascending: false }).limit(5),
+    supabase.from("projects").select("*, customers(*)").in("status", ["in_arbeit", "geplant"]).order("created_at", { ascending: false }).limit(12),
     supabase.from("documents").select("id, suggested_filename, amount_gross, doc_direction, created_at").order("created_at", { ascending: false }).limit(3),
     supabase.from("projects").select("*", { count: "exact", head: true }),
     supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "in_arbeit"),
@@ -352,7 +314,7 @@ export default async function HeutePage() {
   const weekDays = buildWeekDays(weekEvents, today)
   const nextDays = buildNextDays(nextWeekEvents, today)
 
-  const dateStr = today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })
+  const dateStr = today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", timeZone: APP_TIME_ZONE })
 
   return (
     <div className="flex flex-col gap-4 md:gap-5">
@@ -382,7 +344,7 @@ export default async function HeutePage() {
 
         {/* 2. So geht's guide */}
         <div className="rounded-2xl border border-border/60 bg-muted/40 px-4 py-3.5">
-          <p className="mb-2.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">So geht's</p>
+          <p className="mb-2.5 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">So geht&apos;s</p>
           <div className="space-y-2">
             {[
               { n: "1", text: "Neuen Auftrag anlegen wenn ein Kunde anruft", active: true },
@@ -413,6 +375,8 @@ export default async function HeutePage() {
           <StatChip label="Geplant" value={plannedCount ?? 0} />
           <StatChip label="Fertig" value={doneCount ?? 0} accent />
         </div>
+
+        <TodayWorkPlanner projects={projects} today={todayStr} />
 
         {/* 5. Today events */}
         <div>
@@ -563,7 +527,7 @@ export default async function HeutePage() {
       <div className="hidden gap-4 lg:grid lg:grid-cols-[1fr_280px_260px]">
         <AnalyticsChart weekDays={weekDays} />
         <RemindersCard events={todayEvents} />
-        <ProjectListCard projects={projects} />
+        <TodayWorkPlanner projects={projects} today={todayStr} />
       </div>
 
       {/* ── Desktop: Row 3 — Tasks | Progress | Time Tracker ── */}

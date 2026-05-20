@@ -16,6 +16,7 @@ import {
   saveNote,
 } from "@/app/actions/orders"
 import type { CalendarEvent } from "@/types"
+import { formatDateKeyInTimeZone, formatTimeInTimeZone, getMinutesInTimeZone } from "@/lib/date-time"
 
 export interface FreeSlot {
   startTime: string
@@ -24,19 +25,15 @@ export interface FreeSlot {
 }
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
+  return formatTimeInTimeZone(iso)
 }
 
 function isoToDate(iso: string) {
-  return iso.split("T")[0]
+  return formatDateKeyInTimeZone(iso)
 }
 
 function isoToTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  })
+  return formatTimeInTimeZone(iso)
 }
 
 function durLabel(h: number) {
@@ -103,7 +100,7 @@ export function TagesplanSection({
     ...events.map((e) => ({
       kind: "event" as const,
       event: e,
-      sortMin: new Date(e.start_time).getHours() * 60 + new Date(e.start_time).getMinutes(),
+      sortMin: getMinutesInTimeZone(e.start_time),
     })),
     ...freeSlots.map((s) => ({
       kind: "free" as const,
@@ -334,8 +331,7 @@ export function TagesplanSection({
               const eventVisual = getEventVisual(eventTypeDetected)
 
               const endMin =
-                new Date(event.end_time).getHours() * 60 +
-                new Date(event.end_time).getMinutes()
+                getMinutesInTimeZone(event.end_time)
               const isPast = endMin < nowMin
               const isNow = item.sortMin <= nowMin && endMin > nowMin
 

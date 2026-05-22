@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { formatLocalTime, localDateKey } from "@/lib/datetime"
 import {
   deleteCalendarEvent,
   markEventDone,
@@ -28,8 +27,9 @@ import {
 } from "@/app/actions/orders"
 import type { CalendarEvent } from "@/types"
 import { cn } from "@/lib/utils"
+import { addDaysToDateKey, formatDateKeyInTimeZone, formatTimeInTimeZone, localDateTimeToUtcIso } from "@/lib/date-time"
 
-type View = "monat" | "liste" | "woche"
+type View = "monat" | "liste"
 
 const WEEKDAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 const MONTHS_DE = [
@@ -38,15 +38,15 @@ const MONTHS_DE = [
 ]
 
 function formatTime(iso: string) {
-  return formatLocalTime(iso)
+  return formatTimeInTimeZone(iso)
 }
 
 function isoToDate(iso: string) {
-  return localDateKey(iso)
+  return formatDateKeyInTimeZone(iso)
 }
 
 function isoToTime(iso: string) {
-  return formatLocalTime(iso)
+  return formatTimeInTimeZone(iso)
 }
 
 function isSameDay(a: Date, b: Date) {
@@ -54,8 +54,8 @@ function isSameDay(a: Date, b: Date) {
 }
 
 function isSameMonth(iso: string, month: number, year: number) {
-  const date = new Date(localDateKey(iso) + "T12:00:00")
-  return date.getMonth() === month && date.getFullYear() === year
+  const [eventYear, eventMonth] = formatDateKeyInTimeZone(iso).split("-").map(Number)
+  return eventMonth - 1 === month && eventYear === year
 }
 
 function getInitialMonth(events: CalendarEvent[]) {
@@ -64,8 +64,8 @@ function getInitialMonth(events: CalendarEvent[]) {
   if (hasCurrentMonthEvents || events.length === 0) return { month: now.getMonth(), year: now.getFullYear() }
   const nowMs = now.getTime()
   const next = events.find((e) => new Date(e.start_time).getTime() >= nowMs) ?? events[0]
-    const d = new Date(localDateKey(next.start_time) + "T12:00:00")
-  return { month: d.getMonth(), year: d.getFullYear() }
+  const [year, month] = formatDateKeyInTimeZone(next.start_time).split("-").map(Number)
+  return { month: month - 1, year }
 }
 
 function getEventLocation(event: CalendarEvent) {
@@ -122,8 +122,11 @@ function EventCard({
   return (
     <div
       className={cn(
-        "rounded-xl border border-l-4 bg-card p-4 shadow-sm",
-        event.status === "erledigt" ? "border-l-green-500 opacity-75" : "border-l-primary",
+        "rounded-xl border border-l-4 p-4 shadow-sm",
+        event.status === "erledigt" ? "border-l-green-500 bg-green-50/60 opacity-75"
+          : detectEventType(event.title) === "privat" ? "border-l-violet-500 bg-violet-50/80"
+          : detectEventType(event.title) === "baustelle" ? "border-l-amber-500 bg-amber-50/80"
+          : "border-l-blue-500 bg-blue-50/80",
         dense && "p-3"
       )}
     >
@@ -133,7 +136,7 @@ function EventCard({
             <Clock className="size-4" />
             <span>{formatTime(event.start_time)} – {formatTime(event.end_time)}</span>
             <EventTypeBadge title={event.title} />
-            {event.status === "erledigt" && <Badge variant="secondary" className="text-xs"><span className="nsh-i18n" data-sq="Kryer">Erledigt</span></Badge>}
+            {event.status === "erledigt" && <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">Erledigt</span>}
           </div>
           <h3 className={cn("mt-1 font-black", dense ? "text-base" : "text-lg")}>
             {event.title.replace(/^\[.*?\]\s*/, "")}
@@ -224,11 +227,11 @@ function DayDetailSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 pb-[env(safe-area-inset-bottom)] sm:items-center sm:pb-0"
       onClick={onClose}
     >
       <div
-        className="w-full max-h-[88dvh] max-w-lg overflow-y-auto rounded-t-2xl bg-background shadow-2xl sm:rounded-2xl"
+        className="w-full max-h-[88dvh] max-w-lg overflow-y-auto rounded-t-2xl bg-background pb-[env(safe-area-inset-bottom)] shadow-2xl sm:rounded-2xl sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle (mobile) */}
@@ -391,14 +394,26 @@ function DayDetailSheet({
 // ── Views ────────────────────────────────────────────────────────────────────
 
 function ListView({
-  events, month, year, onDelete, onEdit,
+  events, onDelete, onEdit, todayKey, tomorrowKey,
 }: {
   events: CalendarEvent[]
-  month: number; year: number
   onDelete: (id: string) => void
   onEdit: (event: CalendarEvent) => void
+  todayKey: string
+  tomorrowKey: string
 }) {
-  if (events.length === 0) return <EmptyState month={month} year={year} />
+  if (events.length === 0) return (
+    <Card className="border-dashed">
+      <CardContent className="py-12 text-center text-muted-foreground">
+        <p className="text-lg font-bold text-foreground">
+          <span className="nsh-i18n nsh-i18n-center" data-sq="Nuk ka termine të ardhshme">Keine bevorstehenden Termine</span>
+        </p>
+        <p className="text-sm">
+          <span className="nsh-i18n nsh-i18n-center" data-sq={'Me "Termin i ri" mund të shtosh direkt një termin.'}>Mit &quot;Neuer Termin&quot; kannst du direkt einen Termin eintragen.</span>
+        </p>
+      </CardContent>
+    </Card>
+  )
 
   const grouped = events.reduce<Record<string, CalendarEvent[]>>((acc, e) => {
     const day = isoToDate(e.start_time)
@@ -411,67 +426,26 @@ function ListView({
     <div className="space-y-6">
       {Object.entries(grouped).map(([day, dayEvents]) => {
         const date = new Date(day + "T12:00:00")
-        const isToday = isSameDay(date, new Date())
+        const isToday = day === todayKey
+        const isTomorrow = day === tomorrowKey
+        const fullDate = date.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })
+        const dayLabel = isToday ? `Heute — ${fullDate}`
+          : isTomorrow ? `Morgen — ${fullDate}`
+          : fullDate
         return (
           <section key={day}>
-            <div className={cn("mb-3 flex items-center gap-2 rounded-xl px-3 py-2", isToday && "bg-primary/10")}>
-              <h2 className={cn("text-base font-black capitalize", isToday && "text-primary")}>
-                {isToday ? "Heute — " : ""}
-                {date.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}
+            <div className={cn(
+              "mb-3 flex items-center gap-2 rounded-xl px-3 py-2",
+              isToday ? "bg-primary/10" : "bg-muted/40"
+            )}>
+              <h2 className={cn("text-sm font-black capitalize", isToday ? "text-primary" : "text-foreground")}>
+                {dayLabel}
               </h2>
-              <Badge variant="secondary" className="text-xs">{dayEvents.length}</Badge>
+              <Badge variant="secondary" className="text-xs ml-auto">{dayEvents.length} Termin{dayEvents.length !== 1 ? "e" : ""}</Badge>
             </div>
             <div className="space-y-3">
               {dayEvents.map((event) => (
                 <EventCard key={event.id} event={event} onDelete={() => onDelete(event.id)} onEdit={() => onEdit(event)} />
-              ))}
-            </div>
-          </section>
-        )
-      })}
-    </div>
-  )
-}
-
-function WeekView({
-  events, month, year, onDelete, onEdit,
-}: {
-  events: CalendarEvent[]
-  month: number; year: number
-  onDelete: (id: string) => void
-  onEdit: (event: CalendarEvent) => void
-}) {
-  if (events.length === 0) return <EmptyState month={month} year={year} />
-
-  const weeks = events.reduce<Record<string, CalendarEvent[]>>((acc, e) => {
-    const date = new Date(localDateKey(e.start_time) + "T12:00:00")
-    const ws = new Date(date)
-    const day = ws.getDay()
-    ws.setDate(date.getDate() - (day === 0 ? 6 : day - 1))
-    const key = localDateKey(ws)
-    if (!acc[key]) acc[key] = []
-    acc[key].push(e)
-    return acc
-  }, {})
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {Object.entries(weeks).map(([weekStart, weekEvents]) => {
-        const start = new Date(weekStart + "T12:00:00")
-        const end = new Date(start)
-        end.setDate(start.getDate() + 6)
-        return (
-          <section key={weekStart} className="rounded-xl border bg-card p-4">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-black">
-                {start.toLocaleDateString("de-DE", { day: "numeric", month: "short" })} –{" "}
-                {end.toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
-              </h2>
-              <Badge variant="secondary">{weekEvents.length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {weekEvents.map((e) => (
-                <EventCard key={e.id} event={e} dense onDelete={() => onDelete(e.id)} onEdit={() => onEdit(e)} />
               ))}
             </div>
           </section>
@@ -497,7 +471,7 @@ function MonthView({
 
   const eventsByDay: Record<number, CalendarEvent[]> = {}
   events.forEach((e) => {
-    const day = new Date(localDateKey(e.start_time) + "T12:00:00").getDate()
+    const day = Number(isoToDate(e.start_time).split("-")[2])
     if (!eventsByDay[day]) eventsByDay[day] = []
     eventsByDay[day].push(e)
   })
@@ -564,7 +538,10 @@ function MonthView({
                       className={cn(
                         "block w-full rounded-md px-1.5 py-1 text-[10px] leading-tight lg:px-2 lg:text-xs",
                         i === 1 && "hidden lg:block",
-                        e.status === "erledigt" ? "bg-green-100 text-green-800" : "bg-primary text-primary-foreground"
+                        e.status === "erledigt" ? "bg-green-100 text-green-800"
+                          : detectEventType(e.title) === "privat" ? "bg-violet-100 text-violet-800"
+                          : detectEventType(e.title) === "baustelle" ? "bg-amber-100 text-amber-800"
+                          : "bg-blue-100 text-blue-800"
                       )}
                     >
                       <span className="block truncate font-black">
@@ -597,9 +574,10 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
   const [isPending, startTransition] = useTransition()
   const initial = getInitialMonth(events)
 
-  const [view, setView] = useState<View>("monat")
+  const [view, setView] = useState<View>("liste")
   const [month, setMonth] = useState(initial.month)
   const [year, setYear] = useState(initial.year)
+  const [todayKey] = useState(() => formatDateKeyInTimeZone(new Date()))
   const [selectedDay, setSelectedDay] = useState<SelectedDay | null>(null)
 
   const [editing, setEditing] = useState<CalendarEvent | null>(null)
@@ -613,6 +591,12 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
   const activeEvents = monthEvents.filter((e) => e.status !== "abgesagt")
   const doneCount = activeEvents.filter((e) => e.status === "erledigt").length
   const openCount = activeEvents.length - doneCount
+
+  const tomorrowKey = addDaysToDateKey(todayKey, 1)
+  const startOfToday = new Date(localDateTimeToUtcIso(todayKey, "00:00:00"))
+  const upcomingEvents = events
+    .filter((e) => e.status !== "abgesagt" && new Date(e.start_time) >= startOfToday)
+    .sort((a, b) => a.start_time.localeCompare(b.start_time))
 
   function handleDelete(eventId: string) {
     startTransition(async () => {
@@ -679,40 +663,51 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
             <span className="nsh-i18n nsh-i18n-button" data-sq="Termin i ri">Neuer Termin</span>
           </Link>
           <div className="flex gap-1 rounded-xl border bg-card p-1">
-            {(["monat", "liste", "woche"] as View[]).map((item) => (
+            {([["liste", "Agenda", "listë"], ["monat", "Monat", "muaj"]] as [View, string, string][]).map(([key, label, sq]) => (
               <button
-                key={item}
-                onClick={() => setView(item)}
+                key={key}
+                onClick={() => setView(key)}
                 className={cn(
-                  "min-w-20 rounded-lg px-3 py-2 text-sm font-bold capitalize transition-colors",
-                  view === item ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                  "min-w-20 rounded-lg px-3 py-2 text-sm font-bold transition-colors",
+                  view === key ? "bg-primary text-primary-foreground" : "hover:bg-accent"
                 )}
               >
-                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={item === "monat" ? "muaj" : item === "liste" ? "listë" : "javë"}>{item}</span>
+                <span className="nsh-i18n nsh-i18n-center nsh-i18n-button" data-sq={sq}>{label}</span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-3">
-        <div className="flex items-center justify-between gap-2 sm:gap-3">
-          <button onClick={prevMonth} className="flex size-11 items-center justify-center rounded-xl border transition-colors hover:bg-accent" aria-label="Vorheriger Monat">
-            <ChevronLeft className="size-5" />
-          </button>
-          <div className="text-center">
-            <h2 className="text-xl font-black sm:text-2xl">{MONTHS_DE[month]} {year}</h2>
-            <p className="text-sm font-semibold text-muted-foreground">
-              <span className="nsh-i18n nsh-i18n-center" data-sq={`${activeEvents.length} termine · ${openCount} hapur · ${doneCount} kryer`}>
-                {activeEvents.length} Termine · {openCount} offen · {doneCount} erledigt
-              </span>
-            </p>
+      {view === "monat" ? (
+        <div className="rounded-xl border bg-card p-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
+            <button onClick={prevMonth} className="flex size-11 items-center justify-center rounded-xl border transition-colors hover:bg-accent" aria-label="Vorheriger Monat">
+              <ChevronLeft className="size-5" />
+            </button>
+            <div className="text-center">
+              <h2 className="text-xl font-black sm:text-2xl">{MONTHS_DE[month]} {year}</h2>
+              <p className="text-sm font-semibold text-muted-foreground">
+                <span className="nsh-i18n nsh-i18n-center" data-sq={`${activeEvents.length} termine · ${openCount} hapur · ${doneCount} kryer`}>
+                  {activeEvents.length} Termine · {openCount} offen · {doneCount} erledigt
+                </span>
+              </p>
+            </div>
+            <button onClick={nextMonth} className="flex size-11 items-center justify-center rounded-xl border transition-colors hover:bg-accent" aria-label="Nächster Monat">
+              <ChevronRight className="size-5" />
+            </button>
           </div>
-          <button onClick={nextMonth} className="flex size-11 items-center justify-center rounded-xl border transition-colors hover:bg-accent" aria-label="Nächster Monat">
-            <ChevronRight className="size-5" />
-          </button>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-xl border bg-card px-4 py-3">
+          <p className="text-base font-black">
+            <span className="nsh-i18n" data-sq="Termine të ardhshme">Bevorstehende Termine</span>
+          </p>
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-black text-primary">
+            {upcomingEvents.length}
+          </span>
+        </div>
+      )}
 
       {view === "monat" && (
         <MonthView
@@ -725,10 +720,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
         />
       )}
       {view === "liste" && (
-        <ListView events={activeEvents} month={month} year={year} onDelete={handleDelete} onEdit={openEdit} />
-      )}
-      {view === "woche" && (
-        <WeekView events={activeEvents} month={month} year={year} onDelete={handleDelete} onEdit={openEdit} />
+            <ListView events={upcomingEvents} onDelete={handleDelete} onEdit={openEdit} todayKey={todayKey} tomorrowKey={tomorrowKey} />
       )}
 
       {/* Day detail sheet */}
@@ -745,7 +737,7 @@ export function KalenderClient({ events }: { events: CalendarEvent[] }) {
       {/* Edit modal */}
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 pb-[max(env(safe-area-inset-bottom),1rem)] sm:items-center sm:p-4"
           onClick={() => setEditing(null)}
         >
           <Card className="w-full max-w-lg" onClick={(e) => e.stopPropagation()}>

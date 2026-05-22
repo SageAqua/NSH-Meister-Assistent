@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { AlertTriangle, CalendarDays, CheckCircle2, Clock, Loader2 } from "lucide-react"
 import { getCalendarEventsForDate } from "@/app/actions/orders"
-import { formatLocalTime } from "@/lib/datetime"
 import type { CalendarEvent } from "@/types"
+import { formatTimeInTimeZone, getMinutesInTimeZone } from "@/lib/date-time"
 
 type Props = {
   date: string
@@ -14,7 +14,7 @@ type Props = {
 }
 
 function formatTime(iso: string) {
-  return formatLocalTime(iso)
+  return formatTimeInTimeZone(iso)
 }
 
 function timeToMinutes(value: string) {
@@ -25,8 +25,8 @@ function timeToMinutes(value: string) {
 
 function eventMinutes(event: CalendarEvent) {
   return {
-    start: timeToMinutes(formatLocalTime(event.start_time)) ?? 0,
-    end: timeToMinutes(formatLocalTime(event.end_time)) ?? 0,
+    start: getMinutesInTimeZone(event.start_time),
+    end: getMinutesInTimeZone(event.end_time),
   }
 }
 

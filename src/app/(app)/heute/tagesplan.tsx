@@ -7,7 +7,6 @@ import { AlertTriangle, BriefcaseBusiness, Building2, CalendarClock, CheckCircle
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DaySchedulePreview } from "@/components/day-schedule-preview"
-import { formatLocalTime, localDateKey } from "@/lib/datetime"
 import { cn } from "@/lib/utils"
 import {
   markEventDoneWithResult,
@@ -17,6 +16,7 @@ import {
   saveNote,
 } from "@/app/actions/orders"
 import type { CalendarEvent } from "@/types"
+import { formatDateKeyInTimeZone, formatTimeInTimeZone, getMinutesInTimeZone } from "@/lib/date-time"
 
 export interface FreeSlot {
   startTime: string
@@ -25,15 +25,15 @@ export interface FreeSlot {
 }
 
 function formatTime(iso: string) {
-  return formatLocalTime(iso)
+  return formatTimeInTimeZone(iso)
 }
 
 function isoToDate(iso: string) {
-  return localDateKey(iso)
+  return formatDateKeyInTimeZone(iso)
 }
 
 function isoToTime(iso: string) {
-  return formatLocalTime(iso)
+  return formatTimeInTimeZone(iso)
 }
 
 function durLabel(h: number) {
@@ -100,7 +100,7 @@ export function TagesplanSection({
     ...events.map((e) => ({
       kind: "event" as const,
       event: e,
-      sortMin: new Date(e.start_time).getHours() * 60 + new Date(e.start_time).getMinutes(),
+      sortMin: getMinutesInTimeZone(e.start_time),
     })),
     ...freeSlots.map((s) => ({
       kind: "free" as const,
@@ -331,8 +331,7 @@ export function TagesplanSection({
               const eventVisual = getEventVisual(eventTypeDetected)
 
               const endMin =
-                new Date(event.end_time).getHours() * 60 +
-                new Date(event.end_time).getMinutes()
+                getMinutesInTimeZone(event.end_time)
               const isPast = endMin < nowMin
               const isNow = item.sortMin <= nowMin && endMin > nowMin
 
@@ -642,7 +641,7 @@ export function TagesplanSection({
       {/* Edit modal */}
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-sm sm:items-center sm:p-6 sm:pb-6"
           onClick={() => setEditing(null)}
         >
           <Card className="w-full max-w-lg animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 overflow-hidden shadow-2xl duration-200" onClick={(e) => e.stopPropagation()}>
@@ -743,7 +742,7 @@ export function TagesplanSection({
       {/* Delete confirmation */}
       {deleting && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-sm sm:items-center sm:p-6 sm:pb-6"
           onClick={() => setDeleting(null)}
         >
           <Card className="w-full max-w-md animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 overflow-hidden shadow-2xl duration-200" onClick={(e) => e.stopPropagation()}>

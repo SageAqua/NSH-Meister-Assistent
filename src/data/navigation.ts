@@ -12,6 +12,8 @@ export const moreNav: NavItem[] = [
   { href: "/kalender", labelDe: "Kalender", labelSq: "Kalendari", icon: "calendar" },
   { href: "/preisrechner", labelDe: "Preisrechner", labelSq: "Llogaritësi i çmimeve", icon: "calculator" },
   { href: "/baustellen", labelDe: "Baustellen", labelSq: "Kantiere", icon: "building2" },
+  { href: "/dokumente", labelDe: "Dokumente", labelSq: "Dokumente", icon: "file-check" },
+  { href: "/finanzen", labelDe: "Finanzen", labelSq: "Financat", icon: "bar-chart-3" },
   { href: "/deutsch-lernen", labelDe: "Deutsch lernen", labelSq: "Mëso gjermanisht", icon: "book-open" },
   { href: "/material", labelDe: "Material", labelSq: "Materiale", icon: "package" },
   { href: "/einstellungen", labelDe: "Einstellungen", labelSq: "Cilësime", icon: "settings" },

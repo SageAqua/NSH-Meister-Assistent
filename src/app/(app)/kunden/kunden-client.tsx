@@ -256,15 +256,15 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
                         <p className="mt-0.5 truncate text-xs italic text-muted-foreground">{customer.notes}</p>
                       )}
                       {totalProjects > 0 && (
-                        <div className="mt-1 flex gap-1.5">
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
                           {activeProjects > 0 && (
-                            <Badge className={cn("text-xs", "bg-primary/10 text-primary border-primary/20")}>
-                              <span className="nsh-i18n" data-sq="aktivë">{activeProjects} aktiv</span>
-                            </Badge>
+                            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                              {activeProjects} aktiv
+                            </span>
                           )}
-                          <Badge variant="secondary" className="text-xs">
-                            <span className="nsh-i18n" data-sq="porosi">{totalProjects} Aufträge</span>
-                          </Badge>
+                          <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+                            {totalProjects} Aufträge
+                          </span>
                         </div>
                       )}
                     </div>
@@ -306,7 +306,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
 
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-sm sm:items-center sm:p-6 sm:pb-6"
           onClick={() => setEditing(null)}
         >
           <Card className="w-full max-w-lg animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 shadow-2xl duration-200" onClick={(event) => event.stopPropagation()}>
@@ -415,7 +415,7 @@ export function KundenClient({ customers }: { customers: CustomerWithProjects[] 
 
       {deleting && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-sm sm:items-center sm:p-6 sm:pb-6"
           onClick={() => setDeleting(null)}
         >
           <Card className="w-full max-w-md animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 shadow-2xl duration-200" onClick={(event) => event.stopPropagation()}>

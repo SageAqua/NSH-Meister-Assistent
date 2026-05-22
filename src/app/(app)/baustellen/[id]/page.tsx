@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { markEventDone, markTaskDone, updateProjectStatus } from "@/app/actions/orders"
-import { formatLocalTime } from "@/lib/datetime"
 import type { Project, CalendarEvent, Task, Note, Material } from "@/types"
 import { cn } from "@/lib/utils"
 import { ProjectEditor } from "./project-editor"
 import { ProjectDelayButton } from "./project-day-actions"
+import { APP_TIME_ZONE, formatTimeInTimeZone } from "@/lib/date-time"
 
 const STATUS_COLORS: Record<string, string> = {
   geplant: "bg-blue-100 text-blue-700",
@@ -28,10 +28,10 @@ const MATERIAL_STATUS: Record<string, { label: string; color: string }> = {
 }
 
 function formatTime(iso: string) {
-  return formatLocalTime(iso)
+  return formatTimeInTimeZone(iso)
 }
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", weekday: "short", day: "numeric", month: "short" })
+  return new Date(iso).toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short", timeZone: APP_TIME_ZONE })
 }
 
 export default async function BaustelleDetailPage({

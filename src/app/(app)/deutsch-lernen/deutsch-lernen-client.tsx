@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { BookOpen, ChevronLeft, ChevronRight, Copy, Check, MessageCircle } from "lucide-react"
+import { BookOpen, ChevronLeft, ChevronRight, Copy, Check, MessageCircle, Volume2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type { DictionaryTerm } from "@/types"
@@ -16,9 +16,20 @@ const SECTIONS: Record<string, { label: string; sq: string }> = {
   probleme: { label: "Probleme", sq: "Problemet" },
 }
 
+function speakDE(text: string) {
+  if (!("speechSynthesis" in window)) return
+  window.speechSynthesis.cancel()
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.lang = "de-DE"
+  utterance.rate = 0.82
+  utterance.pitch = 1
+  window.speechSynthesis.speak(utterance)
+}
+
 function FlashCard({ term }: { term: DictionaryTerm }) {
   const [copied, setCopied] = useState(false)
   const [whatsapp, setWhatsapp] = useState(false)
+  const [speaking, setSpeaking] = useState(false)
 
   function copyDE() {
     const text = term.example_de ?? term.german
@@ -34,6 +45,13 @@ function FlashCard({ term }: { term: DictionaryTerm }) {
     setTimeout(() => setWhatsapp(false), 2000)
   }
 
+  function handleSpeak() {
+    const text = term.example_de ?? term.german
+    speakDE(text)
+    setSpeaking(true)
+    setTimeout(() => setSpeaking(false), 2500)
+  }
+
   return (
     <Card className="w-full">
       <CardContent className="space-y-4 p-4 sm:p-6">
@@ -45,6 +63,18 @@ function FlashCard({ term }: { term: DictionaryTerm }) {
           {term.example_de && (
             <p className="mt-3 text-sm italic text-muted-foreground">{`"${term.example_de}"`}</p>
           )}
+          <button
+            onClick={handleSpeak}
+            className={cn(
+              "mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all",
+              speaking
+                ? "bg-primary text-primary-foreground scale-95"
+                : "bg-primary/20 text-primary hover:bg-primary/30"
+            )}
+          >
+            <Volume2 className={cn("size-4", speaking && "animate-pulse")} />
+            {speaking ? "Spricht..." : "Anhören"}
+          </button>
         </div>
 
         <div className="rounded-lg bg-muted p-5 text-center">

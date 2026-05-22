@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Poppins } from "next/font/google"
 import "./globals.css"
 import { ServiceWorkerRegister } from "@/components/service-worker-register"
+import { OfflineSync } from "@/components/offline-sync"
 
 const poppins = Poppins({
   variable: "--font-sans",
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="antialiased">
         {children}
+        <OfflineSync />
         <ServiceWorkerRegister />
       </body>
     </html>

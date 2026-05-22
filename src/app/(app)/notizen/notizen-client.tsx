@@ -328,9 +328,9 @@ export function NotizenClient({
               <Card key={note.id} className="transition-colors hover:border-primary/30">
                 <CardContent className="p-4">
                   <div className="mb-3 flex items-start justify-between gap-3">
-                    <Badge className={cn("border text-xs", TYPE_COLORS[note.type])}>
-                      <span className="nsh-i18n" data-sq={TYPE_LABELS_SQ[note.type]}>{TYPE_LABELS[note.type]}</span>
-                    </Badge>
+                    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", TYPE_COLORS[note.type])}>
+                      {TYPE_LABELS[note.type]}
+                    </span>
                     <div className="flex shrink-0 items-center gap-1">
                       <button
                         type="button"
@@ -374,7 +374,7 @@ export function NotizenClient({
 
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-sm sm:items-center sm:p-6 sm:pb-6"
           onClick={() => setEditing(null)}
         >
           <Card className="w-full max-w-lg animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 shadow-2xl duration-200" onClick={(e) => e.stopPropagation()}>
@@ -438,7 +438,7 @@ export function NotizenClient({
 
       {deleting && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/35 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-sm sm:items-center sm:p-6 sm:pb-6"
           onClick={() => setDeleting(null)}
         >
           <Card className="w-full max-w-md animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 shadow-2xl duration-200" onClick={(e) => e.stopPropagation()}>

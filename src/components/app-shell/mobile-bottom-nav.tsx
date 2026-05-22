@@ -60,7 +60,6 @@ export function MobileBottomNav() {
               )}
             >
               {item.labelDe}
-              {item.labelSq && <span className="mt-0.5 block text-[9px] font-semibold text-muted-foreground">{item.labelSq}</span>}
             </span>
           </Link>
         )

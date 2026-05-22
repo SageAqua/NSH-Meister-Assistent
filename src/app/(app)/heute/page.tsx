@@ -132,11 +132,26 @@ function StatChip({ label, value, accent }: { label: string; value: number; acce
 // ── Analytics Bar Chart ────────────────────────────────────────────────────────
 function AnalyticsChart({ weekDays }: { weekDays: { dateStr: string; label: string; events: CalendarEvent[] }[] }) {
   const max = Math.max(...weekDays.map((d) => d.events.length), 1)
+  const totalEvents = weekDays.reduce((sum, day) => sum + day.events.length, 0)
+  const workingDays = weekDays.filter((day) => day.events.length > 0).length
+  const freeDays = weekDays.length - workingDays
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-5">
+    <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
       <p className="text-base font-black text-foreground">Projekt Analyse</p>
-      <p className="mb-4 text-xs text-muted-foreground">Termine diese Woche</p>
-      <div className="flex flex-1 items-end gap-2">
+      <p className="text-xs text-muted-foreground">Termine diese Woche</p>
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        {[
+          { label: "Termine", value: totalEvents },
+          { label: "Arbeitstage", value: workingDays },
+          { label: "Frei", value: freeDays },
+        ].map((item) => (
+          <div key={item.label} className="rounded-xl bg-muted/45 px-3 py-2">
+            <p className="text-2xl font-black tabular-nums text-foreground">{item.value}</p>
+            <p className="text-[10px] font-bold uppercase text-muted-foreground">{item.label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 flex h-36 items-end gap-2">
         {weekDays.map((day) => {
           const pct = day.events.length === 0 ? 0 : Math.max((day.events.length / max) * 100, 8)
           const isToday = day.dateStr === formatDateKey(new Date())
@@ -147,7 +162,7 @@ function AnalyticsChart({ weekDays }: { weekDays: { dateStr: string; label: stri
                   {day.events.length}
                 </span>
               )}
-              <div className="w-full overflow-hidden rounded-lg bg-muted" style={{ height: "120px" }}>
+              <div className="h-24 w-full overflow-hidden rounded-lg bg-muted">
                 <div
                   className={`w-full rounded-lg transition-all ${isToday ? "bg-primary" : "bg-primary/40 group-hover:bg-primary/70"}`}
                   style={{ height: `${pct}%`, marginTop: `${100 - pct}%` }}
@@ -169,7 +184,7 @@ function RemindersCard({ events }: { events: CalendarEvent[] }) {
     <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
       <p className="text-base font-black text-foreground">Erinnerungen</p>
       {next ? (
-        <div className="mt-3 flex flex-1 flex-col">
+        <div className="mt-3 flex flex-col">
           <p className="text-xl font-black leading-snug text-foreground">
             {next.title.replace(/^\[.*?\]\s*/, "")}
           </p>
@@ -184,9 +199,27 @@ function RemindersCard({ events }: { events: CalendarEvent[] }) {
               </button>
             </Link>
           </div>
+          <div className="mt-4 space-y-2 border-t border-border pt-4">
+            {events.slice(0, 3).map((event) => (
+              <div key={event.id} className="flex items-center gap-2 rounded-lg bg-muted/35 px-2.5 py-2">
+                <span className="size-2 shrink-0 rounded-full bg-primary" />
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold text-foreground">
+                    {event.title.replace(/^\[.*?\]\s*/, "")}
+                  </p>
+                  <p className="text-[10px] font-semibold text-muted-foreground">
+                    {time(event.start_time)} - {time(event.end_time)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-muted-foreground">Keine Termine heute.</p>
+        <div className="mt-3 rounded-xl border border-dashed border-border bg-muted/20 px-3 py-4">
+          <p className="text-sm font-semibold text-foreground">Keine Termine heute.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Zeit fuer Planung, Dokumente oder offene Aufgaben.</p>
+        </div>
       )}
     </div>
   )
@@ -524,7 +557,7 @@ export default async function HeutePage() {
       </div>
 
       {/* ── Desktop: Row 2 — Analytics | Reminders | Projects ── */}
-      <div className="hidden gap-4 lg:grid lg:grid-cols-[1fr_280px_260px]">
+      <div className="hidden items-start gap-4 lg:grid lg:grid-cols-[1fr_280px_260px]">
         <AnalyticsChart weekDays={weekDays} />
         <RemindersCard events={todayEvents} />
         <TodayWorkPlanner projects={projects} today={todayStr} />

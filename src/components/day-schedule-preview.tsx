@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { AlertTriangle, CalendarDays, CheckCircle2, Clock, Loader2 } from "lucide-react"
 import { getCalendarEventsForDate } from "@/app/actions/orders"
+import { formatLocalTime } from "@/lib/datetime"
 import type { CalendarEvent } from "@/types"
 
 type Props = {
@@ -13,7 +14,7 @@ type Props = {
 }
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
+  return formatLocalTime(iso)
 }
 
 function timeToMinutes(value: string) {
@@ -23,11 +24,9 @@ function timeToMinutes(value: string) {
 }
 
 function eventMinutes(event: CalendarEvent) {
-  const start = new Date(event.start_time)
-  const end = new Date(event.end_time)
   return {
-    start: start.getHours() * 60 + start.getMinutes(),
-    end: end.getHours() * 60 + end.getMinutes(),
+    start: timeToMinutes(formatLocalTime(event.start_time)) ?? 0,
+    end: timeToMinutes(formatLocalTime(event.end_time)) ?? 0,
   }
 }
 

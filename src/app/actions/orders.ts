@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
+import { addDaysToDateKey, dateKeyRangeToIso, dateKeyToIso, formatLocalTime, localDateKey, todayDateKey } from "@/lib/datetime"
 import type { ProjectStatus, VinylOrderForm, CalendarPlanDay, CalendarEvent } from "@/types"
 
 export async function saveVinylOrder(form: VinylOrderForm, plan: CalendarPlanDay[]) {
@@ -57,8 +58,8 @@ export async function saveVinylOrder(form: VinylOrderForm, plan: CalendarPlanDay
       user_id: user.id,
       project_id: project.id,
       title: day.title,
-      start_time: `${day.date}T${day.startTime}:00`,
-      end_time: `${day.date}T${day.endTime}:00`,
+      start_time: dateKeyToIso(day.date, day.startTime),
+      end_time: dateKeyToIso(day.date, day.endTime),
       status: "geplant" as const,
       helpers_count: day.helpers,
     }))
@@ -69,7 +70,7 @@ export async function saveVinylOrder(form: VinylOrderForm, plan: CalendarPlanDay
 
   // Create standard tasks
   const tasks = [
-    { title: "Angebot verschicken", due_date: new Date().toISOString().split("T")[0] },
+    { title: "Angebot verschicken", due_date: todayDateKey() },
     { title: "Material bestellen", due_date: form.startDate ?? null },
     { title: "Abnahme mit Kunde durchführen", due_date: null },
     { title: "Rechnung stellen", due_date: null },
@@ -239,8 +240,8 @@ export async function updateCalendarEvent(data: {
     .from("calendar_events")
     .update({
       title: data.title,
-      start_time: `${data.date}T${data.startTime}:00`,
-      end_time: `${data.date}T${data.endTime}:00`,
+      start_time: dateKeyToIso(data.date, data.startTime),
+      end_time: dateKeyToIso(data.date, data.endTime),
     })
     .eq("id", data.id)
     .eq("user_id", user.id)
@@ -258,8 +259,7 @@ export async function getCalendarEventsForDate(date: string): Promise<{ events?:
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Nicht angemeldet." }
 
-  const startOfDay = `${date}T00:00:00`
-  const endOfDay = `${date}T23:59:59`
+  const { start: startOfDay, end: endOfDay } = dateKeyRangeToIso(date)
 
   const { data, error } = await supabase
     .from("calendar_events")
@@ -317,8 +317,8 @@ export async function saveUniversalOrder(data: {
         user_id: user.id,
         project_id: project.id,
         title: day.title,
-        start_time: `${day.date}T${day.startTime}:00`,
-        end_time: `${day.date}T${day.endTime}:00`,
+        start_time: dateKeyToIso(day.date, day.startTime),
+        end_time: dateKeyToIso(day.date, day.endTime),
         status: "geplant" as const,
         helpers_count: data.helpersCount,
       }))
@@ -326,7 +326,7 @@ export async function saveUniversalOrder(data: {
   }
 
   await supabase.from("tasks").insert([
-    { user_id: user.id, project_id: project.id, title: "Angebot verschicken", due_date: new Date().toISOString().split("T")[0] },
+    { user_id: user.id, project_id: project.id, title: "Angebot verschicken", due_date: todayDateKey() },
     { user_id: user.id, project_id: project.id, title: "Material bestellen", due_date: data.startDate },
     { user_id: user.id, project_id: project.id, title: "Rechnung stellen", due_date: null },
   ])
@@ -421,14 +421,14 @@ export async function saveSimpleOrder(data: {
     const durationDays = Math.max(1, Math.min(60, data.durationDays ?? 1))
     const workOnWeekends = data.workOnWeekends ?? false
     const plannedDates: string[] = []
-    const cursor = new Date(`${data.startDate}T12:00:00`)
+    let cursor = data.startDate
 
     while (plannedDates.length < durationDays) {
-      const day = cursor.getDay()
+      const day = new Date(`${cursor}T12:00:00`).getDay()
       if (workOnWeekends || (day !== 0 && day !== 6)) {
-        plannedDates.push(cursor.toISOString().split("T")[0])
+        plannedDates.push(cursor)
       }
-      cursor.setDate(cursor.getDate() + 1)
+      cursor = addDaysToDateKey(cursor, 1)
     }
 
     await supabase.from("calendar_events").insert(
@@ -436,8 +436,8 @@ export async function saveSimpleOrder(data: {
         user_id: user.id,
         project_id: project.id,
         title: durationDays > 1 ? `${workTitle} (Tag ${index + 1}/${durationDays})` : workTitle,
-        start_time: `${date}T${startTime}:00`,
-        end_time: `${date}T${endTime}:00`,
+        start_time: dateKeyToIso(date, startTime),
+        end_time: dateKeyToIso(date, endTime),
         status: "geplant",
         helpers_count: data.helpersCount,
         notes: data.notes?.trim() || null,
@@ -446,7 +446,7 @@ export async function saveSimpleOrder(data: {
   }
 
   const tasks = [
-    data.offerNeeded ? { title: "Angebot schicken", due_date: new Date().toISOString().split("T")[0] } : null,
+    data.offerNeeded ? { title: "Angebot schicken", due_date: todayDateKey() } : null,
     data.materialNeeded ? { title: "Material prüfen oder bestellen", due_date: data.startDate || null } : null,
     { title: "Kunde nach Fertigstellung informieren", due_date: null },
     { title: "Rechnung stellen", due_date: null },
@@ -465,11 +465,16 @@ export async function saveSimpleOrder(data: {
 }
 
 function addWorkDelayToIso(iso: string, workOnWeekends: boolean) {
-  const date = new Date(iso)
+  let dateKey = addDaysToDateKey(localDateKey(iso), 1)
+  const time = formatLocalTime(iso)
+
   do {
-    date.setDate(date.getDate() + 1)
-  } while (!workOnWeekends && (date.getDay() === 0 || date.getDay() === 6))
-  return date.toISOString()
+    const day = new Date(`${dateKey}T12:00:00`).getDay()
+    if (workOnWeekends || (day !== 0 && day !== 6)) break
+    dateKey = addDaysToDateKey(dateKey, 1)
+  } while (true)
+
+  return dateKeyToIso(dateKey, time)
 }
 
 export async function delayProjectWorkFromEvent(eventId: string): Promise<{ error?: string }> {
@@ -627,8 +632,6 @@ export async function saveCalendarEvent(data: {
   date?: string
   startTime?: string
   endTime?: string
-  startIso?: string
-  endIso?: string
   projectId?: string
 }): Promise<{ error?: string }> {
   const supabase = await createClient()
@@ -639,8 +642,8 @@ export async function saveCalendarEvent(data: {
     user_id: user.id,
     project_id: data.projectId ?? null,
     title: data.title,
-    start_time: data.startIso ?? `${data.date}T${data.startTime}:00`,
-    end_time: data.endIso ?? `${data.date}T${data.endTime}:00`,
+    start_time: dateKeyToIso(data.date ?? todayDateKey(), data.startTime ?? "08:00"),
+    end_time: dateKeyToIso(data.date ?? todayDateKey(), data.endTime ?? "09:00"),
     status: "geplant",
     helpers_count: 0,
   })

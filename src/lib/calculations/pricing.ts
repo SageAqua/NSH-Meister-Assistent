@@ -1,3 +1,5 @@
+import { addDaysToDateKey } from "@/lib/datetime"
+
 export type WorkCategory = "maler" | "boden" | "fugen" | "leisten" | "trockenbau" | "sonstiges"
 
 export interface ServiceItem {
@@ -124,9 +126,7 @@ export interface WorkDayPlan {
 }
 
 function addDays(dateStr: string, n: number): string {
-  const d = new Date(dateStr + "T12:00:00")
-  d.setDate(d.getDate() + n)
-  return d.toISOString().split("T")[0]
+  return addDaysToDateKey(dateStr, n)
 }
 
 function workerFactor(total: number): number {

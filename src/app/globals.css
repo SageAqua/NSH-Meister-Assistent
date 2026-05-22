@@ -120,6 +120,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
   body {
     @apply bg-background text-foreground;
@@ -167,15 +168,36 @@
 
   input[type="date"],
   input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
     min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
+    line-height: 1;
   }
 
   input[type="date"]::-webkit-date-and-time-value,
   input[type="time"]::-webkit-date-and-time-value {
     min-height: 1.5rem;
     text-align: left;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    margin-inline-start: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    min-width: 0;
+    font: inherit;
+  }
+
+  select {
+    max-width: 100%;
   }
 
   /* Promote nav to GPU layer for instant visual feedback */
@@ -263,5 +285,21 @@
 
   .nsh-section-title {
     @apply flex items-center gap-2 text-base font-black text-foreground sm:text-lg;
+  }
+
+  .nsh-mobile-field {
+    @apply min-w-0 max-w-full truncate;
+  }
+
+  .nsh-mobile-time {
+    @apply min-w-0 max-w-full text-center text-base leading-none sm:text-lg;
+    padding-inline: 0.75rem;
+  }
+
+  @supports (-webkit-touch-callout: none) {
+    .nsh-mobile-time {
+      font-size: 1rem;
+      padding-inline: 0.625rem;
+    }
   }
 }

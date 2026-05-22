@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { markTaskDone } from "@/app/actions/orders"
+import { dateKeyRangeToIso, dateKeyToIso, formatLocalTime, localDateKey } from "@/lib/datetime"
 import { TagesplanSection } from "./tagesplan"
 import { MonthlyCalendar, type MonthlyCalendarEvent } from "./monthly-calendar"
 import type { CalendarEvent, Customer, Project, Task } from "@/types"
@@ -21,7 +22,7 @@ function formatDateKey(date: Date) {
 }
 
 function time(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
+  return formatLocalTime(iso)
 }
 
 function serviceName(service: string) {
@@ -38,7 +39,7 @@ function startOfWeek(d: Date): string {
   const mon = new Date(d)
   mon.setDate(d.getDate() + diff)
   mon.setHours(0, 0, 0, 0)
-  return formatDateKey(mon) + "T00:00:00"
+  return dateKeyToIso(formatDateKey(mon), "00:00")
 }
 
 function endOfWeek(d: Date): string {
@@ -47,16 +48,16 @@ function endOfWeek(d: Date): string {
   const sun = new Date(d)
   sun.setDate(d.getDate() + diff)
   sun.setHours(23, 59, 59, 0)
-  return formatDateKey(sun) + "T23:59:59"
+  return dateKeyToIso(formatDateKey(sun), "23:59")
 }
 
 function startOfMonth(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01T00:00:00`
+  return dateKeyToIso(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`, "00:00")
 }
 
 function endOfMonth(d: Date): string {
   const last = new Date(d.getFullYear(), d.getMonth() + 1, 0)
-  return formatDateKey(last) + "T23:59:59"
+  return dateKeyToIso(formatDateKey(last), "23:59")
 }
 
 function detectEventType(title: string): "privat" | "arbeit" | "baustelle" {
@@ -80,7 +81,7 @@ function buildWeekDays(events: CalendarEvent[], today: Date) {
     return {
       dateStr,
       label,
-      events: events.filter((e) => e.start_time.startsWith(dateStr)),
+      events: events.filter((e) => localDateKey(e.start_time) === dateStr),
     }
   })
 }
@@ -210,8 +211,7 @@ export default async function HeutePage() {
   const supabase = await createClient()
   const today = new Date()
   const todayStr = formatDateKey(today)
-  const startOfDay = `${todayStr}T00:00:00`
-  const endOfDay = `${todayStr}T23:59:59`
+  const { start: startOfDay, end: endOfDay } = dateKeyRangeToIso(todayStr)
 
   const [
     { data: todayEventsRaw },
@@ -262,8 +262,8 @@ export default async function HeutePage() {
   const projects = (projectsRaw ?? []) as ProjectFull[]
 
   const monthEventsMap = monthEvents.reduce<Record<string, MonthlyCalendarEvent[]>>((acc, ev) => {
-    const key = ev.start_time.slice(0, 7)
-    const date = ev.start_time.split("T")[0]
+    const date = localDateKey(ev.start_time)
+    const key = date.slice(0, 7)
     if (!acc[key]) acc[key] = []
     acc[key].push({
       id: ev.id,

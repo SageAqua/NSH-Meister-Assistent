@@ -1,6 +1,7 @@
 import type {
   VinylOrderForm, PriceEstimate, DurationEstimate, CalendarPlanDay
 } from "@/types"
+import { addDaysToDateKey } from "@/lib/datetime"
 
 const BASE_RATES: Record<string, number> = {
   klickvinyl: 28,
@@ -109,7 +110,7 @@ export function generateCalendarPlan(form: VinylOrderForm): CalendarPlanDay[] {
   const [startHour, endHour] = getWorkingHours(form.workingHours, form.workingHoursCustom)
 
   const plan: CalendarPlanDay[] = []
-  const startDate = new Date(form.startDate)
+  const startDate = form.startDate
 
   for (let i = 0; i < days; i++) {
     const date = addWorkdays(startDate, i)
@@ -120,7 +121,7 @@ export function generateCalendarPlan(form: VinylOrderForm): CalendarPlanDay[] {
       if (form.extras.moebelRaeumen && days > 1) {
         dayTasks.push("Möbel räumen und Raum vorbereiten")
         plan.push({
-          date: date.toISOString().split("T")[0],
+          date,
           title: "Tag 1: Vorbereitung",
           tasks: dayTasks,
           startTime: `${startHour}:00`,
@@ -135,7 +136,7 @@ export function generateCalendarPlan(form: VinylOrderForm): CalendarPlanDay[] {
       if (form.extras.spachteln) dayTasks.push("Untergrund spachteln und trocknen lassen")
       dayTasks.push("Vinyl verlegen beginnen")
       plan.push({
-        date: date.toISOString().split("T")[0],
+        date,
         title: `Tag ${i + 1}: Start`,
         tasks: dayTasks,
         startTime: `${startHour}:00`,
@@ -151,7 +152,7 @@ export function generateCalendarPlan(form: VinylOrderForm): CalendarPlanDay[] {
       dayTasks.push("Abnahme mit Kunden")
       if (form.extras.endreinigung) dayTasks.push("Endreinigung")
       plan.push({
-        date: date.toISOString().split("T")[0],
+        date,
         title: `Tag ${i + 1}: Abschluss`,
         tasks: dayTasks,
         startTime: `${startHour}:00`,
@@ -160,7 +161,7 @@ export function generateCalendarPlan(form: VinylOrderForm): CalendarPlanDay[] {
       })
     } else {
       plan.push({
-        date: date.toISOString().split("T")[0],
+        date,
         title: `Tag ${i + 1}: Verlegen`,
         tasks: ["Vinyl verlegen"],
         startTime: `${startHour}:00`,
@@ -182,13 +183,13 @@ function getWorkingHours(hours?: string, custom?: string): [number, number] {
   return [8, 16] // default
 }
 
-function addWorkdays(start: Date, days: number): Date {
-  const date = new Date(start)
+function addWorkdays(start: string, days: number): string {
+  let date = start
   let added = 0
   while (added < days) {
-    date.setDate(date.getDate() + 1)
-    const day = date.getDay()
+    date = addDaysToDateKey(date, 1)
+    const day = new Date(`${date}T12:00:00`).getDay()
     if (day !== 0 && day !== 6) added++ // skip weekends
   }
-  return added === 0 ? new Date(start) : date
+  return date
 }

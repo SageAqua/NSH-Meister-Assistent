@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DaySchedulePreview } from "@/components/day-schedule-preview"
+import { addDaysToDateKey, todayDateKey } from "@/lib/datetime"
 import { calculatePrice, calculateDuration, getRiskHints, generateCalendarPlan } from "@/lib/calculations/vinyl"
 import { saveVinylOrder } from "@/app/actions/orders"
 import type { VinylOrderForm, Customer, PriceEstimate, DurationEstimate, CalendarPlanDay } from "@/types"
@@ -367,7 +368,7 @@ function StepMaterial({ form, setForm }: { form: VinylOrderForm; setForm: (f: Vi
 }
 
 function StepStartdatum({ form, setForm }: { form: VinylOrderForm; setForm: (f: VinylOrderForm) => void }) {
-  const today = new Date().toISOString().split("T")[0]
+  const today = todayDateKey()
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold sm:text-2xl">Startdatum <span className="text-base text-muted-foreground font-normal sm:text-lg">/ Data e fillimit</span></h2>
@@ -384,8 +385,7 @@ function StepStartdatum({ form, setForm }: { form: VinylOrderForm; setForm: (f: 
         )}
         <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
           {[1, 3, 7, 14].map((days) => {
-            const d = new Date(); d.setDate(d.getDate() + days)
-            const str = d.toISOString().split("T")[0]
+            const str = addDaysToDateKey(today, days)
             return (
               <button
                 key={days}

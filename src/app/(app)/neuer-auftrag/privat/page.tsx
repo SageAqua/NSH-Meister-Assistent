@@ -47,8 +47,9 @@ export default function PrivatTerminPage() {
     startTransition(async () => {
       const result = await saveCalendarEvent({
         title: `[privat] ${title.trim()}`,
-        startIso: new Date(`${date}T${startTime}:00`).toISOString(),
-        endIso: new Date(`${date}T${endTime}:00`).toISOString(),
+        date,
+        startTime,
+        endTime,
       })
       if (result?.error) {
         setError(result.error)
@@ -62,7 +63,7 @@ export default function PrivatTerminPage() {
   return (
     <div className="flex min-w-0 flex-col">
       <div className="p-4 pb-52 sm:p-6 sm:pb-44">
-        <div className="mx-auto max-w-xl">
+        <div className="mx-auto max-w-xl min-w-0">
           <Link
             href="/neuer-auftrag"
             className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground"
@@ -114,14 +115,14 @@ export default function PrivatTerminPage() {
                     key={p.label}
                     type="button"
                     onClick={() => applyPreset(p)}
-                    className={`h-14 min-w-0 rounded-xl border-2 px-3 text-left transition-colors sm:h-16 sm:px-4 ${
+                    className={`h-14 min-w-0 overflow-hidden rounded-xl border-2 px-2.5 text-left transition-colors sm:h-16 sm:px-4 ${
                       selectedPreset === p.label
                         ? "border-violet-500 bg-violet-100 text-violet-900"
                         : "border-border bg-card hover:bg-muted"
                     }`}
                   >
-                    <p className="text-sm font-black sm:text-base"><span className="nsh-i18n" data-sq={p.sq}>{p.label}</span></p>
-                    <p className="text-[11px] text-muted-foreground sm:text-xs">{p.sub}</p>
+                    <p className="truncate text-sm font-black sm:text-base"><span className="nsh-i18n" data-sq={p.sq}>{p.label}</span></p>
+                    <p className="truncate text-[11px] text-muted-foreground sm:text-xs">{p.sub}</p>
                   </button>
                 ))}
               </div>
@@ -136,7 +137,7 @@ export default function PrivatTerminPage() {
                     type="time"
                     value={startTime}
                     onChange={(e) => { setStartTime(e.target.value); setSelectedPreset(null) }}
-                    className="h-12 min-w-0 w-full max-w-full appearance-none rounded-xl border-2 bg-card px-3 text-base font-black focus:border-violet-500 focus:outline-none sm:h-14 sm:text-lg"
+                    className="nsh-mobile-time h-12 w-full appearance-none rounded-xl border-2 bg-card font-black focus:border-violet-500 focus:outline-none sm:h-14"
                   />
                 </div>
                 <div className="min-w-0">
@@ -145,7 +146,7 @@ export default function PrivatTerminPage() {
                     type="time"
                     value={endTime}
                     onChange={(e) => { setEndTime(e.target.value); setSelectedPreset(null) }}
-                    className="h-12 min-w-0 w-full max-w-full appearance-none rounded-xl border-2 bg-card px-3 text-base font-black focus:border-violet-500 focus:outline-none sm:h-14 sm:text-lg"
+                    className="nsh-mobile-time h-12 w-full appearance-none rounded-xl border-2 bg-card font-black focus:border-violet-500 focus:outline-none sm:h-14"
                   />
                 </div>
               </div>

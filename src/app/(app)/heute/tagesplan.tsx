@@ -7,6 +7,7 @@ import { AlertTriangle, BriefcaseBusiness, Building2, CalendarClock, CheckCircle
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DaySchedulePreview } from "@/components/day-schedule-preview"
+import { formatLocalTime, localDateKey } from "@/lib/datetime"
 import { cn } from "@/lib/utils"
 import {
   markEventDoneWithResult,
@@ -24,19 +25,15 @@ export interface FreeSlot {
 }
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
+  return formatLocalTime(iso)
 }
 
 function isoToDate(iso: string) {
-  return iso.split("T")[0]
+  return localDateKey(iso)
 }
 
 function isoToTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  })
+  return formatLocalTime(iso)
 }
 
 function durLabel(h: number) {
@@ -585,23 +582,23 @@ export function TagesplanSection({
               />
             </div>
             <DaySchedulePreview date={date} startTime={startTime} endTime={endTime} />
-            <div className="grid grid-cols-2 gap-2">
-              <div>
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
+              <div className="min-w-0">
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></label>
                 <input
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="nsh-mobile-time h-12 w-full rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none"
                 />
               </div>
-              <div>
+              <div className="min-w-0">
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></label>
                 <input
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="h-12 w-full rounded-xl border-2 border-border bg-background px-3 text-base focus:border-primary focus:outline-none"
+                  className="nsh-mobile-time h-12 w-full rounded-xl border-2 border-border bg-background focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
@@ -696,8 +693,8 @@ export function TagesplanSection({
                 />
               </label>
 
-              <div className="grid grid-cols-2 gap-2">
-                <label className="block">
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
+                <label className="block min-w-0">
                   <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
                     <span className="nsh-i18n" data-sq="Nga">Von</span>
                   </span>
@@ -705,10 +702,10 @@ export function TagesplanSection({
                     type="time"
                     value={editStart}
                     onChange={(e) => setEditStart(e.target.value)}
-                    className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base transition-colors focus:border-primary focus:outline-none"
+                    className="nsh-mobile-time h-12 w-full rounded-lg border-2 border-border bg-background transition-colors focus:border-primary focus:outline-none"
                   />
                 </label>
-                <label className="block">
+                <label className="block min-w-0">
                   <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
                     <span className="nsh-i18n" data-sq="Deri">Bis</span>
                   </span>
@@ -716,7 +713,7 @@ export function TagesplanSection({
                     type="time"
                     value={editEnd}
                     onChange={(e) => setEditEnd(e.target.value)}
-                    className="h-12 w-full rounded-lg border-2 border-border bg-background px-3 text-base transition-colors focus:border-primary focus:outline-none"
+                    className="nsh-mobile-time h-12 w-full rounded-lg border-2 border-border bg-background transition-colors focus:border-primary focus:outline-none"
                   />
                 </label>
               </div>

@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { formatLocalTime, localDateKey } from "@/lib/datetime"
 import {
   deleteCalendarEvent,
   markEventDone,
@@ -37,15 +38,15 @@ const MONTHS_DE = [
 ]
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
+  return formatLocalTime(iso)
 }
 
 function isoToDate(iso: string) {
-  return iso.split("T")[0]
+  return localDateKey(iso)
 }
 
 function isoToTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", hour12: false })
+  return formatLocalTime(iso)
 }
 
 function isSameDay(a: Date, b: Date) {
@@ -53,7 +54,7 @@ function isSameDay(a: Date, b: Date) {
 }
 
 function isSameMonth(iso: string, month: number, year: number) {
-  const date = new Date(iso)
+  const date = new Date(localDateKey(iso) + "T12:00:00")
   return date.getMonth() === month && date.getFullYear() === year
 }
 
@@ -63,7 +64,7 @@ function getInitialMonth(events: CalendarEvent[]) {
   if (hasCurrentMonthEvents || events.length === 0) return { month: now.getMonth(), year: now.getFullYear() }
   const nowMs = now.getTime()
   const next = events.find((e) => new Date(e.start_time).getTime() >= nowMs) ?? events[0]
-  const d = new Date(next.start_time)
+    const d = new Date(localDateKey(next.start_time) + "T12:00:00")
   return { month: d.getMonth(), year: d.getFullYear() }
 }
 
@@ -443,11 +444,11 @@ function WeekView({
   if (events.length === 0) return <EmptyState month={month} year={year} />
 
   const weeks = events.reduce<Record<string, CalendarEvent[]>>((acc, e) => {
-    const date = new Date(e.start_time)
+    const date = new Date(localDateKey(e.start_time) + "T12:00:00")
     const ws = new Date(date)
     const day = ws.getDay()
     ws.setDate(date.getDate() - (day === 0 ? 6 : day - 1))
-    const key = ws.toISOString().split("T")[0]
+    const key = localDateKey(ws)
     if (!acc[key]) acc[key] = []
     acc[key].push(e)
     return acc
@@ -496,7 +497,7 @@ function MonthView({
 
   const eventsByDay: Record<number, CalendarEvent[]> = {}
   events.forEach((e) => {
-    const day = new Date(e.start_time).getDate()
+    const day = new Date(localDateKey(e.start_time) + "T12:00:00").getDate()
     if (!eventsByDay[day]) eventsByDay[day] = []
     eventsByDay[day].push(e)
   })

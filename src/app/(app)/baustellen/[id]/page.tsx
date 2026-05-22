@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { markEventDone, markTaskDone, updateProjectStatus } from "@/app/actions/orders"
+import { formatLocalTime } from "@/lib/datetime"
 import type { Project, CalendarEvent, Task, Note, Material } from "@/types"
 import { cn } from "@/lib/utils"
 import { ProjectEditor } from "./project-editor"
@@ -27,10 +28,10 @@ const MATERIAL_STATUS: Record<string, { label: string; color: string }> = {
 }
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })
+  return formatLocalTime(iso)
 }
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" })
+  return new Date(iso).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", weekday: "short", day: "numeric", month: "short" })
 }
 
 export default async function BaustelleDetailPage({

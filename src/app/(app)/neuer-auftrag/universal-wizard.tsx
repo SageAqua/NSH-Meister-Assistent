@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DaySchedulePreview } from "@/components/day-schedule-preview"
+import { todayDateKey } from "@/lib/datetime"
 import { cn } from "@/lib/utils"
 import { saveSimpleOrder } from "@/app/actions/orders"
 import type { Customer } from "@/types"
@@ -33,7 +34,7 @@ const QUICK_WORK = [
 type CustomerMode = "existing" | "new" | "later"
 
 function todayKey() {
-  return new Date().toISOString().split("T")[0]
+  return todayDateKey()
 }
 
 export function UniversalWizard({ customers }: { customers: Customer[] }) {
@@ -104,7 +105,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+      <section className="min-w-0 rounded-lg border bg-card p-4 shadow-sm sm:p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Hammer className="size-6" />
@@ -147,7 +148,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
         </div>
       </section>
 
-      <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+      <section className="min-w-0 rounded-lg border bg-card p-4 shadow-sm sm:p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
             <UserRound className="size-6" />
@@ -190,7 +191,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             <select
               value={customerId}
               onChange={(event) => setCustomerId(event.target.value)}
-              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-lg font-semibold outline-none focus:border-primary"
+              className="nsh-mobile-field h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary sm:text-lg"
             >
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
@@ -201,14 +202,14 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
             {selectedCustomer && (
               <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground sm:grid-cols-2">
                 {selectedCustomer.phone && (
-                  <p className="flex items-center gap-2 rounded-lg bg-muted p-3">
+                  <p className="flex min-w-0 items-center gap-2 rounded-lg bg-muted p-3">
                     <Phone className="size-4" /> {selectedCustomer.phone}
                   </p>
                 )}
                 {(selectedCustomer.address || selectedCustomer.city) && (
-                  <p className="flex items-center gap-2 rounded-lg bg-muted p-3">
-                    <MapPin className="size-4" />
-                    {[selectedCustomer.address, selectedCustomer.city].filter(Boolean).join(", ")}
+                  <p className="flex min-w-0 items-center gap-2 rounded-lg bg-muted p-3">
+                    <MapPin className="size-4 shrink-0" />
+                    <span className="truncate">{[selectedCustomer.address, selectedCustomer.city].filter(Boolean).join(", ")}</span>
                   </p>
                 )}
               </div>
@@ -251,7 +252,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
         )}
       </section>
 
-      <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+      <section className="min-w-0 rounded-lg border bg-card p-4 shadow-sm sm:p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
             <CalendarDays className="size-6" />
@@ -267,34 +268,34 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-          <label className="space-y-1 sm:col-span-2">
+          <label className="min-w-0 space-y-1 sm:col-span-2">
             <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Fillimi">Start</span></span>
             <input
               type="date"
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
-              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+              className="nsh-mobile-field h-14 w-full rounded-lg border-2 border-border bg-background px-3 text-base font-semibold outline-none focus:border-primary sm:px-4"
             />
           </label>
-          <label className="space-y-1">
+          <label className="min-w-0 space-y-1">
             <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Nga">Von</span></span>
             <input
               type="time"
               value={startTime}
               onChange={(event) => setStartTime(event.target.value)}
-              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+              className="nsh-mobile-time h-14 w-full rounded-lg border-2 border-border bg-background font-semibold outline-none focus:border-primary"
             />
           </label>
-          <label className="space-y-1">
+          <label className="min-w-0 space-y-1">
             <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Deri">Bis</span></span>
             <input
               type="time"
               value={endTime}
               onChange={(event) => setEndTime(event.target.value)}
-              className="h-14 w-full rounded-lg border-2 border-border bg-background px-4 text-base font-semibold outline-none focus:border-primary"
+              className="nsh-mobile-time h-14 w-full rounded-lg border-2 border-border bg-background font-semibold outline-none focus:border-primary"
             />
           </label>
-          <label className="space-y-1 sm:col-span-2">
+          <label className="min-w-0 space-y-1 sm:col-span-2">
             <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Sipërfaqe m²">Fläche m²</span></span>
             <input
               type="number"
@@ -307,14 +308,14 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
           </label>
           <div className="space-y-1 sm:col-span-2">
             <span className="text-xs font-bold uppercase text-muted-foreground"><span className="nsh-i18n" data-sq="Ndihmës">Helfer</span></span>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid min-w-0 grid-cols-3 gap-2">
               {[0, 1, 2].map((count) => (
                 <button
                   key={count}
                   type="button"
                   onClick={() => setHelpersCount(count)}
                   className={cn(
-                    "h-14 rounded-lg border-2 text-base font-black",
+                    "h-14 min-w-0 rounded-lg border-2 text-base font-black",
                     helpersCount === count
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border bg-background"
@@ -393,7 +394,7 @@ export function UniversalWizard({ customers }: { customers: Customer[] }) {
         </div>
       </section>
 
-      <section className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+      <section className="min-w-0 rounded-lg border bg-card p-4 shadow-sm sm:p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-white">
             <ClipboardList className="size-6" />

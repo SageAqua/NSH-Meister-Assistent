@@ -556,18 +556,22 @@ export default async function HeutePage() {
         <StatCard title="Geplant" value={plannedCount ?? 0} subtitle="In Planung" />
       </div>
 
-      {/* ── Desktop: Row 2 — Analytics | Reminders | Projects ── */}
-      <div className="hidden items-start gap-4 lg:grid lg:grid-cols-[1fr_280px_260px]">
-        <AnalyticsChart weekDays={weekDays} />
-        <RemindersCard events={todayEvents} />
-        <TodayWorkPlanner projects={projects} today={todayStr} />
-      </div>
+      {/* ── Desktop dashboard body ── */}
+      <div className="hidden items-start gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_260px]">
+        <div className="min-w-0 space-y-4">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <AnalyticsChart weekDays={weekDays} />
+            <RemindersCard events={todayEvents} />
+          </div>
 
-      {/* ── Desktop: Row 3 — Tasks | Progress | Time Tracker ── */}
-      <div className="hidden gap-4 lg:grid lg:grid-cols-[1fr_240px_240px]">
-        <TasksCard tasks={tasks} />
-        <ProgressGauge done={doneTasksCount ?? 0} total={totalTasksCount ?? 0} />
-        <TimeTracker />
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px_240px]">
+            <TasksCard tasks={tasks} />
+            <ProgressGauge done={doneTasksCount ?? 0} total={totalTasksCount ?? 0} />
+            <TimeTracker />
+          </div>
+        </div>
+
+        <TodayWorkPlanner projects={projects} today={todayStr} />
       </div>
 
     </div>
